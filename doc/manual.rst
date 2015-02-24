@@ -288,6 +288,7 @@ Miscellaneous options
 .....................
 
     * ``--backend auto|sqlite3|leveldb|redis`` :	Specify or override the database backend to use
+    * ``--disable-blocklist-prefetch`` :		Do not prefetch a block list - faster when mapping small parts of large worlds.
 
 
 Detailed Description of Options
@@ -376,6 +377,40 @@ Detailed Description of Options
 
 	See also `--geometry`_
 
+``--disable-blocklist-prefetch``
+......................................
+	Do not prefetch a list of block coordinates from the database before commencing
+	map generation.
+
+	This option will probably improve mapping speed when mapping a smaller part
+	of a very large world. In other cases it may actually reduce mapping speed.
+	It is incompatible with, and  disables, the 'shrinking' mode of `--geometrymode`_.
+	It also significantly reduces the amount of information the `--verbose`_ option
+	can report.
+
+	Normally, minetestmapper will read a full list of coordinates (not the contents)
+	of existing blocks from the database before starting map generation. This option
+	disables this query, and instead, causes and all blocks that are in the mapped
+	space to be requested individually, whether or not they are in the database.
+
+	Querying the database for a block coordinate list beforehand is time-consuming
+	on large databases. If just a small part of a large world is being mapped, the
+	time for this step quickly dominates the map generation time.
+
+	On the other hand, querying the database for large numbers of non-existing blocks
+	while mapping (possibly several orders of magniture more than there are existing
+	blocks!) is also quite inefficient. If a large part of the blocks queried are not
+	in the database, the cost of those extra queries will quickly dominate map generation
+	time.
+
+	The tradeoff between those two approaches depends on the volume being mapped, the
+	speed of the disk (or SSD), the database backend being used, the number of blocks
+	in the database, etc.
+
+	The worst-case behavior of this option is probably quite bad, even though it will
+	refuse to continue if the requested space is excessive: exceeding 1G (2^30) blocks.
+	Please use this option with consideration, and use `--progress`_ to monitor its
+	actual behavior.
 
 ``--draw[map]<figure> "<geometry> <color> [<text>]"``
 .....................................................

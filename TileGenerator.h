@@ -109,6 +109,7 @@ public:
 
 	TileGenerator();
 	~TileGenerator();
+	void setGenerateNoPrefetch(int enable);
 	void setHeightMap(bool enable);
 	void setHeightMapYScale(float scale);
 	void setSeaLevel(int level);
@@ -241,6 +242,7 @@ private:
 	int m_heightScaleMinor;
 
 	DB *m_db;
+	bool m_generateNoPrefetch;
 	long long m_databaseFormatFound[BlockPos::STRFORMAT_MAX];
 	gdImagePtr m_image;
 	PixelAttributes m_blockPixelAttributes;

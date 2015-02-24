@@ -35,6 +35,8 @@ Minor Features
 * Draw shades to accentuate height differences (on by default)
 * Report actual world dimensions in all directions, as
   well which part of it will be in the map.
+* optionally, avoid reading the block list from the database
+  (may be more efficient when mapping small parts of the *existing* world)
 
 Differences From Stock Minetestmapper
 =====================================
@@ -66,6 +68,8 @@ Differences From Stock Minetestmapper
 * The scale can be enabled on the left and top side individually
 * Major and minor (tick) intervals are configurable for the scale
 * Block numbers are shown on the scale as well
+* optionally, avoid reading the block list from the database
+  (dramatically speeds up generating maps of small parts of large worlds)
 
 In addition a number bugs have been fixed. As bugs are also getting
 fixed in the stock version of minetestmapper, no accurate list

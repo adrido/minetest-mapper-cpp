@@ -1,3 +1,15 @@
+[]
+    Enhancements:
+	- Added an optimisation option: --disable-blocklist-prefetch. With this
+		option, minetestmapper does not query the database to make a block
+		list before starting map generation, but directly tries to fetch
+		all possible blocks that might be in the mapped space.
+
+		This improves speed on large worlds when mapping a small part of
+		them. When mapping a large part of the world, or when not adequately
+		limiting the mapping height (--min-y and --max-y), this option can
+		cause **excessively** long mapping times.
+
 [2 mar 2015]
     Features:
 

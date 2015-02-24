@@ -39,6 +39,7 @@ using namespace std;
 #define OPT_DRAWHEIGHTSCALE		0x8d
 #define OPT_SCALEFACTOR			0x8e
 #define OPT_SCALEINTERVAL		0x8f
+#define OPT_NO_BLOCKLIST_PREFETCH	0x90
 
 // Will be replaced with the actual name and location of the executable (if found)
 string executableName = "minetestmapper";
@@ -106,6 +107,7 @@ void usage()
 			"  --min-y <y>\n"
 			"  --max-y <y>\n"
 			"  --backend <" USAGE_DATABASES ">\n"
+			"  --disable-blocklist-prefetch[=force]\n"
 			"  --geometry <geometry>\n"
 			"\t(Warning: has a compatibility mode - see README.rst)\n"
 			"  --cornergeometry <geometry>\n"
@@ -618,6 +620,7 @@ int main(int argc, char *argv[])
 		{"min-y", required_argument, 0, 'a'},
 		{"max-y", required_argument, 0, 'c'},
 		{"backend", required_argument, 0, 'd'},
+		{"disable-blocklist-prefetch", optional_argument, 0, OPT_NO_BLOCKLIST_PREFETCH},
 		{"sqlite-cacheworldrow", no_argument, 0, OPT_SQLITE_CACHEWORLDROW},
 		{"tiles", required_argument, 0, 't'},
 		{"tileorigin", required_argument, 0, 'T'},
@@ -681,6 +684,20 @@ int main(int argc, char *argv[])
 					break;
 				case 'b':
 					generator.setBgColor(Color(optarg, 0));
+					break;
+				case OPT_NO_BLOCKLIST_PREFETCH:
+					if (optarg && *optarg) {
+						if (std::string(optarg) == "force")
+							generator.setGenerateNoPrefetch(2);
+						else {
+							std::cerr << "Invalid parameter to '" << long_options[option_index].name << "'; expected 'force' or nothing." << std::endl;
+							usage();
+							exit(1);
+						}
+					}
+					else {
+						generator.setGenerateNoPrefetch(1);
+					}
 					break;
 				case OPT_HEIGHTMAP:
 					generator.setHeightMap(true);

@@ -34,6 +34,10 @@
 #endif
 
 #define MESSAGE_WIDTH 25
+#define MAX_NOPREFETCH_VOLUME (1LL<<24)
+#define MIN_NOPREFETCH_VOLUME (1LL<<16)
+#define MAX_NOPREFETCH_VOLUME_EXAMPLE "16384x256x16384"
+
 
 using namespace std;
 
@@ -157,6 +161,7 @@ TileGenerator::TileGenerator():
 	m_sideScaleMinor(0),
 	m_heightScaleMajor(0),
 	m_heightScaleMinor(0),
+	m_generateNoPrefetch(0),
 	m_image(0),
 	m_xMin(INT_MAX/16-1),
 	m_xMax(INT_MIN/16+1),
@@ -198,6 +203,11 @@ TileGenerator::TileGenerator():
 
 TileGenerator::~TileGenerator()
 {
+}
+
+void TileGenerator::setGenerateNoPrefetch(int enable)
+{
+	m_generateNoPrefetch = enable;
 }
 
 void TileGenerator::setHeightMap(bool enable)
@@ -913,6 +923,34 @@ void TileGenerator::loadBlocks()
 	geomYMax = MAPBLOCK_MIN;
 	m_worldBlocks = 0;
 	map_blocks = 0;
+	if (m_generateNoPrefetch) {
+		if (m_generateNoPrefetch == 1) {
+			long long volume = (long long)(m_reqXMax - m_reqXMin + 1) * (m_reqYMax - m_reqYMin + 1) * (m_reqZMax - m_reqZMin + 1);
+			if (volume > MAX_NOPREFETCH_VOLUME) {
+				std::ostringstream oss;
+				oss << "Requested map volume is excessive for --disable-blocklist-prefetch: " << volume
+					    << " (" << (m_reqXMax - m_reqXMin + 1)
+					    << " x " << (m_reqYMax - m_reqYMin + 1)
+					    << " x " << (m_reqZMax - m_reqZMin + 1)
+					    << " blocks of 16x16x16 nodes);"
+					    << "\n"
+					    << " Mapping will be slow. Use --disable-blocklist-prefetch='force' for more than " << MAX_NOPREFETCH_VOLUME << " blocks"
+					    << " (e.g. " << MAX_NOPREFETCH_VOLUME_EXAMPLE << " nodes)";
+				throw(std::runtime_error(oss.str()));
+			}
+		}
+		if (m_shrinkGeometry) {
+			std::cerr << "WARNING: geometrymode 'shrink' not supported with '--disable-blocklist-prefetch'" << std::endl;
+			m_shrinkGeometry = false;
+		}
+		m_xMin = m_reqXMin;
+		m_xMax = m_reqXMax;
+		m_yMin = m_reqYMin;
+		m_yMax = m_reqYMax;
+		m_zMin = m_reqZMin;
+		m_zMax = m_reqZMax;
+	}
+	else {
 	if (progressIndicator)
 		cout << "Scanning world (reading block list)...\r" << std::flush;
 	const DB::BlockPosList &blocks = m_db->getBlockPos();
@@ -1047,6 +1085,8 @@ void TileGenerator::loadBlocks()
 			<< std::setw(6) << "z"
 			<< ")\n";
 	}
+	m_positions.sort();
+	}
 	if (verboseCoordinates >= 1) {
 		cout
 			<< std::setw(MESSAGE_WIDTH) << std::left
@@ -1069,7 +1109,6 @@ void TileGenerator::loadBlocks()
 			<< ")    blocks: "
 			<< std::setw(10) << map_blocks << "\n";
 	}
-	m_positions.sort();
 	if (m_backend == "leveldb") {
 		if (verboseStatistics >= 3) {
 			cout
@@ -1504,6 +1543,51 @@ void TileGenerator::processMapBlock(const DB::Block &block)
 	renderMapBlock(mapData, pos, version);
 }
 
+class MapBlockIterator
+{
+public:
+	virtual ~MapBlockIterator(void) {}
+	virtual MapBlockIterator &operator++(void) = 0;
+	virtual BlockPos &operator*(void) = 0;
+	virtual MapBlockIterator &operator=(const MapBlockIterator &i) = 0;
+	virtual bool operator==(const MapBlockIterator &i) const = 0;
+	bool operator!=(const MapBlockIterator &i) const { return !operator==(i); }
+	virtual void breakDim(int i) { (void) i; }
+};
+
+class MapBlockIteratorBlockList : public MapBlockIterator
+{
+public:
+	MapBlockIteratorBlockList(void) {}
+	MapBlockIteratorBlockList(const std::list<BlockPos>::iterator &i) : m_iter(i) {}
+	MapBlockIterator &operator++(void) override { m_iter++; return *this; }
+	BlockPos &operator*(void) override { return *m_iter; }
+	MapBlockIterator &operator=(const MapBlockIterator &i) override
+		{ const MapBlockIteratorBlockList &i2 = dynamic_cast<const MapBlockIteratorBlockList &>(i); m_iter = i2.m_iter; return *this; }
+	bool operator==(const MapBlockIterator &i) const override
+		{ const MapBlockIteratorBlockList &i2 = dynamic_cast<const MapBlockIteratorBlockList &>(i); return m_iter == i2.m_iter; }
+	// breakDim() might be implemented, but is not strictly necessary
+private:
+	std::list<BlockPos>::iterator m_iter;
+};
+
+class MapBlockIteratorBlockPos : public MapBlockIterator
+{
+public:
+	MapBlockIteratorBlockPos(void) {}
+	MapBlockIteratorBlockPos(const BlockPosIterator &i) : m_iter(i) {}
+	MapBlockIterator &operator++(void) override { m_iter++; return *this; }
+	BlockPos &operator*(void) override { return *m_iter; }
+	MapBlockIterator &operator=(const MapBlockIterator &i) override
+		{ const MapBlockIteratorBlockPos &i2 = dynamic_cast<const MapBlockIteratorBlockPos &>(i); m_iter = i2.m_iter; return *this; }
+	bool operator==(const MapBlockIterator &i) const override
+		{ const MapBlockIteratorBlockPos &i2 = dynamic_cast<const MapBlockIteratorBlockPos &>(i); return m_iter == i2.m_iter; }
+	void breakDim(int i) { m_iter.breakDim(i); }
+private:
+	BlockPosIterator m_iter;
+};
+
+
 void TileGenerator::renderMap()
 {
 	int unpackErrors = 0;
@@ -1514,8 +1598,28 @@ void TileGenerator::renderMap()
 	currentPos.y() = INT_MAX;
 	currentPos.z() = INT_MIN;
 	bool allReaded = false;
-	for (std::list<BlockPos>::const_iterator position = m_positions.begin(); position != m_positions.end(); ++position) {
-		const BlockPos &pos = *position;
+	MapBlockIterator *position;
+	MapBlockIterator *begin;
+	MapBlockIterator *end;
+	if (m_generateNoPrefetch) {
+		position = new MapBlockIteratorBlockPos();
+		begin = new MapBlockIteratorBlockPos(BlockPosIterator(
+				BlockPos(m_xMin, m_yMax, m_zMax),
+				BlockPos(m_xMax, m_yMin, m_zMin)));
+		end = new MapBlockIteratorBlockPos(BlockPosIterator(
+				BlockPos(m_xMin, m_yMax, m_zMax),
+				BlockPos(m_xMax, m_yMin, m_zMin),
+				BlockPosIterator::End));
+	}
+	else {
+		position = new MapBlockIteratorBlockList(std::list<BlockPos>::iterator());
+		begin = new MapBlockIteratorBlockList(m_positions.begin());
+		end = new MapBlockIteratorBlockList(m_positions.end());
+	}
+	std::cout << std::flush;
+	std::cerr << std::flush;
+	for (*position = *begin; *position != *end; ++*position) {
+		const BlockPos &pos = **position;
 		if (currentPos.x() != pos.x() || currentPos.z() != pos.z()) {
 			area_rendered++;
 			if (currentPos.y() == m_yMin)
@@ -1542,6 +1646,7 @@ void TileGenerator::renderMap()
 			currentPos = pos;
 		}
 		else if (allReaded) {
+			position->breakDim(1);
 			continue;
 		}
 		currentPos.y() = pos.y();
@@ -1582,6 +1687,9 @@ void TileGenerator::renderMap()
 			throw(std::runtime_error("Too many block unpacking errors - bailing out"));
 		}
 	}
+	delete position;
+	delete begin;
+	delete end;
 	if (currentPos.z() != INT_MIN) {
 		if (currentPos.y() == m_yMin)
 			m_emptyMapArea++;
