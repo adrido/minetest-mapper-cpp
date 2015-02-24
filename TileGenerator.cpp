@@ -972,141 +972,141 @@ void TileGenerator::loadBlocks()
 		m_zMax = m_reqZMax;
 	}
 	else {
-	if (progressIndicator)
-		cout << "Scanning world (reading block list)...\r" << std::flush;
-	const DB::BlockPosList &blocks = m_db->getBlockPos();
-	for(DB::BlockPosList::const_iterator it = blocks.begin(); it != blocks.end(); ++it) {
-		m_worldBlocks++;
-		const BlockPos &pos = *it;
-		m_databaseFormatFound[pos.databaseFormat()]++;
-		if (pos.x() < mapXMin) {
-			mapXMin = pos.x();
+		if (progressIndicator)
+			cout << "Scanning world (reading block list)...\r" << std::flush;
+		const DB::BlockPosList &blocks = m_db->getBlockPos();
+		for(DB::BlockPosList::const_iterator it = blocks.begin(); it != blocks.end(); ++it) {
+			m_worldBlocks++;
+			const BlockPos &pos = *it;
+			m_databaseFormatFound[pos.databaseFormat()]++;
+			if (pos.x() < mapXMin) {
+				mapXMin = pos.x();
+			}
+			if (pos.x() > mapXMax) {
+				mapXMax = pos.x();
+			}
+			if (pos.y() < mapYMin) {
+				mapYMin = pos.y();
+			}
+			if (pos.y() > mapYMax) {
+				mapYMax = pos.y();
+			}
+			if (pos.z() < mapZMin) {
+				mapZMin = pos.z();
+			}
+			if (pos.z() > mapZMax) {
+				mapZMax = pos.z();
+			}
+			if (pos.x() < m_reqXMin || pos.x() > m_reqXMax || pos.z() < m_reqZMin || pos.z() > m_reqZMax) {
+				continue;
+			}
+			if (pos.y() < geomYMin) {
+				geomYMin = pos.y();
+			}
+			if (pos.y() > geomYMax) {
+				geomYMax = pos.y();
+			}
+			if (pos.y() < m_reqYMin || pos.y() > m_reqYMax) {
+				continue;
+			}
+			map_blocks++;
+			if (pos.y() < m_yMin) {
+				m_yMin = pos.y();
+			}
+			if (pos.y() > m_yMax) {
+				m_yMax = pos.y();
+			}
+			if (pos.x() < m_xMin) {
+				m_xMin = pos.x();
+			}
+			if (pos.x() > m_xMax) {
+				m_xMax = pos.x();
+			}
+			if (pos.z() < m_zMin) {
+				m_zMin = pos.z();
+			}
+			if (pos.z() > m_zMax) {
+				m_zMax = pos.z();
+			}
+			m_positions.push_back(pos);
 		}
-		if (pos.x() > mapXMax) {
-			mapXMax = pos.x();
+		if (verboseCoordinates >= 1) {
+			cout
+				<< std::setw(MESSAGE_WIDTH) << std::left
+				<< "World Geometry:" << std::right
+				<< std::setw(7) << mapXMin*16 << ","
+				<< std::setw(7) << mapYMin*16 << ","
+				<< std::setw(7) << mapZMin*16
+				<< "  ..  "
+				<< std::setw(7) << mapXMax*16+15 << ","
+				<< std::setw(7) << mapYMax*16+15 << ","
+				<< std::setw(7) << mapZMax*16+15
+				<< "    ("
+				<< std::setw(6) << mapXMin << ","
+				<< std::setw(6) << mapYMin << ","
+				<< std::setw(6) << mapZMin
+				<< "  ..  "
+				<< std::setw(6) << mapXMax << ","
+				<< std::setw(6) << mapYMax << ","
+				<< std::setw(6) << mapZMax
+				<< ")    blocks: "
+				<< std::setw(10) << m_worldBlocks << "\n";
 		}
-		if (pos.y() < mapYMin) {
-			mapYMin = pos.y();
+		if (m_shrinkGeometry) {
+			if (m_xMin != m_reqXMin) m_mapXStartNodeOffset = 0;
+			if (m_xMax != m_reqXMax) m_mapXEndNodeOffset = 0;
+			if (m_zMin != m_reqZMin) m_mapYEndNodeOffset = 0;
+			if (m_zMax != m_reqZMax) m_mapYStartNodeOffset = 0;
 		}
-		if (pos.y() > mapYMax) {
-			mapYMax = pos.y();
+		else {
+			if (verboseCoordinates >= 2) {
+				cout
+					<< std::setw(MESSAGE_WIDTH) << std::left
+					<< "Minimal Map Geometry:" << std::right
+					<< std::setw(7) << m_xMin*16 << ","
+					<< std::setw(7) << m_yMin*16+m_reqYMinNode << ","
+					<< std::setw(7) << m_zMin*16
+					<< "  ..  "
+					<< std::setw(7) << m_xMax*16+15 << ","
+					<< std::setw(7) << m_yMax*16+m_reqYMaxNode << ","
+					<< std::setw(7) << m_zMax*16+15
+					<< "    ("
+					<< std::setw(6) << m_xMin << ","
+					<< std::setw(6) << m_yMin << ","
+					<< std::setw(6) << m_zMin
+					<< "  ..  "
+					<< std::setw(6) << m_xMax << ","
+					<< std::setw(6) << m_yMax << ","
+					<< std::setw(6) << m_zMax
+					<< ")\n";
+			}
+			m_xMin = m_reqXMin;
+			m_xMax = m_reqXMax;
+			m_zMin = m_reqZMin;
+			m_zMax = m_reqZMax;
 		}
-		if (pos.z() < mapZMin) {
-			mapZMin = pos.z();
-		}
-		if (pos.z() > mapZMax) {
-			mapZMax = pos.z();
-		}
-		if (pos.x() < m_reqXMin || pos.x() > m_reqXMax || pos.z() < m_reqZMin || pos.z() > m_reqZMax) {
-			continue;
-		}
-		if (pos.y() < geomYMin) {
-			geomYMin = pos.y();
-		}
-		if (pos.y() > geomYMax) {
-			geomYMax = pos.y();
-		}
-		if (pos.y() < m_reqYMin || pos.y() > m_reqYMax) {
-			continue;
-		}
-		map_blocks++;
-		if (pos.y() < m_yMin) {
-			m_yMin = pos.y();
-		}
-		if (pos.y() > m_yMax) {
-			m_yMax = pos.y();
-		}
-		if (pos.x() < m_xMin) {
-			m_xMin = pos.x();
-		}
-		if (pos.x() > m_xMax) {
-			m_xMax = pos.x();
-		}
-		if (pos.z() < m_zMin) {
-			m_zMin = pos.z();
-		}
-		if (pos.z() > m_zMax) {
-			m_zMax = pos.z();
-		}
-		m_positions.push_back(pos);
-	}
-	if (verboseCoordinates >= 1) {
-		cout
-			<< std::setw(MESSAGE_WIDTH) << std::left
-			<< "World Geometry:" << std::right
-			<< std::setw(7) << mapXMin*16 << ","
-			<< std::setw(7) << mapYMin*16 << ","
-			<< std::setw(7) << mapZMin*16
-			<< "  ..  "
-			<< std::setw(7) << mapXMax*16+15 << ","
-			<< std::setw(7) << mapYMax*16+15 << ","
-			<< std::setw(7) << mapZMax*16+15
-			<< "    ("
-			<< std::setw(6) << mapXMin << ","
-			<< std::setw(6) << mapYMin << ","
-			<< std::setw(6) << mapZMin
-			<< "  ..  "
-			<< std::setw(6) << mapXMax << ","
-			<< std::setw(6) << mapYMax << ","
-			<< std::setw(6) << mapZMax
-			<< ")    blocks: "
-			<< std::setw(10) << m_worldBlocks << "\n";
-	}
-	if (m_shrinkGeometry) {
-		if (m_xMin != m_reqXMin) m_mapXStartNodeOffset = 0;
-		if (m_xMax != m_reqXMax) m_mapXEndNodeOffset = 0;
-		if (m_zMin != m_reqZMin) m_mapYEndNodeOffset = 0;
-		if (m_zMax != m_reqZMax) m_mapYStartNodeOffset = 0;
-	}
-	else {
 		if (verboseCoordinates >= 2) {
 			cout
 				<< std::setw(MESSAGE_WIDTH) << std::left
-				<< "Minimal Map Geometry:" << std::right
-				<< std::setw(7) << m_xMin*16 << ","
-				<< std::setw(7) << m_yMin*16+m_reqYMinNode << ","
-				<< std::setw(7) << m_zMin*16
+				<< "Map Vertical Limits:" << std::right
+				<< std::setw(7) << "x" << ","
+				<< std::setw(7) << geomYMin*16 << ","
+				<< std::setw(7) << "z"
 				<< "  ..  "
-				<< std::setw(7) << m_xMax*16+15 << ","
-				<< std::setw(7) << m_yMax*16+m_reqYMaxNode << ","
-				<< std::setw(7) << m_zMax*16+15
+				<< std::setw(7) << "x" << ","
+				<< std::setw(7) << geomYMax*16+15 << ","
+				<< std::setw(7) << "z"
 				<< "    ("
-				<< std::setw(6) << m_xMin << ","
-				<< std::setw(6) << m_yMin << ","
-				<< std::setw(6) << m_zMin
+				<< std::setw(6) << "x" << ","
+				<< std::setw(6) << geomYMin << ","
+				<< std::setw(6) << "z"
 				<< "  ..  "
-				<< std::setw(6) << m_xMax << ","
-				<< std::setw(6) << m_yMax << ","
-				<< std::setw(6) << m_zMax
+				<< std::setw(6) << "x" << ","
+				<< std::setw(6) << geomYMax << ","
+				<< std::setw(6) << "z"
 				<< ")\n";
 		}
-		m_xMin = m_reqXMin;
-		m_xMax = m_reqXMax;
-		m_zMin = m_reqZMin;
-		m_zMax = m_reqZMax;
-	}
-	if (verboseCoordinates >= 2) {
-		cout
-			<< std::setw(MESSAGE_WIDTH) << std::left
-			<< "Map Vertical Limits:" << std::right
-			<< std::setw(7) << "x" << ","
-			<< std::setw(7) << geomYMin*16 << ","
-			<< std::setw(7) << "z"
-			<< "  ..  "
-			<< std::setw(7) << "x" << ","
-			<< std::setw(7) << geomYMax*16+15 << ","
-			<< std::setw(7) << "z"
-			<< "    ("
-			<< std::setw(6) << "x" << ","
-			<< std::setw(6) << geomYMin << ","
-			<< std::setw(6) << "z"
-			<< "  ..  "
-			<< std::setw(6) << "x" << ","
-			<< std::setw(6) << geomYMax << ","
-			<< std::setw(6) << "z"
-			<< ")\n";
-	}
-	m_positions.sort();
+		m_positions.sort();
 	}
 	if (verboseCoordinates >= 1) {
 		cout
