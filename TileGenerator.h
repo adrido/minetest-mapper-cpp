@@ -134,7 +134,6 @@ public:
 	void setMaxY(int y);
 	void setShrinkGeometry(bool shrink);
 	void setBlockGeometry(bool block);
-	void setSqliteCacheWorldRow(bool cacheWorldRow);
 	void setTileBorderColor(const Color &tileBorderColor);
 	void setTileBorderSize(int size);
 	void setTileSize(int width, int heigth);
@@ -235,7 +234,6 @@ private:
 	bool m_shrinkGeometry;
 	bool m_blockGeometry;
 	int m_scaleFactor;
-	bool m_sqliteCacheWorldRow;
 	int m_chunkSize;
 	int m_sideScaleMajor;
 	int m_sideScaleMinor;

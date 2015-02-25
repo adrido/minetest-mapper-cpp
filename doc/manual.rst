@@ -163,7 +163,6 @@ Miscellaneous options
 .....................
 
     * ``--backend <auto/sqlite3/leveldb/redis>`` :	Specify or override the database backend to use
-    * ``--sqlite-cacheworldrow`` :			Modify how minetestmapper accesses the sqlite3 database. For performance.
 
 
 Detailed Description of Options
@@ -839,15 +838,9 @@ Detailed Description of Options
 
 ``--sqlite-cacheworldrow``
 ..........................
-	Modify the way minetestmapper accesses the sqlite3 database.
-
-	When using sqlite3, read an entire world row at one, instead of reading
-	one block at a time.
-
-	This option was added to possibly achieve better performance
-	in some cases where a complete map is drawn of a very large world.
-
-	It may or may not have the desired effect. Any feedback is welcome.
+	This option is no longer supported, as minetestmapper performed
+	consistently worse with it than without it, as tested on a few
+	large worlds.
 
 ``--tilebordercolor <color>``
 .............................

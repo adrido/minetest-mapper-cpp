@@ -150,7 +150,6 @@ TileGenerator::TileGenerator():
 	m_shrinkGeometry(true),
 	m_blockGeometry(false),
 	m_scaleFactor(1),
-	m_sqliteCacheWorldRow(false),
 	m_chunkSize(0),
 	m_sideScaleMajor(0),
 	m_sideScaleMinor(0),
@@ -230,11 +229,6 @@ void TileGenerator::setShrinkGeometry(bool shrink)
 void TileGenerator::setBlockGeometry(bool block)
 {
 	m_blockGeometry = block;
-}
-
-void TileGenerator::setSqliteCacheWorldRow(bool cacheWorldRow)
-{
-	m_sqliteCacheWorldRow = cacheWorldRow;
 }
 
 void TileGenerator::setScaleColor(const Color &scaleColor)
@@ -792,7 +786,6 @@ void TileGenerator::openDb(const std::string &input)
 #if USE_SQLITE3
 		DBSQLite3 *db;
 		m_db = db = new DBSQLite3(input);
-		db->cacheWorldRow = m_sqliteCacheWorldRow;
 #else
 		unsupported = true;
 #endif
@@ -1560,9 +1553,8 @@ void TileGenerator::renderMap()
 	}
 	if (verboseStatistics) {
 		cout << "Statistics"
-		     << ":  blocks read: " << m_db->getBlocksReadCount()
-		     << "  (" << m_db->getBlocksCachedCount() << " cached + "
-			       << m_db->getBlocksUnCachedCount() << " uncached)"
+		     << ":  blocks read/queried: " << m_db->getBlocksReadCount()
+		     << " / " << m_db->getBlocksQueriedCount()
 		     << ";  blocks rendered: " << blocks_rendered
 		     << ";  area rendered: " << area_rendered
 		     << "/" << (m_xMax-m_xMin+1) * (m_zMax-m_zMin+1)

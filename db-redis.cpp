@@ -86,7 +86,7 @@ std::string get_setting_default(std::string name, std::istream &is, const std::s
 
 DBRedis::DBRedis(const std::string &mapdir) :
 	m_blocksReadCount(0),
-	m_blocksUnCachedCount(0)
+	m_blocksQueriedCount(0)
 {
 	std::ifstream ifs((mapdir + "/world.mt").c_str());
 	if(!ifs.good())
@@ -124,16 +124,9 @@ int DBRedis::getBlocksReadCount(void)
 	return m_blocksReadCount;
 }
 
-
-int DBRedis::getBlocksCachedCount(void)
+int DBRedis::getBlocksQueriedCount(void)
 {
-	return 0;
-}
- 
-
-int DBRedis::getBlocksUnCachedCount(void)
-{
-	return m_blocksUnCachedCount;
+	return m_blocksQueriedCount;
 }
 
 
@@ -162,13 +155,13 @@ DB::Block DBRedis::getBlockOnPos(const BlockPos &pos)
 	std::string tmp;
 	Block block(pos,reinterpret_cast<const unsigned char *>(""));
 
-	m_blocksReadCount++;
+	m_blocksQueriedCount++;
 
 	reply = (redisReply*) redisCommand(ctx, "HGET %s %s", hash.c_str(), pos.databasePosStr().c_str());
 	if(!reply)
 		throw std::runtime_error(std::string("redis command 'HGET %s %s' failed: ") + ctx->errstr);
 	if (reply->type == REDIS_REPLY_STRING && reply->len != 0) {
-		m_blocksUnCachedCount++;
+		m_blocksReadCount++;
 		block = Block(pos, ustring(reinterpret_cast<const unsigned char *>(reply->str), reply->len));
 	} else
 		throw std::runtime_error("Got wrong response to 'HGET %s %s' command");

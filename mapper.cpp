@@ -114,9 +114,6 @@ void usage()
 			"\tblock:   round geometry away from zero, to entire map blocks (16 nodes)\n"
 			"\tfixed:   generate a map of exactly the requested geometry\n"
 			"\tshrink:  generate a smaller map if possible\n"
-#if USE_SQLITE3
-			"  --sqlite-cacheworldrow\n"
-#endif
 			"  --tiles <tilesize>[+<border>]|block|chunk\n"
 			"  --tileorigin <x>,<y>|world|map\n"
 			"  --tilecenter <x>,<y>|world|map\n"
@@ -840,7 +837,11 @@ int main(int argc, char *argv[])
 					generator.setShading(false);
 					break;
 				case OPT_SQLITE_CACHEWORLDROW:
-					generator.setSqliteCacheWorldRow(true);
+					// This option is recognised for backward compatibility.
+					// Tests with a (large) world on SSD and on HDD showed a performance decrease
+					// on all map sizes with this option enabled.
+					// (Next: print a message when this option is used.
+					//  Later: remove it completely)
 					break;
 				case OPT_PROGRESS_INDICATOR:
 					generator.enableProgressIndicator();

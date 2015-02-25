@@ -18,7 +18,7 @@ inline std::string i64tos(int64_t i) {
 
 DBLevelDB::DBLevelDB(const std::string &mapdir) :
 	m_blocksReadCount(0),
-	m_blocksUnCachedCount(0)
+	m_blocksQueriedCount(0)
 {
 	leveldb::Options options;
 	options.create_if_missing = false;
@@ -36,14 +36,9 @@ int DBLevelDB::getBlocksReadCount(void)
 	return m_blocksReadCount;
 }
 
-int DBLevelDB::getBlocksCachedCount(void)
+int DBLevelDB::getBlocksQueriedCount(void)
 {
-	return 0;
-}
-
-int DBLevelDB::getBlocksUnCachedCount(void)
-{
-	return m_blocksUnCachedCount;
+	return m_blocksQueriedCount;
 }
 
 const DB::BlockPosList &DBLevelDB::getBlockPos() {
@@ -61,11 +56,11 @@ DB::Block DBLevelDB::getBlockOnPos(const BlockPos &pos)
 	std::string datastr;
 	leveldb::Status status;
 
-	m_blocksReadCount++;
+	m_blocksQueriedCount++;
 
 	status = m_db->Get(leveldb::ReadOptions(), pos.databasePosStr(), &datastr);
 	if(status.ok()) {
-		m_blocksUnCachedCount++;
+		m_blocksReadCount++;
 		return Block(pos, ustring(reinterpret_cast<const unsigned char *>(datastr.c_str()), datastr.size()));
 	}
 	else {
