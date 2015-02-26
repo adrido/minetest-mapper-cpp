@@ -3,15 +3,17 @@
 #include <unistd.h> // for usleep
 #include "types.h"
 
-#define BLOCKPOSLIST_STATEMENT	"SELECT pos FROM blocks"
-#define BLOCK_STATEMENT		"SELECT pos, data FROM blocks WHERE pos == ?"
+#define BLOCKPOSLIST_STATEMENT	"SELECT pos, rowid FROM blocks"
+#define BLOCK_STATEMENT_POS	"SELECT pos, data FROM blocks WHERE pos == ?"
+#define BLOCK_STATEMENT_ROWID	"SELECT pos, data FROM blocks WHERE rowid == ?"
 
 
 DBSQLite3::DBSQLite3(const std::string &mapdir) :
 	m_blocksQueriedCount(0),
 	m_blocksReadCount(0),
 	m_blockPosListStatement(NULL),
-	m_blockOnPosStatement(NULL)
+	m_blockOnPosStatement(NULL),
+	m_blockOnRowidStatement(NULL)
 {
 	
 	std::string db_name = mapdir + "map.sqlite";
@@ -21,14 +23,18 @@ DBSQLite3::DBSQLite3(const std::string &mapdir) :
 	if (SQLITE_OK != sqlite3_prepare_v2(m_db, BLOCKPOSLIST_STATEMENT, sizeof(BLOCKPOSLIST_STATEMENT)-1, &m_blockPosListStatement, 0)) {
 		throw std::runtime_error("Failed to prepare SQL statement (blockPosListStatement)");
 	}
-	if (SQLITE_OK != sqlite3_prepare_v2(m_db, BLOCK_STATEMENT, sizeof(BLOCK_STATEMENT)-1, &m_blockOnPosStatement, 0)) {
+	if (SQLITE_OK != sqlite3_prepare_v2(m_db, BLOCK_STATEMENT_POS, sizeof(BLOCK_STATEMENT_POS)-1, &m_blockOnPosStatement, 0)) {
 		throw std::runtime_error("Failed to prepare SQL statement (blockOnPosStatement)");
+	}
+	if (SQLITE_OK != sqlite3_prepare_v2(m_db, BLOCK_STATEMENT_ROWID, sizeof(BLOCK_STATEMENT_ROWID)-1, &m_blockOnRowidStatement, 0)) {
+		throw std::runtime_error("Failed to prepare SQL statement (blockOnRowidStatement)");
 	}
 }
 
 DBSQLite3::~DBSQLite3() {
 	if (m_blockPosListStatement) sqlite3_finalize(m_blockPosListStatement);
 	if (m_blockOnPosStatement) sqlite3_finalize(m_blockOnPosStatement);
+	if (m_blockOnRowidStatement) sqlite3_finalize(m_blockOnRowidStatement);
 	sqlite3_close(m_db);
 }
 
@@ -49,7 +55,8 @@ const DB::BlockPosList &DBSQLite3::getBlockPos() {
 		result = sqlite3_step(m_blockPosListStatement);
 		if(result == SQLITE_ROW) {
 			sqlite3_int64 blocknum = sqlite3_column_int64(m_blockPosListStatement, 0);
-			m_BlockPosList.push_back(blocknum);
+			sqlite3_int64 rowid = sqlite3_column_int64(m_blockPosListStatement, 1);
+			m_BlockPosList.push_back(BlockPos(blocknum, rowid));
 		} else if (result == SQLITE_BUSY) // Wait some time and try again
 			usleep(10000);
 		else
@@ -64,15 +71,25 @@ DB::Block DBSQLite3::getBlockOnPos(const BlockPos &pos)
 {
 	Block block(pos,reinterpret_cast<const unsigned char *>(""));
 	int result = 0;
+	
 	m_blocksQueriedCount++;
 
-	sqlite3_bind_int64(m_blockOnPosStatement, 1, pos.databasePosI64());
+	sqlite3_stmt *statement;
+
+	if (pos.databasePosIdIsValid()) {
+		statement = m_blockOnRowidStatement;
+		sqlite3_bind_int64(m_blockOnRowidStatement, 1, pos.databasePosId());
+	}
+	else {
+		statement = m_blockOnPosStatement;
+		sqlite3_bind_int64(m_blockOnPosStatement, 1, pos.databasePosI64());
+	}
 
 	while (true) {
-		result = sqlite3_step(m_blockOnPosStatement);
+		result = sqlite3_step(statement);
 		if(result == SQLITE_ROW) {
-			const unsigned char *data = reinterpret_cast<const unsigned char *>(sqlite3_column_blob(m_blockOnPosStatement, 1));
-			int size = sqlite3_column_bytes(m_blockOnPosStatement, 1);
+			const unsigned char *data = reinterpret_cast<const unsigned char *>(sqlite3_column_blob(statement, 1));
+			int size = sqlite3_column_bytes(statement, 1);
 			block = Block(pos, ustring(data, size));
 			m_blocksReadCount++;
 			break;
@@ -82,7 +99,7 @@ DB::Block DBSQLite3::getBlockOnPos(const BlockPos &pos)
 			break;
 		}
 	}
-	sqlite3_reset(m_blockOnPosStatement);
+	sqlite3_reset(statement);
 
 	return block;
 }

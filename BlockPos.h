@@ -34,19 +34,23 @@ struct BlockPos {
 //#else
 //	std::size_t hash(void) const { return databasePosI64() % SIZE_MAX; }
 //#endif
-	BlockPos() : dimension{0, 0, 0}, m_strFormat(Unknown) {}
-	BlockPos(int _x, int _y, int _z) : dimension{_x, _y, _z}, m_strFormat(Unknown) {}
-	BlockPos(const BlockPos &pos) : dimension{pos.x(), pos.y(), pos.z()}, m_strFormat(pos.m_strFormat) {}
+	BlockPos() : dimension{0, 0, 0}, m_strFormat(Unknown), m_id(INT64_MIN) {}
+	BlockPos(int _x, int _y, int _z) : dimension{_x, _y, _z}, m_strFormat(Unknown), m_id(INT64_MIN) {}
+	BlockPos(int _x, int _y, int _z, int64_t id) : dimension{_x, _y, _z}, m_strFormat(Unknown), m_id(id) {}
+	BlockPos(const BlockPos &pos) : dimension{pos.x(), pos.y(), pos.z()}, m_strFormat(pos.m_strFormat), m_id(pos.m_id) {}
 	BlockPos(int64_t i) { operator=(i); }
+	BlockPos(int64_t i, int64_t id) { operator=(i); m_id = id; }
 	BlockPos(const std::string &s) { operator=(s); }
 	int64_t databasePosI64(void) const { return getDBPos(); }
+	int64_t databasePosId(void) const { return m_id; }
+	bool databasePosIdIsValid(void) const { return m_id != INT64_MIN; }
 	std::string databasePosStr(StrFormat defaultFormat = Unknown) const;
 	std::string databasePosStrFmt(StrFormat format) const;
 
 	bool operator<(const BlockPos& p) const;
 	bool operator==(const BlockPos& p) const;
-	void operator=(const BlockPos &p) { x() = p.x(); y() = p.y(); z() = p.z(); m_strFormat = p.m_strFormat; }
-	void operator=(int64_t i) { setFromDBPos(i); m_strFormat = I64; }
+	void operator=(const BlockPos &p) { x() = p.x(); y() = p.y(); z() = p.z(); m_strFormat = p.m_strFormat; m_id = p.m_id; }
+	void operator=(int64_t i) { setFromDBPos(i); m_strFormat = I64; m_id = INT64_MIN; }
 	void operator=(const std::string &s);
 
 	static const int Any = INT_MIN;
@@ -62,7 +66,7 @@ protected:
 private:
 	// WARNING: see comment about m_strFormat above !!
 	StrFormat m_strFormat;
-
+	int64_t m_id;
 };
 
 struct NodeCoord : BlockPos
@@ -117,6 +121,7 @@ namespace std {
 
 inline void BlockPos::operator=(const std::string &s)
 {
+	m_id = INT64_MIN;
 	std::istringstream is(s);
 	if (isdigit(is.peek()) || is.peek() == '-' || is.peek() == '+') {
 		int64_t ipos;

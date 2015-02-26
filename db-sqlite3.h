@@ -32,6 +32,7 @@ private:
 	sqlite3 *m_db;
 	sqlite3_stmt *m_blockPosListStatement;
 	sqlite3_stmt *m_blockOnPosStatement;
+	sqlite3_stmt *m_blockOnRowidStatement;
 	std::ostringstream  m_getBlockSetStatementBlocks;
 	BlockCache  m_blockCache;
 	BlockPosList m_BlockPosList;
