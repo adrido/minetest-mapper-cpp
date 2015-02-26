@@ -357,35 +357,35 @@ void TileGenerator::enableProgressIndicator(void)
 
 void TileGenerator::setGeometry(const NodeCoord &corner1, const NodeCoord &corner2)
 {
-	if (corner1.x > 0) {
-		m_reqXMin = corner1.x / 16;
+	if (corner1.x() > 0) {
+		m_reqXMin = corner1.x() / 16;
 	}
 	else {
-		m_reqXMin = (corner1.x - 15) / 16;
+		m_reqXMin = (corner1.x() - 15) / 16;
 	}
-	if (corner1.y > 0) {
-		m_reqZMin = corner1.y / 16;
+	if (corner1.y() > 0) {
+		m_reqZMin = corner1.y() / 16;
 	}
 	else {
-		m_reqZMin = (corner1.y - 15) / 16;
+		m_reqZMin = (corner1.y() - 15) / 16;
 	}
-	m_mapXStartNodeOffsetOrig = m_mapXStartNodeOffset = corner1.x - m_reqXMin * 16;
-	m_mapYEndNodeOffsetOrig = m_mapYEndNodeOffset = m_reqZMin * 16 - corner1.y;
+	m_mapXStartNodeOffsetOrig = m_mapXStartNodeOffset = corner1.x() - m_reqXMin * 16;
+	m_mapYEndNodeOffsetOrig = m_mapYEndNodeOffset = m_reqZMin * 16 - corner1.y();
 
-	if (corner2.x > 0) {
-		m_reqXMax = corner2.x / 16;
+	if (corner2.x() > 0) {
+		m_reqXMax = corner2.x() / 16;
 	}
 	else {
-		m_reqXMax = (corner2.x - 15) / 16;
+		m_reqXMax = (corner2.x() - 15) / 16;
 	}
-	if (corner2.y > 0) {
-		m_reqZMax = corner2.y / 16;
+	if (corner2.y() > 0) {
+		m_reqZMax = corner2.y() / 16;
 	}
 	else {
-		m_reqZMax = (corner2.y - 15) / 16;
+		m_reqZMax = (corner2.y() - 15) / 16;
 	}
-	m_mapXEndNodeOffsetOrig = m_mapXEndNodeOffset = corner2.x - (m_reqXMax * 16 + 15);
-	m_mapYStartNodeOffsetOrig = m_mapYStartNodeOffset = (m_reqZMax * 16 + 15) - corner2.y;
+	m_mapXEndNodeOffsetOrig = m_mapXEndNodeOffset = corner2.x() - (m_reqXMax * 16 + 15);
+	m_mapYStartNodeOffsetOrig = m_mapYStartNodeOffset = (m_reqZMax * 16 + 15) - corner2.y();
 }
 
 void TileGenerator::setMinY(int y)
@@ -922,54 +922,54 @@ void TileGenerator::loadBlocks()
 	for(DB::BlockPosList::const_iterator it = blocks.begin(); it != blocks.end(); ++it) {
 		world_blocks ++;
 		const BlockPos &pos = *it;
-		if (pos.x < mapXMin) {
-			mapXMin = pos.x;
+		if (pos.x() < mapXMin) {
+			mapXMin = pos.x();
 		}
-		if (pos.x > mapXMax) {
-			mapXMax = pos.x;
+		if (pos.x() > mapXMax) {
+			mapXMax = pos.x();
 		}
-		if (pos.y < mapYMin) {
-			mapYMin = pos.y;
+		if (pos.y() < mapYMin) {
+			mapYMin = pos.y();
 		}
-		if (pos.y > mapYMax) {
-			mapYMax = pos.y;
+		if (pos.y() > mapYMax) {
+			mapYMax = pos.y();
 		}
-		if (pos.z < mapZMin) {
-			mapZMin = pos.z;
+		if (pos.z() < mapZMin) {
+			mapZMin = pos.z();
 		}
-		if (pos.z > mapZMax) {
-			mapZMax = pos.z;
+		if (pos.z() > mapZMax) {
+			mapZMax = pos.z();
 		}
-		if (pos.x < m_reqXMin || pos.x > m_reqXMax || pos.z < m_reqZMin || pos.z > m_reqZMax) {
+		if (pos.x() < m_reqXMin || pos.x() > m_reqXMax || pos.z() < m_reqZMin || pos.z() > m_reqZMax) {
 			continue;
 		}
-		if (pos.y < geomYMin) {
-			geomYMin = pos.y;
+		if (pos.y() < geomYMin) {
+			geomYMin = pos.y();
 		}
-		if (pos.y > geomYMax) {
-			geomYMax = pos.y;
+		if (pos.y() > geomYMax) {
+			geomYMax = pos.y();
 		}
-		if (pos.y < m_reqYMin || pos.y > m_reqYMax) {
+		if (pos.y() < m_reqYMin || pos.y() > m_reqYMax) {
 			continue;
 		}
 		map_blocks++;
-		if (pos.y < m_yMin) {
-			m_yMin = pos.y;
+		if (pos.y() < m_yMin) {
+			m_yMin = pos.y();
 		}
-		if (pos.y > m_yMax) {
-			m_yMax = pos.y;
+		if (pos.y() > m_yMax) {
+			m_yMax = pos.y();
 		}
-		if (pos.x < m_xMin) {
-			m_xMin = pos.x;
+		if (pos.x() < m_xMin) {
+			m_xMin = pos.x();
 		}
-		if (pos.x > m_xMax) {
-			m_xMax = pos.x;
+		if (pos.x() > m_xMax) {
+			m_xMax = pos.x();
 		}
-		if (pos.z < m_zMin) {
-			m_zMin = pos.z;
+		if (pos.z() < m_zMin) {
+			m_zMin = pos.z();
 		}
-		if (pos.z > m_zMax) {
-			m_zMax = pos.z;
+		if (pos.z() > m_zMax) {
+			m_zMax = pos.z();
 		}
 		m_positions.push_back(pos);
 	}
@@ -1480,27 +1480,27 @@ void TileGenerator::renderMap()
 	int blocks_rendered = 0;
 	int area_rendered = 0;
 	BlockPos currentPos;
-	currentPos.x = INT_MIN;
-	currentPos.y = 0;
-	currentPos.z = INT_MIN;
+	currentPos.x() = INT_MIN;
+	currentPos.y() = 0;
+	currentPos.z() = INT_MIN;
 	bool allReaded = false;
 	for (std::list<BlockPos>::const_iterator position = m_positions.begin(); position != m_positions.end(); ++position) {
 		const BlockPos &pos = *position;
-		if (currentPos.x != pos.x || currentPos.z != pos.z) {
+		if (currentPos.x() != pos.x() || currentPos.z() != pos.z()) {
 			area_rendered++;
-			if (currentPos.z != pos.z) {
+			if (currentPos.z() != pos.z()) {
 				if (m_scaleFactor > 1) {
-					scalePixelRows(m_blockPixelAttributes, m_blockPixelAttributesScaled, pos.z);
-					pushPixelRows(m_blockPixelAttributesScaled, pos.z);
-					m_blockPixelAttributesScaled.setLastY(((m_zMax - pos.z) * 16 + 15) / m_scaleFactor);
+					scalePixelRows(m_blockPixelAttributes, m_blockPixelAttributesScaled, pos.z());
+					pushPixelRows(m_blockPixelAttributesScaled, pos.z());
+					m_blockPixelAttributesScaled.setLastY(((m_zMax - pos.z()) * 16 + 15) / m_scaleFactor);
 				}
 				else {
-					pushPixelRows(m_blockPixelAttributes, pos.z);
+					pushPixelRows(m_blockPixelAttributes, pos.z());
 				}
-				m_blockPixelAttributes.setLastY((m_zMax - pos.z) * 16 + 15);
+				m_blockPixelAttributes.setLastY((m_zMax - pos.z()) * 16 + 15);
 				if (progressIndicator)
-				    cout << "Processing Z-coordinate: " << std::setw(6) << pos.z*16
-					<< "  (" << std::fixed << std::setprecision(0) << 100.0 * (m_zMax - pos.z) / (m_zMax - m_zMin)
+				    cout << "Processing Z-coordinate: " << std::setw(6) << pos.z()*16
+					<< "  (" << std::fixed << std::setprecision(0) << 100.0 * (m_zMax - pos.z()) / (m_zMax - m_zMin)
 					<< "%)          \r" << std::flush;
 			}
 			for (int i = 0; i < 16; ++i) {
@@ -1527,19 +1527,19 @@ void TileGenerator::renderMap()
 				}
 			}
 			catch (UnpackError &e) {
-				std::cerr << "Failed to unpack map block " << pos.x << "," << pos.y << "," << pos.z
+				std::cerr << "Failed to unpack map block " << pos.x() << "," << pos.y() << "," << pos.z()
 					<< " (id: " << pos.databasePosStr(BlockPos::I64) << "). Block corrupt ?"
 					<< std::endl
-					<< "\tCoordinates: " << pos.x*16 << "," << pos.y*16 << "," << pos.z*16 << "+16+16+16"
+					<< "\tCoordinates: " << pos.x()*16 << "," << pos.y()*16 << "," << pos.z()*16 << "+16+16+16"
 					<< ";  Data: " << e.type << " at: " << e.offset << "(+" << e.length <<  ")/" << e.dataLength
 					<< std::endl;
 				unpackErrors++;
 			}
 			catch (ZlibDecompressor::DecompressError &e) {
-				std::cerr << "Failed to decompress data in map block " << pos.x << "," << pos.y << "," << pos.z
+				std::cerr << "Failed to decompress data in map block " << pos.x() << "," << pos.y() << "," << pos.z()
 					<< " (id: " << pos.databasePosStr(BlockPos::I64) << "). Block corrupt ?"
 					<< std::endl
-					<< "\tCoordinates: " << pos.x*16 << "," << pos.y*16 << "," << pos.z*16 << "+16+16+16"
+					<< "\tCoordinates: " << pos.x()*16 << "," << pos.y()*16 << "," << pos.z()*16 << "+16+16+16"
 					<< ";  Cause: " << e.message
 					<< std::endl;
 				unpackErrors++;
@@ -1549,13 +1549,13 @@ void TileGenerator::renderMap()
 			throw(std::runtime_error("Too many block unpacking errors - bailing out"));
 		}
 	}
-	if (currentPos.z != INT_MIN) {
+	if (currentPos.z() != INT_MIN) {
 		if (m_scaleFactor > 1) {
-			scalePixelRows(m_blockPixelAttributes, m_blockPixelAttributesScaled, currentPos.z - 1);
-			pushPixelRows(m_blockPixelAttributesScaled, currentPos.z - 1);
+			scalePixelRows(m_blockPixelAttributes, m_blockPixelAttributesScaled, currentPos.z() - 1);
+			pushPixelRows(m_blockPixelAttributesScaled, currentPos.z() - 1);
 		}
 		else {
-			pushPixelRows(m_blockPixelAttributes, currentPos.z - 1);
+			pushPixelRows(m_blockPixelAttributes, currentPos.z() - 1);
 		}
 	}
 	if (verboseStatistics) {
@@ -1601,11 +1601,11 @@ Color TileGenerator::computeMapHeightColor(int height)
 inline void TileGenerator::renderMapBlock(const ustring &mapBlock, const BlockPos &pos, int version)
 {
 	checkBlockNodeDataLimit(version, mapBlock.length());
-	int xBegin = worldBlockX2StoredX(pos.x);
-	int zBegin = worldBlockZ2StoredY(pos.z);
+	int xBegin = worldBlockX2StoredX(pos.x());
+	int zBegin = worldBlockZ2StoredY(pos.z());
 	const unsigned char *mapData = mapBlock.c_str();
-	int minY = (pos.y < m_reqYMin) ? 16 : (pos.y > m_reqYMin) ?  0 : m_reqYMinNode;
-	int maxY = (pos.y > m_reqYMax) ? -1 : (pos.y < m_reqYMax) ? 15 : m_reqYMaxNode;
+	int minY = (pos.y() < m_reqYMin) ? 16 : (pos.y() > m_reqYMin) ?  0 : m_reqYMinNode;
+	int maxY = (pos.y() > m_reqYMax) ? -1 : (pos.y() < m_reqYMax) ? 15 : m_reqYMaxNode;
 	for (int z = 0; z < 16; ++z) {
 		bool rowIsEmpty = true;
 		for (int x = 0; x < 16; ++x) {
@@ -1627,7 +1627,7 @@ inline void TileGenerator::renderMapBlock(const ustring &mapBlock, const BlockPo
 				if (m_nodeIDColor[content] == NodeColorNotDrawn) {
 					continue;
 				}
-				int height = pos.y * 16 + y;
+				int height = pos.y() * 16 + y;
 				if (m_heightMap) {
 					if (m_nodeIDColor[content] && nodeColor.a != 0) {
 						if (!(m_readedPixels[z] & (1 << x))) {
@@ -1942,19 +1942,19 @@ void TileGenerator::renderDrawObjects(void)
 		}
 		switch(o->type) {
 		case DrawObject::Point:
-			gdImageSetPixel(m_image, o->center.x, o->center.y, o->color.to_libgd());
+			gdImageSetPixel(m_image, o->center.x(), o->center.y(), o->color.to_libgd());
 			break;
 		case DrawObject::Line:
-			gdImageLine(m_image, o->corner1.x, o->corner1.y, o->corner2.x, o->corner2.y, o->color.to_libgd());
+			gdImageLine(m_image, o->corner1.x(), o->corner1.y(), o->corner2.x(), o->corner2.y(), o->color.to_libgd());
 			break;
 		case DrawObject::Ellipse:
-			gdImageArc(m_image, o->center.x, o->center.y, o->dimensions.x, o->dimensions.y, 0, 360, o->color.to_libgd());
+			gdImageArc(m_image, o->center.x(), o->center.y(), o->dimensions.x(), o->dimensions.y(), 0, 360, o->color.to_libgd());
 			break;
 		case DrawObject::Rectangle:
-			gdImageRectangle(m_image, o->corner1.x, o->corner1.y, o->corner2.x, o->corner2.y, o->color.to_libgd());
+			gdImageRectangle(m_image, o->corner1.x(), o->corner1.y(), o->corner2.x(), o->corner2.y(), o->color.to_libgd());
 			break;
 		case DrawObject::Text:
-			gdImageString(m_image, gdFontGetMediumBold(), o->center.x, o->center.y, reinterpret_cast<unsigned char *>(const_cast<char *>(o->text.c_str())), o->color.to_libgd());
+			gdImageString(m_image, gdFontGetMediumBold(), o->center.x(), o->center.y(), reinterpret_cast<unsigned char *>(const_cast<char *>(o->text.c_str())), o->color.to_libgd());
 			break;
 		default:
 #ifdef DEBUG
@@ -1969,7 +1969,7 @@ inline std::list<int> TileGenerator::getZValueList() const
 {
 	std::list<int> zlist;
 	for (std::list<BlockPos>::const_iterator position = m_positions.begin(); position != m_positions.end(); ++position) {
-		zlist.push_back(position->z);
+		zlist.push_back(position->z());
 	}
 	zlist.sort();
 	zlist.unique();

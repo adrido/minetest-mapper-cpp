@@ -430,7 +430,7 @@ static bool parseGeometry(istream &is, NodeCoord &coord1, NodeCoord &coord2, Nod
 	is.clear();
 	is.seekg(pos);
 	if (wildcard) {
-		coord1.x = coord1.y = coord1.z = 0;
+		coord1.x() = coord1.y() = coord1.z() = 0;
 	}
 	if (parseCoordinates(is, coord1, n, wildcard, ',')) {
 		if (expectDimensions == FuzzyBool::No || (expectDimensions == FuzzyBool::Maybe && (is.eof() || is.peek() == ' ' || is.peek() == '\t'))) {
@@ -438,7 +438,7 @@ static bool parseGeometry(istream &is, NodeCoord &coord1, NodeCoord &coord2, Nod
 			centered = false;
 			return (is.eof() || is.peek() == ' ' || is.peek() == '\t');
 		}
-		else if (wildcard && (coord1.x == wildcard || coord1.y == wildcard || coord1.z == wildcard)) {
+		else if (wildcard && (coord1.x() == wildcard || coord1.y() == wildcard || coord1.z() == wildcard)) {
 			// wildcards are only allowed for plain coordinates (i.e. no dimensions)
 			return false;
 		}
@@ -959,11 +959,11 @@ int main(int argc, char *argv[])
 							if (result) {
 								if (origin) {
 									convertBlockToNodeCoordinates(coord, 0, 2);
-									generator.setTileOrigin(coord.x, coord.y);
+									generator.setTileOrigin(coord.x(), coord.y());
 								}
 								else {
 									convertBlockToNodeCoordinates(coord, 8, 2);
-									generator.setTileCenter(coord.x, coord.y);
+									generator.setTileCenter(coord.x(), coord.y());
 								}
 							}
 							else {

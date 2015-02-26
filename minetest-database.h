@@ -52,18 +52,18 @@ static inline int64_t pythonmodulo(int64_t i, int16_t mod)
 
 inline int64_t getDBPos(void) const
 {
-	return (uint64_t) z * 0x1000000 +
-		(uint64_t) y * 0x1000 +
-		(uint64_t) x;
+	return (uint64_t) z() * 0x1000000 +
+		(uint64_t) y() * 0x1000 +
+		(uint64_t) x();
 }
 
 
 inline void setFromDBPos(int64_t i)
 {
-	x = unsigned_to_signed(pythonmodulo(i, 4096), 2048);
-	i = (i - x) / 4096;
-	y = unsigned_to_signed(pythonmodulo(i, 4096), 2048);
-	i = (i - y) / 4096;
-	z = unsigned_to_signed(pythonmodulo(i, 4096), 2048);
+	x() = unsigned_to_signed(pythonmodulo(i, 4096), 2048);
+	i = (i - x()) / 4096;
+	y() = unsigned_to_signed(pythonmodulo(i, 4096), 2048);
+	i = (i - y()) / 4096;
+	z() = unsigned_to_signed(pythonmodulo(i, 4096), 2048);
 }
 
