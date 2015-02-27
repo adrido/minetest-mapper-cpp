@@ -123,6 +123,6 @@ Manual
 ======
 
 For more elaborate compilation and installation documentation, please consult
-the build manual: `<doc/build-instruction.rst>`_.
+the build manual: `<doc/build-instructions.rst>`_.
 
 For more elaborate usage instruction, please consult the user manual: `<doc/manual.rst>`_.
