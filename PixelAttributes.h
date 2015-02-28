@@ -47,7 +47,7 @@ public:
 	bool isNormalized(void) const { return !m_n; }
 	Color color(void) const { return Color(red(), green(), blue(), alpha()); }
 
-	inline bool is_valid() const { return !isnan(m_h); }
+	inline bool is_valid() const { return !std::isnan(m_h); }
 	PixelAttribute &operator=(const PixelAttribute &p);
 	void normalize(double count = 0, Color defaultColor = Color(127, 127, 127));
 	void add(const PixelAttribute &p);
