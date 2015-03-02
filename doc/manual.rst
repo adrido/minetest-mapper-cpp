@@ -4,6 +4,10 @@ Minetest Mapper
 A tool to generate maps of minetest and freeminer worlds.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. NOTE:: Note to readers reading this from the github repository:
+    Github mangles the internal links in this document, so unfortunately
+    many of them don't work.
+
 .. Contents:: :depth: 2
 
 Invocation
