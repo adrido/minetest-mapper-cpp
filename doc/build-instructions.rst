@@ -1,37 +1,149 @@
 Minetest Mapper Build Instructions
 ##################################
 
-Minetestmapper can be built on posix (linux, freebsd, ...), osx and windows
-platforms (although not all platforms receive the same amount of testing -
-please let me know if there is a problem on your platform).
+Minetestmapper can be built on posix (Linux, \*BSD, ...), OSX and Windows
+platforms.
 
-Both the gcc and clang compiler suites are supported.
+Not all platforms receive the same amount of testing:
+
+* Gcc and clang builds on Linux are frequently tested.
+* The BSD family should also give little trouble. It is not tested that I know of.
+* Windows building using MinGW is also regularly tested and should work.
+* MSVC on Windows has not been tested recently.
+* Building on OSX has not been tested recently.
+
+Please let me know how you fared on your platform (when you encounter problems,
+but also when you're successful - so I can update this text with the latest
+information).
+
+.. Contents:: :depth: 2
 
 Requirements
 ============
 
-**Libraries:**
+Libraries
+---------
 
 * libgd
-* sqlite3 (enabled by default, set ENABLE_SQLITE3=0 in CMake to disable)
+* sqlite3 (optional - enabled by default, set ENABLE_SQLITE3=0 in CMake to disable)
 * leveldb (optional, set ENABLE_LEVELDB=1 in CMake to enable leveldb support)
 * hiredis (optional, set ENABLE_REDIS=1 in CMake to enable redis support)
 
-**Build environment:**
+At least one of ``sqlite3``, ``leveldb`` and ``hiredis`` is required. Check the
+minetest worlds that will be mapped to know which ones should be included.
 
-* C++ compiler suite (clang or gcc)
+Build Environment
+-----------------
+
+* C++ compiler suite (clang or gcc (including mingw); msvc has not recently been tested)
 * cmake
 * make
 
-**Documentation:**
+Documentation
+-------------
 
 If converting the documentation to HTML, or another format is desired:
 
 * python-docutils
 
 
+Install Dependencies
+====================
+
+Debian and Derivatives
+----------------------
+
+Install a compiler if not yet installed. Either gcc/g++:
+
+::
+
+	apt-get install make cmake cmake-curses-gui g++
+
+Or clang:
+
+::
+
+	apt-get install make cmake cmake-curses-gui clang
+
+To convert the manual to HTML (if desired), install ``python-docutils``
+
+::
+
+	apt-get install python-docutils
+
+In order to make a ``.deb`` package (if desired), install the required tools:
+
+::
+
+	apt-get install fakeroot
+
+Finally install the minetestmapper dependencies. At least one of ``libsqlite3-dev``,
+``libleveldb-dev`` and ``libhiredis-dev`` is required.
+
+::
+
+	apt-get install zlib1g-dev libgd-dev libsqlite3-dev libleveldb-dev libhiredis-dev
+
+Fedora and Derivatives
+----------------------
+
+Install a compiler if not yet installed. Either gcc/g++:
+
+::
+
+	yum install make cmake gcc-c++
+
+Or clang:
+
+::
+
+	yum install make cmake clang
+
+To convert the manual to HTML (if desired), install ``python-docutils``
+
+::
+
+	yum install python-docutils
+
+In order to make an ``.rpm`` package (if desired), install the required tools:
+
+::
+
+	yum install rpm-build
+
+Finally install the minetestmapper dependencies. At least one of ``libsqlite3x-devel``,
+``leveldb-devel`` and ``hiredis-devel`` is required.
+
+::
+
+	yum install zlib-devel gd-devel libsqlite3x-devel leveldb-devel hiredis-devel
+
+Ubuntu
+------
+See `Debian and Derivatives`_
+
+Linux Mint
+----------
+See `Debian and Derivatives`_
+
+Windows
+-------
+
+You're probably in for a lot of work, downloading software, and
+probably compiling at least some of the direct and indirect dependencies.
+At the moment, regrettably, detailed instructions are not available.
+
+Other
+-----
+
+At this moment, no specific instructions are available for other platforms.
+Feel free to contribute...
+
 Compilation
 ===========
+
+Linux / BSD / ...
+-----------------
 
 Plain:
 
@@ -47,58 +159,77 @@ With levelDB and Redis support:
     cmake -DENABLE_LEVELDB=true -DENABLE_REDIS=true .
     make
 
-Create installation package(s):
+Create native installation package(s):
 
 ::
 
+    cmake -DCMAKE_INSTALL_PREFIX=/usr -DCREATE_FLAT_PACKAGE=False
     cpack
 
-Cmake variables:
-----------------
+See `CMake Variables`_ for more CMake options.
+
+Windows
+-------
+
+Unfortunately, at the moment no instructions for Windows building are available.
+
+OSX
+---
+
+Probably quite similar to Linux, BSD, etc. Unfortunately no detailed instructions
+are available.
+
+CMake Variables
+---------------
 
 ENABLE_SQLITE3:
-    Enable sqlite3 backend support (on by default)
+    Whether to enable sqlite3 backend support (on by default)
 
 ENABLE_LEVELDB:
-    Enable leveldb backend support (off by default)
+    Whether to enable leveldb backend support (off by default)
 
 ENABLE_REDIS:
-    Enable redis backend support (off by default)
+    Whether to enable redis backend support (off by default)
 
 ENABLE_ALL_DATABASES:
-    Enable support for all backends (off by default)
+    Whether to enable support for all backends (off by default)
 
 CMAKE_BUILD_TYPE:
     Type of build: 'Release' or 'Debug'. Defaults to 'Release'.
 
 CREATE_FLAT_PACKAGE:
-    Create a .tar.gz package suitable for installation in a user's private directory.
+    Whether to create a .tar.gz package suitable for installation in a user's private
+    directory.
     The archive will unpack into a single directory, with the mapper's files inside
     (this is the default).
 
-    If off, .tar.gz, .deb and .rpm packages suitable for system-wide installation
-    will be created if possible. The tar.gz package will unpack into a directory hierarchy.
+    If off, ``.tar.gz``, ``.deb`` and/or ``.rpm`` packages suitable for system-wide installation
+    will be created if possible. The ``tar.gz`` package will unpack into a directory hierarchy.
 
-    For creation of .deb and .rpm packages, CMAKE_INSTALL_PREFIX must be '/usr'.
+    For creation of ``.deb`` and ``.rpm packages``, CMAKE_INSTALL_PREFIX must be '/usr'.
 
-    For .deb package creation, dpkg and fakeroot are required.
+    For ``.deb`` package creation, dpkg and fakeroot are required.
 
-    For .rpm package creation, rpmbuild is required.
+    For ``.rpm`` package creation, rpmbuild is required.
+
+CMAKE_INSTALL_PREFIX:
+    The install location. Should probably be ``/usr`` or ``/usr/local`` on Linux and BSD variants.
 
 ARCHIVE_PACKAGE_NAME:
-    Name of the .zip or .tar.gz package (without extension). This will also be
+    Name of the ``.zip`` or ``.tar.gz`` package (without extension). This will also be
     the name of the directory into which the archive unpacks.
 
-    Defaults to minetestmapper-<version>-<os-type>
+    Defaults to ``minetestmapper-<version>-<os-type>``
 
-    The names of .deb and .rpm packages are *not* affected by this variable.
+    The names of ``.deb`` and ``.rpm`` packages are *not* affected by this variable.
 
-Converting the documentation
+Converting the Documentation
 ============================
 
 Using python-docutils, the manual can be converted to a variety of formats.
 
-**HTML**
+HTML
+----
 
 Conversion to HTML yields a nice manual:
 
@@ -107,7 +238,8 @@ Conversion to HTML yields a nice manual:
 	cd doc
 	rst2html manual.rst > manual.html
 
-**Unix manpage**
+Unix manpage
+------------
 
 Conversion to unix man format has acceptable, but not perfect results:
 
@@ -116,14 +248,16 @@ Conversion to unix man format has acceptable, but not perfect results:
 	cd doc
 	rst2html manual.rst > minetestmapper.1
 
-**PDF**
+PDF
+---
 
-The results of using rst2pdf (which, as an aside, is not part of python-docutils)
-to convert to PDF directly are not good: random images are scaled down, some even
-to almost invisibly small. If PDF is desired, a good option is to open the HTML file
-in a webbrowser, and print it to PDF.
+The results of using ``rst2pdf`` (which, as an aside, is not part of python-docutils,
+and needs to be obtained separately) to convert to PDF directly are not good: random
+images are scaled down, some even to almost invisibly small. If PDF is desired, a
+good option is to open the HTML file in a webbrowser, and print it to PDF.  
 
-**Other**
+Other
+-----
 
 Other conversions are possible using python-docutils. If you tried any, and
 they warrant specific instructions, feel free to contribute.
