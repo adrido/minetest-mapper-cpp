@@ -264,6 +264,17 @@ target_link_libraries(
 # CPack
 
 file(GLOB META_FILES RELATIVE "${CMAKE_HOME_DIRECTORY}" AUTHORS COPYING LICENSE.* README.rst)
+file(GLOB DOC_RST_FILES RELATIVE "${CMAKE_HOME_DIRECTORY}" doc/*.rst)
+file(GLOB DOC_HTML_FILES RELATIVE "${CMAKE_HOME_DIRECTORY}" doc/*.html)
+file(GLOB DOC_IMAGE_FILES RELATIVE "${CMAKE_HOME_DIRECTORY}" doc/images/*)
+set(COLORS_FILES
+	colors.txt
+	heightmap-nodes.txt
+	heightmap-colors.txt
+	heightmap-colors-rainbow.txt
+	colors-average-alpha.txt
+	colors-cumulative-alpha.txt
+)
 
 #set(CPACK_SET_DESTDIR ON)
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Map generator for Minetest")
@@ -295,12 +306,10 @@ if(WIN32)
 	set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${VERSION_STRING}-win32")
 
 	install(FILES ${META_FILES} DESTINATION ".")
-	install(FILES "colors.txt" DESTINATION ".")
-	install(FILES "heightmap-nodes.txt" DESTINATION ".")
-	install(FILES "heightmap-colors.txt" DESTINATION ".")
-	install(FILES "heightmap-colors-rainbow.txt" DESTINATION ".")
-	install(FILES "colors-average-alpha.txt" DESTINATION ".")
-	install(FILES "colors-cumulative-alpha.txt" DESTINATION ".")
+	install(FILES ${COLORS_FILES} DESTINATION ".")
+	install(FILES ${DOC_RST_FILES} DESTINATION "doc")
+	install(FILES ${DOC_HTML_FILES} DESTINATION "doc")
+	install(FILES ${DOC_IMAGE_FILES} DESTINATION "doc/images")
 	install(PROGRAMS "${PROJECT_BINARY_DIR}/minetestmapper.exe" DESTINATION ".")
 
 elseif(CREATE_FLAT_PACKAGE)
@@ -320,12 +329,10 @@ elseif(CREATE_FLAT_PACKAGE)
 	message(STATUS "Flat archive package name: ${CPACK_PACKAGE_FILE_NAME}.tar.gz")
 
 	install(FILES ${META_FILES} DESTINATION ".")
-	install(FILES "colors.txt" DESTINATION ".")
-	install(FILES "heightmap-nodes.txt" DESTINATION ".")
-	install(FILES "heightmap-colors.txt" DESTINATION ".")
-	install(FILES "heightmap-colors-rainbow.txt" DESTINATION ".")
-	install(FILES "colors-average-alpha.txt" DESTINATION ".")
-	install(FILES "colors-cumulative-alpha.txt" DESTINATION ".")
+	install(FILES ${COLORS_FILES} DESTINATION ".")
+	install(FILES ${DOC_RST_FILES} DESTINATION "doc")
+	install(FILES ${DOC_HTML_FILES} DESTINATION "doc")
+	install(FILES ${DOC_IMAGE_FILES} DESTINATION "doc/images")
 	install(PROGRAMS "${PROJECT_BINARY_DIR}/minetestmapper" DESTINATION ".")
 
 else(WIN32)
@@ -357,12 +364,10 @@ else(WIN32)
 	message(STATUS "Archive package name: ${CPACK_TGZ_PACKAGE_FILE_NAME}.tar.gz")
 
 	install(FILES ${META_FILES} DESTINATION "share/doc/${PROJECT_NAME}" COMPONENT mapper)
-	install(FILES colors.txt DESTINATION "share/games/${PROJECT_NAME}" COMPONENT mapper)
-	install(FILES heightmap-nodes.txt DESTINATION "share/games/${PROJECT_NAME}" COMPONENT mapper)
-	install(FILES heightmap-colors.txt DESTINATION "share/games/${PROJECT_NAME}" COMPONENT mapper)
-	install(FILES heightmap-colors-rainbow.txt DESTINATION "share/games/${PROJECT_NAME}" COMPONENT mapper)
-	install(FILES colors-average-alpha.txt DESTINATION "share/games/${PROJECT_NAME}" COMPONENT mapper)
-	install(FILES colors-cumulative-alpha.txt DESTINATION "share/games/${PROJECT_NAME}" COMPONENT mapper)
+	install(FILES ${COLORS_FILES} DESTINATION "share/games/${PROJECT_NAME}" COMPONENT mapper)
+	install(FILES ${DOC_RST_FILES} DESTINATION "share/doc/${PROJECT_NAME}/doc" COMPONENT mapper)
+	install(FILES ${DOC_HTML_FILES} DESTINATION "share/doc/${PROJECT_NAME}/doc" COMPONENT mapper)
+	install(FILES ${DOC_IMAGE_FILES} DESTINATION "share/doc/${PROJECT_NAME}/doc/images" COMPONENT mapper)
 	install(TARGETS minetestmapper RUNTIME DESTINATION bin COMPONENT mapper)
 
 	if(CMAKE_INSTALL_PREFIX STREQUAL "/usr")
