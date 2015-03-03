@@ -1,5 +1,5 @@
-Minetest Mapper
-###############
+Minetest Mapper Manual
+######################
 
 A tool to generate maps of minetest and freeminer worlds.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -13,14 +13,20 @@ A tool to generate maps of minetest and freeminer worlds.
 Invocation
 ==========
 
-Basic Usage
------------
+Basic Usage (Linux / BSD / ...)
+-------------------------------
+
+.. NOTE::
+	For readability, example commands below are spread over multiple lines, using '``\``' as
+	a continuation character: '``\``' as the last character on a line indicates that the command
+	continues on the next line. Most shells will also interpret '``\``' in that way, and execute
+	the entire command only after the first line that does not end in '``\``'.
+
+	Alternatively, all parts of the command-line can be typed on a single line, without the '``\``'
+	characters.
+
 
 After installation, minetestmapper is started as follows:
-
-('\\' is a continuation character - the command-line continues
-on the next line. Type return only after the line that does
-not end with the continuation character)
 
 ::
 
@@ -41,10 +47,10 @@ the colors.txt file can be specified on the command-line:
 	--output <image-file-name.png> \
 	--colors <filename>
 
-Or the colors.txt file must be installed in a location where minetestmapper will find it.
+Or copy the colors.txt to a location where minetestmapper will automatically find it.
 A colors.txt file (named ``colors.txt``, in lowercase) in the world's directory will certainly
-be found. Depending on the system and the configuration, other locations are available. Use the
-following command to find out which:
+be found.  Depending on the system and the configuration, a number of other locations are
+searched as well. Use the following command to find out which:
 
 ::
 
@@ -53,14 +59,129 @@ following command to find out which:
 	--output <image-file-name.png> \
 	--verbose-search-colors=2
 
-From the basis above, add any number of other options that are documented below, according
+See also: `Colors Files Search Locations`_.
+
+From this basis, add any number of other options that are documented below, according
 to to personal needs and taste.
+
+Basic Usage (Windows)
+---------------------
+
+.. NOTE::
+	For readability, example commands below are spread over multiple lines, using '``^``' as
+	a continuation character: '``^``' as the last character on a line indicates that the command
+	continues on the next line. The regular windows command prompt will also interpret '``^``'
+	as such, and excute the entire command only after the first line that does not end in '``^``'.
+
+	So there are two options:
+
+	* Type the commands exactly as shown, making sure '``^``' is the last character on each line
+	  before typing return.
+
+	* Type all parts of the command one after another, omitting the '``^``' characters and
+	  type return only after typing the line that does not end in '``^``'.
+
+.. NOTE::
+	The following commands assume that minetestmapper is installed in ``c:\games\minetestmapper``, and that
+	minetestmapper.exe is in ``c:\games\minetestmapper\bin``. If it installed elsewhere, use the actual
+	installation path instead.
+
+From the Command-line
+.....................
+
+After installation, minetestmapper is started as follows from the command-line:
+
+::
+
+    c:\games\minetestmapper\bin\minetestmapper.exe ^
+	--input <world-directory> ^
+	--output <image-file-name.png>
+
+Possibly, minetestmapper will not be able to find the colors.txt file. If that happens, either
+specify its location on the command-line:
+
+::
+
+    c:\games\minetestmapper\bin\minetestmapper.exe ^
+	--input <world-directory> ^
+	--output <image-file-name.png> ^
+	--colors <filename>
+
+Or copy the colors.txt to a location where minetestmapper will automatically find it.
+A colors.txt file (named ``colors.txt``, in lowercase) in the world's directory will certainly
+be found.  Depending on the system and the configuration, a number of other locations are
+searched as well. Use the following command to find out which:
+
+::
+
+    c:\games\minetestmapper\bin\minetestmapper ^
+	--input <world-directory> ^
+	--output <image-file-name.png> ^
+	--verbose-search-colors=2
+
+See also: `Colors Files Search Locations`_.
+
+From this basis, add any number of other options that are documented below, according
+to personal needs and taste.
+
+Using a Batch File
+..................
+
+A batch file is an easy way to prepare a minetestmapper command for later execution. While
+batch files have many interesting features, only a simple example is given here.
+
+The basics of batch files can be easily found on internet. Search for ``writing a
+batch file`` if the description below is too succint.
+
+Using notepad, create a file ``mapper.bat``, which contains the command-line, exactly like it
+would be typed at the prompt. For example:
+
+::
+
+    c:\games\minetestmapper\bin\minetestmapper ^
+	--input c:\games\minetest\worlds\myworld ^
+	--output c:\games\minetest\worlds\myworld\map.png ^
+	--colors c:\games\colors.txt
+
+save the file (for example as ``c:\users\John\mapper.bat``), and execute it at the command-prompt:
+
+::
+
+    c:\> c:\users\John\mapper.bat
+
+And the minetestmapper command-line from the batch file will be executed.
+
 
 Command-line Options Summary
 ----------------------------
 
     For a more detailed description of the options, see `Detailed Description of Options`_
     below.
+
+Option Syntax
+.............
+
+The options below use the following syntax:
+
+	:some-text:	Plain text should be typed as shown.
+
+	:<placeholder>: This is a placeholder. The entire text (including '``<``' and '``>``') must
+			be replaced with whatever it designates.
+
+			E.g. ``<height>`` might become ``100``
+
+	:[optional]:	Anything between '``[``' and '``]``' is optional. It may be specified
+			(without ``[`` and ``]``), or left out (for a different result).
+
+	:one|or|the|other: The '``|``' character signifies that one of the possibilities should
+			be typed.
+
+	:list,of,options: A comma-separated list is a list of possible options. Use one or more
+			of them, separated by commas.
+
+	:<geometry>:	Specify a geometry. See `Geometry Syntax`_
+
+	:<color>:	Specify a color. See `Color Syntax`_
 
 Basic options:
 ..............
@@ -70,13 +191,13 @@ Basic options:
     * ``--input <world-dir>`` :				Specify the world directory (mandatory)
     * ``--output <image filename>`` :			Specify the map file name (mandatory)
     * ``--colors <filename>`` :				Specify the colors file name.
-    * ``--heightmap[=color]>`` :			Generate a height map instead of a regular map
+    * ``--heightmap[=<color>]`` :			Generate a height map instead of a regular map
     * ``--heightmap-nodes <filename>`` :		Specify the nodes list for the height map
     * ``--heightmap-colors <filename>`` :		Specify the color definition file for the height map
     * ``--geometry <geometry>`` :			Specify the desired map dimensions
     * ``--scalefactor <factor>`` :			Specify the scaling factor for the map
     * ``--progress`` :					Print progress information while generating the map
-    * ``--verbose[=2]`` :				Report statistics about the world and the generated map
+    * ``--verbose[=<n>]`` :				Report statistics about the world and the generated map
 
 
 Area options:
@@ -93,13 +214,13 @@ Area options:
 Height map-related options:
 ...........................
 
-    * ``--heightmap[=color]>`` :			Generate a height map instead of a regular map
+    * ``--heightmap[=<color>]`` :			Generate a height map instead of a regular map
     * ``--heightmap-nodes <filename>`` :		Specify the nodes list for the height map
     * ``--heightmap-colors <filename>`` :		Specify the color definition file for the height map
     * ``--heightmap-yscale <factor>`` :			Scale the vertical dimensions by a factor
     * ``--height-level-0 <height>`` :			Set the '0' level differently for determining height map colors
     * ``--drawheightscale`` :				Draw a height scale at the bottom of the map
-    * ``--heightscale-interval <major>[[,:]<minor>]`` :	Use custom major and minor intervals in the height scale.
+    * ``--heightscale-interval <major>[,|:<minor>]`` :	Use custom major and minor intervals in the height scale.
 
 Colors for specific areas or parts of the map:
 ..............................................
@@ -116,13 +237,13 @@ Map features:
 
     * ``--drawscale[=top,left]`` :			Draw a scale on the left and/or top edge
     * ``--drawheightscale`` :				Draw a height scale at the bottom of the map
-    * ``--sidescale-interval <major>[[,:]<minor>]`` :	Use custom major and minor intervals in the scale.
-    * ``--heightscale-interval <major>[[,:]<minor>]`` :	Use custom major and minor intervals in the height scale.
+    * ``--sidescale-interval <major>[,|:<minor>]`` :	Use custom major and minor intervals in the scale.
+    * ``--heightscale-interval <major>[,|:<minor>]`` :	Use custom major and minor intervals in the height scale.
     * ``--draworigin`` :				Draw a circle at the origin (0,0) on the map
     * ``--drawplayers`` :				Draw circles at player positions on the map
     * ``--drawalpha[=cumulative|cumulative-darken|average|none]`` :	Enable drawing transparency for some nodes (e.g. water)
     * ``--drawair`` :					Draw air nodes (read the warnings first!)
-    * ``--noshading`` :					Disable shading that accentuates height diffences
+    * ``--noshading`` :					Disable shading that accentuates height differences
 
 Tiles:
 ......
@@ -138,35 +259,35 @@ Drawing figures on the map
 
     Using world coordinates:
 
-    * ``--drawpoint "<x>,<y> color"`` :			Draw a point (single pixel) on the map
-    * ``--drawline "<geometry> color"`` :		Draw a line on the map
-    * ``--drawcircle "<geometry> color"`` :		Draw a circle on the map
-    * ``--drawellipse "<geometry> color"`` :		Draw an ellipse on the map
-    * ``--drawrectangle "<geometry> color"`` :		Draw a rectangle on the map
-    * ``--drawtext "<x>,<y> color text"`` :		Write some text on the map
+    * ``--drawpoint "<x>,<y> <color>"`` :		Draw a point (single pixel) on the map
+    * ``--drawline "<geometry> <color>"`` :		Draw a line on the map
+    * ``--drawcircle "<geometry> <color>"`` :		Draw a circle on the map
+    * ``--drawellipse "<geometry> <color>"`` :		Draw an ellipse on the map
+    * ``--drawrectangle "<geometry> <color>"`` :	Draw a rectangle on the map
+    * ``--drawtext "<x>,<y> <color> <text>"`` :		Write some text on the map
 
     Same figures using map/image coordinates (0,0 is the top-left corner of the map)
 
-    * ``--drawmappoint "<x>,<y> color"`` :		Draw a point (single pixel) on the map
-    * ``--drawmapline "<geometry> color"`` :		Draw a line on the map
-    * ``--drawmapcircle "<geometry> color"`` :		Draw a circle on the map
-    * ``--drawmapellipse "<geometry> color"`` :		Draw an ellipse on the map
-    * ``--drawmaprectangle "<geometry> color"`` :	Draw a rectangle on the map
-    * ``--drawmaptext "<x>,<y> color text"`` :		Write some text on the map
+    * ``--drawmappoint "<x>,<y> <color>"`` :		Draw a point (single pixel) on the map
+    * ``--drawmapline "<geometry> <color>"`` :		Draw a line on the map
+    * ``--drawmapcircle "<geometry> <color>"`` :	Draw a circle on the map
+    * ``--drawmapellipse "<geometry> <color>"`` :	Draw an ellipse on the map
+    * ``--drawmaprectangle "<geometry> <color>"`` :	Draw a rectangle on the map
+    * ``--drawmaptext "<x>,<y> <color> <text>"`` :	Write some text on the map
 
 Feedback / information options:
 ...............................
 
     * ``--help`` :					Print an option summary
     * ``--version`` :					Print version ID of minetestmapper
-    * ``--verbose[=n]`` :				Report world and map statistics (size, dimensions, number of blocks)
+    * ``--verbose[=<n>]`` :				Report world and map statistics (size, dimensions, number of blocks)
     * ``--verbose-search-colors[=n]`` :			Report which colors files are used and/or which locations are searched
     * ``--progress`` :					Show a progress indicator while generating the map
 
 Miscellaneous options
 .....................
 
-    * ``--backend <auto/sqlite3/leveldb/redis>`` :	Specify or override the database backend to use
+    * ``--backend auto|sqlite3|leveldb|redis`` :	Specify or override the database backend to use
 
 
 Detailed Description of Options
@@ -189,7 +310,7 @@ Detailed Description of Options
 .. Contents:: :local:
 
 
-``--backend <auto|sqlite3|leveldb|redis>``
+``--backend auto|sqlite3|leveldb|redis``
 ..........................................
 	Set or override the database backend to use.
 
@@ -227,21 +348,21 @@ Detailed Description of Options
 ...............................
 	Suggest interpreting a geometry as center coordinates and dimensions. If possible.
 
-		See also `--geometry`_
+	See also `--geometry`_
 
 ``--chunksize <size>``
 ......................
 	Set or override the chunk size.
 
-	The chunk size is the unit of map generation minetest. Minetest never generates
+	The chunk size is the unit of map generation in minetest. Minetest never generates
 	a single block at a time, it always generates a chunk at a time.
 
 	The chunk size may be used by the `--tiles`_ option. It is obtained from
-	the world by default. It is usually but not necessarily 5 (i.e. 5x5x5 blocks).
+	the world by default. It is usually, but not necessarily, 5 (i.e. 5x5x5 blocks).
 
 ``--colors <file>``
 ...................
-	Specify the name of the 'colors.txt' to use.
+	Specify the name of the 'colors.txt' file to use.
 
 	See `Colors and Nodes Files`_ and `Colors.txt Syntax`_.
 
@@ -253,12 +374,12 @@ Detailed Description of Options
 	Suggest interpreting a geometry as corner coordinates and dimensions. If
 	possible.
 
-		See also `--geometry`_
+	See also `--geometry`_
 
 
-``--draw[map]<figure> "<geometry> color"``
-..........................................
-		Draw a figure on the map, with the given geometry and color.
+``--draw[map]<figure> "<geometry> <color> [<text>]"``
+.....................................................
+	Draw a figure on the map, with the given geometry and color.
 
 	Possible figures are:
 
@@ -273,12 +394,12 @@ Detailed Description of Options
 	If ``--drawmap<figure>`` is used, the geometry specifies map (image)
 	coordinates, where 0,0 is the top-left corner of the map-part of
 	the image, and coordinates increase to the right and down. Any points
-	on the left and top scale have negative coordinates.
+	on the left and top scale (if present) have negative coordinates.
 
-	Note that the combination of geometry and color should be a single
-	argument.  This means that the pair must be enclosed in quotes together
-	on the command-line, else they will be misinterpreted as two command-line
-	arguments.
+	Note that the combination of geometry and color (and text if applicable)
+	must be a single argument.  This means that they *must* be enclosed
+	in quotes together on the command-line, else they will be misinterpreted
+	as two or more command-line arguments.
 
 	Example:
 
@@ -310,16 +431,19 @@ Detailed Description of Options
 	If the geometry of a figure is specified using a corner or the center
 	and dimensions, then the corner or center is obviously also interpreted
 	as world-coordinates, but the dimensions will be interpreted relative
-	to the image.
+	to the image. I.e. they won't scale with the map.
 
 	In practise this means that two identically-sized figures in a full-scale
 	map, may have different sizes after scaling, depending on how their
 	geometry was specified. The jury is still out as to whether this is
 	a bug or a feature.
 
-``--draw[map]circle "<geometry> color"``
-........................................
+``--draw[map]circle "<geometry> <color>"``
+..........................................
 	Draw a circle on the map, with the given geometry and color.
+
+	If the geometry does not specify equal horizontal and vertical
+	dimensions, then an ellipse will be drawn.
 
 	See `--draw[map]<figure>`_ for details.
 
@@ -327,14 +451,14 @@ Detailed Description of Options
 
 	.. image:: images/drawcircle.png
 
-``--draw[map]ellipse "<geometry> color"``
-.........................................
+``--draw[map]ellipse "<geometry> <color>"``
+...........................................
 	Draw an ellipse on the map. This is a synonym for ``--draw[map]circle``.
 
 	See `--draw[map]<figure>`_ for details.
 
-``--draw[map]line "<geometry> color"``
-......................................
+``--draw[map]line "<geometry> <color>"``
+........................................
 	Draw a line on the map, with the given geometry and color.
 
 	See `--draw[map]<figure>`_ for details.
@@ -343,8 +467,8 @@ Detailed Description of Options
 
 	.. image:: images/drawline.png
 
-``--draw[map]point "<x>,<y> color"``
-....................................
+``--draw[map]point "<x>,<y> <color>"``
+......................................
 	Draw a point on the map, at the given location, using the given color.
 
 	See `--draw[map]<figure>`_ for details.
@@ -353,8 +477,8 @@ Detailed Description of Options
 
 	.. image:: images/drawpoint.png
 
-``--draw[map]rectangle "<geometry> color"``
-...........................................
+``--draw[map]rectangle "<geometry> <color>"``
+.............................................
 	Draw a reactangle on the map, with the given geometry and color.
 
 	See `--draw[map]<figure>`_ for details.
@@ -364,11 +488,14 @@ Detailed Description of Options
 	.. image:: images/drawrectangle.png
 
 
-``--draw[map]text "<x>,<y> color text"``
-........................................
+``--draw[map]text "<x>,<y> <color> <text>"``
+............................................
 	Write text on the map, at the specified location, using the given color.
 
-	The text can consist of
+	The text can consist of any number of words. be careful when using
+	characters that the command shell may interpret, like '``"``',
+	'``$``', etc. On unix-like systems, use single quotes to avoid
+	interpretation of most characters (except for ``'`` itself).
 
 	Note that the combination of geometry, color and text should be a
 	single argument.  This means that they must be enclosed in quotes
@@ -409,27 +536,32 @@ Detailed Description of Options
 
 	.. image:: images/background-white.png
 	.. image:: images/drawair.png
+	.. image:: images/drawair-detail-0.png
+	.. image:: images/drawair-detail.png
 
 ``--drawalpha[=cumulative|cumulative-darken|average|none]``
 ...........................................................
 	Specify how to render the alpha (transparency) value of nodes.
 
-	* **none**: don't render transparency. This is the same as
-	  omitting this option.
-	* **average**: average the entire stack of transparent nodes
-	  before combining the resulting color with the color of the
-	  first opaque node below the stack. Water will remain transparent
-	  indefinitely.
-	* **cumulative**: make lower nodes progressively more opaque.
-	  The effect is for instance, that water becomes opaque below
-	  a certain depth - only height differences will 'shine' through,
-	  if shading is not disabled (`--noshading`_)
-	* **cumulative-darken**: Same as *cumulative*, except that
-	  after the color has become opaque, it is progressively
-	  darkened to visually simulate greater depth. This is looks great
-	  for deeper waters that are not too deep.
-	  The downside is that very deep water will eventually become black
-	  when using this option.
+	    :none: don't render transparency. This is the same as
+		    omitting this option.
+
+	    :average: average the entire stack of transparent nodes
+		    before combining the resulting color with the color of the
+		    first opaque node below the stack. Water will remain transparent
+		    indefinitely.
+
+	    :cumulative: make lower nodes progressively more opaque.
+		    The effect is for instance, that water becomes opaque below
+		    a certain depth - only height differences will 'shine' through,
+		    if shading is not disabled (`--noshading`_)
+
+	    :cumulative-darken: Same as *cumulative*, except that
+		    after the color has become opaque, it is progressively
+		    darkened to visually simulate greater depth. This is looks great
+		    for deeper waters that are not too deep.
+		    The downside is that very deep water will eventually become black
+		    when using this option.
 
 	If this option is used without a method argument, the
 	default is 'average'.
@@ -443,13 +575,13 @@ Detailed Description of Options
 	for transparent blocks that looks best. For instance, for water, the following
 	are suggested:
 
-	(disabled): 39 66 106 [192 224 - optional: alpha configuration will be ignored]
+	    :(disabled):	``39 66 106`` [``192 224`` - optional: alpha value will be ignored]
 
-	cumulative: 78 132 255 64 224
+	    :cumulative:	``78 132 255 64 224``
 
-	cumulative-darken: 78 132 255 64 224 (same as cumulative)
+	    :cumulative-darken:	``78 132 255 64 224`` (same colors as cumulative)
 
-	average: 49 82 132 192 224 (look also good with alpha disabled)
+	    :average:		``49 82 132 192 224`` (also looks good with alpha disabled)
 
 	Custom colors files are provided for these alternatives: colors-average-alpha.txt
 	and colors-cumulative-alpha.txt. If desired, these must be manually selected.
@@ -492,7 +624,7 @@ Detailed Description of Options
 
 ``--drawscale[=left,top]``
 ..........................
-	Draw scales at the left and.or top of the map.
+	Draw scales at the left and/or top of the map.
 
 	If neither 'left' nor 'top' is specified, draw them on both sides.
 
@@ -501,7 +633,7 @@ Detailed Description of Options
 	The major and minor interval can be configured using
 	`--sidescale-interval`_.
 
-	Images of scales on the top, left and on both sides
+	Images of scales on the top, left and on both sides:
 
 	.. image:: images/drawscale-left.png
 	.. image:: images/drawscale-top.png
@@ -526,40 +658,40 @@ Detailed Description of Options
 
 	The geometry can have pixel or block granularity:
 
-	* **pixel**: interpret the coordinates with pixel granularity.
+	    :pixel: Interpret the coordinates with pixel granularity.
 
-	  A map of exactly the requested size is generated (after
-	  adjustments due to the 'shrink' flag, or possible adjustments
-	  required by the scale factor).
+		  A map of exactly the requested size is generated (after
+		  adjustments due to the 'shrink' flag, or possible adjustments
+		  required by the scale factor).
 
-	* **block**: round the coodinates to a multiple of 16.
+	    :block: Round the coordinates to a multiple of 16.
 
-	  The requested geometry will be extended so that the map does
-	  not contain partial map blocks (of 16x16 nodes each).
-	  At *least* all pixels covered by the geometry will be in the
-	  map, but there may be up to 15 more in every direction.
+		  The requested geometry will be extended so that the map does
+		  not contain partial map blocks (of 16x16 nodes each).
+		  At *least* all pixels covered by the geometry will be in the
+		  map, but there may be up to 15 more in every direction.
 
 	The geometry can be fixed as requested, or the map can be shrunk:
 
-	* **shrink**: Generate a map of at most the requested geometry.
-	  Shrink it to the smallest possible size that still includes the
-	  same information.
+	    :shrink: Generate a map of at most the requested geometry.
+		  Shrink it to the smallest possible size that still includes the
+		  same information.
 
-	  Currently, shrinking is done with block granularity, and
-	  based on which blocks are in the database. As the database
-	  always contains a row or and column of empty, or partially
-	  empty blocks at the map edges, there will still be empty
-	  pixels at the edges of the map. Use `--blockcolor`_ to visualize
-	  these empty blocks.
+		  Currently, shrinking is done with block granularity, and
+		  based on which blocks are in the database. As the database
+		  always contains a row or and column of empty, or partially
+		  empty blocks at the map edges, there will still be empty
+		  pixels at the edges of the map. Use `--blockcolor`_ to visualize
+		  these empty blocks.
 
-	* **fixed**: don't reduce the map size. What ever is specified
-	  using a geometry option, is what will be draw, even if partly
-	  or fully empty.
+	    :fixed: Don't reduce the map size. What ever is specified
+		  using a geometry option, is what will be drawn, even if partly
+		  or fully empty.
 
-	  **NOTE**: If this flag is used, and no actual geometry is
-	  specified, this would result in a maximum-size map (65536
-	  x 65536), which is currently not possible, and will fail,
-	  due to a bug in the drawing library.
+		  **NOTE**: If this flag is used, and no actual geometry is
+		  specified, this would result in a maximum-size map (65536
+		  x 65536), which is currently not possible, and will fail,
+		  due to a bug in the drawing library.
 
 	The default is normally 'pixel' and 'fixed', if a geometry
 	option was specified. See `Legacy Geometry Format`_ for one
@@ -628,13 +760,13 @@ Detailed Description of Options
 
 	Three colors are treated specially:
 
-	* **white**: The entire map will be white. Any visible structure will
-	  result of the rendering of height differences.
-	* **black**: The entire map will be black. Any visible structure will
-	  result of the rendering of height differences. This actually looks
-	  pretty good
-	* **grey**: The map will be drawn in shades of grey, ranging from black
-	  at level -128 to white at level 127
+	    :white: The entire map will be white. Any visible structure will
+		  result from the rendering of height differences.
+	    :black: The entire map will be black. Any visible structure will
+		  result from the rendering of height differences. This actually looks
+		  pretty good
+	    :grey: The map will be drawn in shades of grey, ranging from black
+		  at level -128 to white at level 127
 
 	If no color is specified, minetestmapper will use a colors file to
 	determine which colors to use at which height level. See
@@ -649,7 +781,7 @@ Detailed Description of Options
 	.. image:: images/heightmap-grey.png
 	.. image:: images/heightmap-color.png
 
-``--heightscale-interval <major>[[,:]<minor>]``
+``--heightscale-interval <major>[,|:<minor>]``
 ...............................................
 	When drawing a height scale at the bottom of the map, use the specified
 	subdivisions.
@@ -662,7 +794,7 @@ Detailed Description of Options
 
 	When specified as 'major:minor', 'minor' specifies the number of subdivisions
 	of the major interval. In that case, major should be divisible by minor.
-	E.g.: ``10:2`` is OK (equivalent to 10,5), ``10:3`` is not.
+	E.g.: ``10:2`` is OK (equivalent to ``10,5``), ``10:3`` is not.
 
 	By default, the major interval is calculated based on the available space
 	and the range of heights in the map.
@@ -704,7 +836,7 @@ Detailed Description of Options
 	Specify the upper height limit for the map
 
 	Nodes higher than this level will not be drawn. This can be used
-	to avoid floating islands or floating artefacts from abscuring the
+	to avoid floating islands or floating artefacts from obscuring the
 	world below.
 
 ``--min-y <y>``
@@ -792,32 +924,36 @@ Detailed Description of Options
 
 	The following scale factors are supported:
 
-	* **1:1**: no scaling. This value has no effect.
-	* **1:2**: reduce the map size by a factor 2
-	* **1:4**: reduce the map size by a factor 4
-	* **1:8**: reduce the map size by a factor 8
-	* **1:16**: reduce the map size by a factor 16
+	    :1\:1: no scaling. This value has no effect.
+	    :1\:2: reduce the map size by a factor 2
+	    :1\:4: reduce the map size by a factor 4
+	    :1\:8: reduce the map size by a factor 8
+	    :1\:16: reduce the map size by a factor 16
+
+	.. Note to readers of the text version: the factors above are
+	.. slightly mangled due to markup. The non-markup scale factors
+	.. are: 1:1, 1:2, 1:4, 1:8 and 1:16.
 
 	In addition, scaling needs to follow map block boundaries. That
 	means that when scaling the map, regardless of the geometry,
-	the same pixels will be averaged. E.g. if the scale factor is 1:16,
+	the same pixels will be averaged. E.g. if the scale factor is ``1:16``,
 	then entire map blocks will be averaged, so therefore the map
 	geometry can only include full map-blocks.
 
 	If the requested geometry of the map is not suited to the
 	requested scale factor, the map will be enlarged by as many nodes as
 	needed.  The number of added nodes depends on the scale factor. E.g.
-	if the scale factor is 1:8, then at most 7 nodes may be added to on
+	if the scale factor is ``1:8``, then at most 7 nodes may be added to on
 	each of the four sides of the map.
 
-	Original map, and the same map, scaled to 1:2 and 1:4. The geometry is
+	Original map, and the same map, scaled to ``1:2`` and ``1:4``. The geometry is
 	increased to keep the images the same size:
 
 	.. image:: images/default-0.0.png
 	.. image:: images/scalefactor-2.png
 	.. image:: images/scalefactor-4.png
 
-``--sidescale-interval <major>[[,:]<minor>]``
+``--sidescale-interval <major>[,|:<minor>]``
 .............................................
 	When drawing a side scale at the top or left of the map, use the specified
 	subdivisions.
@@ -830,9 +966,9 @@ Detailed Description of Options
 
 	When specified as 'major:minor', 'minor' specifies the number of subdivisions
 	of the major interval. In that case, major should be divisible by minor.
-	E.g.: ``100:20`` is OK (equivalent to 100,5), ``100:33`` is not.
+	E.g.: ``100:20`` is OK (equivalent to ``100,5``), ``100:33`` is not.
 
-	By default, the major interval is 64 for a 1:1 map, 128 for a 1:2 map etc.
+	By default, the major interval is 64 for a ``1:1`` map, 128 for a ``1:2`` map etc.
 	The default minor interval is 0 (i.e. no minor ticks)
 
 	Default side scale, and custom version:
@@ -885,7 +1021,7 @@ Detailed Description of Options
 .............................................
 	Divide the map in square tiles of the requested size. A border of the
 	requested width (or width 1, of not specfied) is drawn between the tiles.
-	In order to preserve all map pixels (and to prevent overwriting them with
+	In order to preserve all map pixels (to prevent overwriting them with
 	borders), extra pixel rows and columns for the borders are inserted into
 	the map.
 
@@ -893,9 +1029,9 @@ Detailed Description of Options
 	blocks (16x16 nodes) or to chunks (the unit of map generation: 5x5 blocks
 	for a world with default settings).
 
-	In order to allow partial world maps to be combined into larger maps, edge
-	borders of the map are always drawn on the same side (left or top). Other
-	edges are always border-less.
+	In order to allow partial world maps to be combined into larger maps, tile
+	borders at the edge of the map are always drawn on the same side (left or top).
+	Other map edges are always border-less.
 
 	NOTE: As a consequence of preserving all map pixels:
 
@@ -912,7 +1048,7 @@ Detailed Description of Options
 	positioning of tiles. By default, tiles are arranged so that one tile
 	has, or would have, its center at the world origin (0,0).
 
-	Tiled map. On the left, 16x16 tiles with corner at the world origin. In
+	Tiled maps. On the left, 16x16 tiles with corner at the world origin. In
 	the middle, 16x16 tiles with center at the world origin. To the right,
 	20x20 tiles with center at the world origin:
 
@@ -921,14 +1057,14 @@ Detailed Description of Options
 	.. image:: images/tiles-20-centered.png
 
 
-``--verbose-search-colors[=n]``
+``--verbose-search-colors[=<n>]``
 ...............................
 	report the location of the colors file(s) that are being used.
 
 	With ``--verbose-search-colors=2``, report all search locations
 	that are being considered as well.
 
-``--verbose[=n]``
+``--verbose[=<n>]``
 .................
 	report some useful / interesting information:
 
@@ -963,7 +1099,7 @@ Color Codes
     E.g.: ``#ff34c1``
 
     The alpha component is optional in some cases, and not allowed in others. It
-    defaults to opaque (ff).
+    defaults to opaque (``ff``).
 
     The color components can also be specified using a single digit per color,
     which are duplicated to obtain the full value. E.g.
@@ -1007,13 +1143,13 @@ Lighter or Darker Colors
     cyan (c), magenta (m), yellow (y). The value specifies the amount, ranging from 0 (mix in/out no color) to
     1 (mix in/out as much of the color as possible). E.g.:
 
-	red+w0.25: add 25% white: light red (#ff3f3f)
+	``red+w0.25``: add 25% white: light red (``#ff3f3f``)
 
-	red+k0.50: add 50% black: dark red (#7f0000)
+	``red+k0.50``: add 50% black: dark red (``#7f0000``)
 
-	red-w0.50: remove 50% white: dark red as well (#7f0000)
+	``red-w0.50``: remove 50% white: dark red as well (``#7f0000``)
 
-	white-b1: remove 100% blue: yellow (#ffff00)
+	``white-b1``: remove 100% blue: yellow (``#ffff00``)
 
 Geometry Syntax
 ===============
@@ -1086,7 +1222,7 @@ Geometry Using Corner and Dimensions
     A geometry using a corner of the area and its dimensions is
     specified as follows:
 
-	``<xoffset>,<yoffset>+width+height``
+	``<xoffset>,<yoffset>+<width>+<height>``
 
     where ``xoffset,yoffset`` are the coordinates of the
     lower-left corner of the area, and ``width`` and ``height``
@@ -1132,7 +1268,7 @@ Geometry Using Center and Dimensions
     A geometry using the center of the area and its dimensions
     is specified as follows
 
-	``<xcenter>,<ycenter>:widthxheight``
+	``<xcenter>,<ycenter>:<width>x<height>``
 
     where ``xcenter,ycenter`` are the coordinates of the center
     of the area, and ``width`` and ``height`` are its dimensions.
@@ -1240,7 +1376,7 @@ Colors.txt Syntax
     The colors.txt file contains a list of minetest node names and associated
     colors. A minetest world node is converted to at most one pixel on the map.
 
-    Lines in the colors.txt file have toe following syntax:
+    Lines in the colors.txt file have the following syntax:
 
 	``<node-name> <red> <green> <blue> [<alpha> [<t>]]``
 
@@ -1254,6 +1390,23 @@ Colors.txt Syntax
 
 	``default:water_flowing 49 82 132 192 224``
 
+    **Alpha**
+
+    If a node has an alpha (transparency) value *and* if the value is not 255,
+    then it will be drawn transparently if `--drawalpha`_ is enabled. The effect
+    is that the colors of nodes below it shine through.
+
+    Water for instance, is defined as transparent. With transparency enabled,
+    nodes under water will be visible, but they will acquire a more or
+    less blueish color from the water. See `--drawalpha`_ for details about
+    the different ways of computing transparency.
+
+    if a node has an alpha of 0 (fully transparent), then it should normally
+    never be visible on the map, regardless of its specified color. If there
+    are any other (types of) nodes below it, then that is what will happen.
+    If there are not, then that node *will* however be made visible. See
+    the option `--drawair`_ for a use for this feature.
+
     **Duplicate Entries**
 
     If the colors file contains duplicate entries for the same node, in general
@@ -1261,7 +1414,7 @@ Colors.txt Syntax
 
     There is one exception to this rule: if one color is opaque (no alpha, or
     alpha = 255), and one is transparent (alpha < 255), the former will be selected when
-    `--drawalpha`_ is diabled, and the latter will be selected when ``drawalpha``
+    ``--drawalpha`` is disabled, and the latter will be selected when ``drawalpha``
     is enabled:
 
 	``# Entry that will be used without 'drawalpha':``
@@ -1350,7 +1503,7 @@ Heightmap-colors.txt Syntax
 
 	``50	100	0 255 0		0 0 255``
 
-    While signifies that between height -50 to 50, the color of the nodes will
+    Which signifies that between height -50 to 50, the color of the nodes will
     slowly change from red to green, and between 50 and 100, the color will slowly
     change from green to blue.
 
@@ -1362,7 +1515,7 @@ Heightmap-colors.txt Syntax
 	``-50	50	0 255 0		0 0 255``
 
     Between the heights -50 and 50, the colors will change from ``#7f7f00`` to ``#007f7f``.
-    (because the colors are *averaged*)
+    (and *not* ``#ffff00`` to ``#00ffff``: the colors are *averaged*)
 
     **Default**
 
@@ -1383,12 +1536,13 @@ Colors Files Common Syntax
     All three types of colors files (colors.txt, heightmap-nodes.txt and heightmap-colors.txt)
     have some syntax elements in common:
 
-    * Any text after the first '#' on a line are comments, and is ignored.
+    * Any text starting from the first '#' on a line is considered a comment, and is ignored.
     * Any empty lines (afer ignoring comments), or lines containing only whitespace are ignored.
 
     In addition, a colors file may include another colors file using ``@include`` on a line. Any
-    color definitions after the inclusion point override the colors from the included file. For
-    example in the following colors.txt file:
+    color definitions from the included file override earlier definitions; any color definitions
+    after the inclusion point override the colors from the included file. For example in the
+    following colors.txt file:
 
 ::
 
@@ -1420,7 +1574,7 @@ Colors Files Common Syntax
 	default:water_source	-
 	default:water_flowing	-
 
-	# The same effect might be achieved by defining water
+	# A similar effect might be achieved by defining water
 	# to have an alpha of 0. Minetest will not complain.
 	#default:water_source	78 132 212 0
 	#default:water_flowing	78 132 212 0
@@ -1498,20 +1652,20 @@ More information is available:
 
 .. _known problems: features.rst#known-problems
 
-.. _--backend: `--backend <auto\|sqlite3\|leveldb\|redis>`_
+.. _--backend: `--backend auto\|sqlite3\|leveldb\|redis`_
 .. _--bgcolor: `--bgcolor <color>`_
 .. _--blockcolor: `--blockcolor <color>`_
 .. _--centergeometry: `--centergeometry <geometry>`_
 .. _--chunksize: `--chunksize <size>`_
 .. _--colors: `--colors <file>`_
 .. _--cornergeometry: `--cornergeometry <geometry>`_
-.. _--draw[map]<figure>: `--draw[map]<figure> "<geometry> color"`_
-.. _--draw[map]circle: `--draw[map]circle "<geometry> color"`_
-.. _--draw[map]ellipse: `--draw[map]ellipse "<geometry> color"`_
-.. _--draw[map]line: `--draw[map]line "<geometry> color"`_
-.. _--draw[map]point: `--draw[map]point "<x>,<y> color"`_
-.. _--draw[map]rectangle: `--draw[map]rectangle "<geometry> color"`_
-.. _--draw[map]text: `--draw[map]text "<x>,<y> color text"`_
+.. _--draw[map]<figure>: `--draw[map]<figure> "<geometry> <color> [<text>]"`_
+.. _--draw[map]circle: `--draw[map]circle "<geometry> <color>"`_
+.. _--draw[map]ellipse: `--draw[map]ellipse "<geometry> <color>"`_
+.. _--draw[map]line: `--draw[map]line "<geometry> <color>"`_
+.. _--draw[map]point: `--draw[map]point "<x>,<y> <color>"`_
+.. _--draw[map]rectangle: `--draw[map]rectangle "<geometry> <color>"`_
+.. _--draw[map]text: `--draw[map]text "<x>,<y> <color> <text>"`_
 .. _--drawalpha: `--drawalpha[=cumulative\|cumulative-darken\|average\|none]`_
 .. _--drawscale: `--drawscale[=left,top]`_
 .. _--geometry: `--geometry <geometry>`_
@@ -1520,7 +1674,7 @@ More information is available:
 .. _--heightmap-nodes: `--heightmap-nodes <file>`_
 .. _--heightmap-yscale: `--heightmap-yscale <factor>`_
 .. _--heightmap: `--heightmap[=<color>]`_
-.. _--heightscale-interval: `--heightscale-interval <major>[[,:]<minor>]`_
+.. _--heightscale-interval: `--heightscale-interval <major>[,\|:<minor>]`_
 .. _--input: `--input <world_path>`_
 .. _--max-y: `--max-y <y>`_
 .. _--min-y: `--min-y <y>`_
@@ -1530,7 +1684,7 @@ More information is available:
 .. _--scalecolor: `--scalecolor <color>`_
 .. _--scalefactor: `--scalefactor 1:<n>`_
 .. _--height-level-0: `--height-level-0 <level>`_
-.. _--sidescale-interval: `--sidescale-interval <major>[[,:]<minor>]`_
+.. _--sidescale-interval: `--sidescale-interval <major>[,\|:<minor>]`_
 .. _--tilebordercolor: `--tilebordercolor <color>`_
 .. _--tilecenter: `--tilecenter <x>,<y>\|world\|map`_
 .. _--tileorigin: `--tileorigin <x>,<y>\|world\|map`_
