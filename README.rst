@@ -12,6 +12,7 @@ Quick links (functional on github. Elsewhere possibly not):
 :Building:		`<doc/build-instructions.rst>`_
 :Github:		`<https://github.com/Rogier-5/minetest-mapper-cpp>`_
 :Bugs:			`<https://github.com/Rogier-5/minetest-mapper-cpp/issues>`_
+:Windows packages:	`<https://github.com/Rogier-5/minetest-mapper-cpp/wiki/Downloads>`_
 
 Features (short list)
 =====================
@@ -36,16 +37,23 @@ Map Generation Features
 Build Features
 --------------
 * Supports both the gcc and clang compiler suites
-* Build windows, rpm, deb and/or tar.gz installation
+* Build rpm, deb and/or tar.gz installation
   packages. Or simply type 'make install'.
 
 Quick Start
 ===========
 
+Windows
+-------
+
+Check the download page to obtain a compiled version:
+`<https://github.com/Rogier-5/minetest-mapper-cpp/wiki/Downloads>`_
+
 Install Dependencies
 --------------------
 
-Make sure the following packages are installed:
+Make sure development versions of the following packages are installed.
+For more detailed instructions, see `<doc/build-instructions.rst>`_.
 
 **Libraries:**
 

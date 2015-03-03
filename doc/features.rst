@@ -24,7 +24,7 @@ Major Features
 Build Features
 ==============
 * Supports both the gcc and clang compiler suites
-* Build windows, rpm, deb and/or tar.gz installation
+* Build rpm, deb and/or tar.gz installation
   packages. Or simply type 'make install'.
 
 Minor Features
@@ -97,7 +97,7 @@ Known Problems
   A third alternative, is of course to support the libgd project in removing
   the current restrictions on image size.
 
-* On scaled maps, the colors of some pixels may be invisibly different on
+* On scaled maps, the colors of some pixels may be imperceptibly different on
   different systems.
 
   The difference would be at most 1/256 per color.

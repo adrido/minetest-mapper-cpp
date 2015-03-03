@@ -1,3 +1,30 @@
+[2 mar 2015]
+    Features:
+
+    Enhancements:
+	- Performance of the sqlite3 database backend was improved slighty.
+	- Searching for color files on Windows was improved. Minetestmapper will
+		now search the directory where minetestmapper is installed.
+	- The documentation is now included in the generated packages as well.
+	- The user manual and building instructions have been improved.
+
+    Bugfixes:
+	- Windows builds (using MinGW) are working again - a few incompatibilities
+		have prevented that for some time.
+
+		Windows compilation has been tested using MinGW as a cross
+		compiler, running on a Linux host.
+
+    Other:
+	- The option --sqlite-cacheworldrow was tested on a few large worlds,
+		and minetestmapper performed consistently worse with it, than
+		without it. The option was therefore deemed useless, and disabled.
+		It is still recognised though, so that existing scripts will keep
+		working.
+
+		If anyone has test data available, or other experience, indicating
+		that this option *did* have tangible benefit, please let me know.
+
 [20 feb 2015]
     Features:
 	- A custom major and minor division can now be specified for the scale.
