@@ -42,6 +42,7 @@ using namespace std;
 
 // Will be replaced with the actual name and location of the executable (if found)
 string executableName = "minetestmapper";
+string executablePath;			// ONLY for use on windows
 string installPrefix = INSTALL_PREFIX;
 string nodeColorsDefaultFile = "colors.txt";
 string heightMapNodesDefaultFile = "heightmap-nodes.txt";
@@ -170,9 +171,43 @@ void parseDataFile(TileGenerator &generator, const string &input, string dataFil
 	if ((homedir = getenv("HOME"))) {
 		colorPaths.push_back(string(homedir) + PATH_SEPARATOR + ".minetest");
 	}
+// TODO: test/verify this (probably another subdirectory ('application data' or so) should be preferred)
+//#if MSDOS || __OS2__ || __NT__ || _WIN32
+//	if ((homedir = getenv("USERPROFILE"))) {
+//		colorPaths.push_back(string(homedir) + PATH_SEPARATOR + ".minetest");
+//	}
+//#endif
 
+#if MSDOS || __OS2__ || __NT__ || _WIN32 || DEBUG
+	// On windows, assume that argv[0] contains the full path location of minetestmapper.exe
+	// (i.e. where it is installed)
+	// On Unix, the path is usually absent from argv[0], and we don't want the behavior to
+	// depend on how it was invoked anyway.
+	// In DEBUG mode, do check the command-line path; so this code can at least be tested on
+	// Linux...
+	if (executablePath != "") {
+		size_t binpos = executablePath.find_last_of(PATH_SEPARATOR);
+		if (binpos != string::npos) {
+			string lastDir = executablePath.substr(binpos + 1);
+			for (size_t i=0; i < lastDir.size(); i++)
+				lastDir[i] = tolower(lastDir[i]);
+			if (lastDir == "bin") {
+				colorPaths.push_back(executablePath.substr(0, binpos) + PATH_SEPARATOR + "colors");
+				colorPaths.push_back(executablePath.substr(0, binpos));
+			}
+			else {
+				colorPaths.push_back(executablePath);
+				colorPaths.push_back(executablePath + PATH_SEPARATOR + "colors");
+			}
+		}
+		else {
+			colorPaths.push_back(executablePath);
+		}
+	}
+#endif
 	if (!installPrefix.empty()) {
 #if PACKAGING_FLAT
+		colorPaths.push_back(installPrefix + PATH_SEPARATOR + "colors");
 		colorPaths.push_back(installPrefix);
 #else
 		colorPaths.push_back(installPrefix + "/share/games/minetestmapper");
@@ -529,9 +564,11 @@ int main(int argc, char *argv[])
 		if (pos == string::npos) {
 			if (!argv0.empty())
 				executableName = argv0;
+				executablePath = "";
 		}
 		else {
 			executableName = argv0.substr(pos + 1);
+			executablePath = argv0.substr(0, pos);
 		}
 	}
 

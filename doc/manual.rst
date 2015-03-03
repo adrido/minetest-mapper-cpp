@@ -1427,32 +1427,55 @@ Colors Files Search Locations
 -----------------------------
 
     When minetestmapper needs a colors file (colors.txt, heightmap-nodes.txt and
-    heightmap-colors.txt), it will search for in a few predefined locations, which
-    depend on your system and the way minetestmapper was built. In general, the
-    following locations can be searched:
+    heightmap-colors.txt), it will search for it in a few predefined locations, which
+    depend on the system it was built for, and the way minetestmapper was built.
+    In general, the following locations can be searched (ordered from most preferred
+    to least preferred):
+
+    In order to find out exactly where a specific copy of minetestmapper did look
+    for its files, use the option ``--verbose-search-colors=2``,
+
+    * The file specified on the command line. If a colors file of the appropriate type
+      was specified on the command-line, that file is used and no further locations
+      are searched, even if it does not exist, or cannot be found.
 
     * The directory of the world being mapped
 
-    * The directory two levels up from the directory of the world being mapped,
-      (i.e. the global minetest configuration directory) provided that that directory
+    * The directory two levels up from the directory of the world being mapped
+      (which would be the minetest configuration directory), provided that that directory
       contains a file 'minetest.conf'
 
     * The user's private minetest directory (``$HOME/.minetest``) - if the environment
-      variable ``$HOME`` exists.
+      variable ``$HOME`` exists. (it would probably be called ``%HOME%`` on Windows).
+
+      NOTE: on Windows, it would be more sensible to use ``%USERPROFILE%``, and search
+      another subdirectory than ``.minetest``. Please advise me about a suitable directory
+      to search - if at all (I am not a Windows user - I don't even own a copy of Windows...).
+
+    * On Windows only: if minetestmapper can determine its own location, which would
+      have one of the following formats:
+
+	``<path-with-drive>\bin\minetestmapper.exe``
+
+	``<path-with-drive>\minetestmapper.exe``
+
+      It searches the following directories:
+
+      * The directory ``<path-with-drive>\colors\``
+
+      * The directory ``<path-with-drive>\``
+
+      I.e.: if the last directory is '``bin``' (or '``BIN``', etc.), then that part
+      is removed from the path, and then the resulting path, with and without
+      '``colors``' appended, is searched.
 
     * The system directory corresponding to the location where minetestmapper
       is installed. Usually, this would be ``/usr/share/games/minetestmapper/``
-      or ``/usr/local/share/games/minetestmapper/``.
+      or ``/usr/local/share/games/minetestmapper/``. This location was configured
+      at *compile time*: moving minetestmapper around will not affect the search location.
 
     * For compatibility, in the current directory as a last resort.
       This causes a warning message to be printed.
-
-    If the location of a colors file was specified using the appropriate option
-    on the command-line, no further locations are searched for that type of
-    colors file.
-
-    In order to find out exactly where a specific copy of minetestmapper searched
-    its files, use the option ``--verbose-search-colors=2``,
 
 More Information
 ================
