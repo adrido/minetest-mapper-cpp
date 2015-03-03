@@ -33,6 +33,8 @@
 #include "db-redis.h"
 #endif
 
+#define MESSAGE_WIDTH 25
+
 using namespace std;
 
 static inline int64_t pythonmodulo(int64_t i, int64_t mod)
@@ -170,6 +172,8 @@ TileGenerator::TileGenerator():
 	m_reqZMax(MAPBLOCK_MAX),
 	m_reqYMinNode(0),
 	m_reqYMaxNode(15),
+	m_YMinMapped(MAPBLOCK_MAX),
+	m_YMaxMapped(MAPBLOCK_MIN),
 	m_mapXStartNodeOffset(0),
 	m_mapYStartNodeOffset(0),
 	m_mapXEndNodeOffset(0),
@@ -815,7 +819,6 @@ void TileGenerator::openDb(const std::string &input)
 
 void TileGenerator::loadBlocks()
 {
-	#define MESSAGE_WIDTH 25
 	int mapXMin, mapXMax;
 	int mapYMin, mapYMax;
 	int mapZMin, mapZMax;
@@ -1065,7 +1068,6 @@ void TileGenerator::loadBlocks()
 			<< std::setw(10) << map_blocks << "\n";
 	}
 	m_positions.sort();
-	#undef MESSAGE_WIDTH
 }
 
 void TileGenerator::scalePixelRows(PixelAttributes &pixelAttributes, PixelAttributes &pixelAttributesScaled, int zPosLimit) {
@@ -1551,6 +1553,27 @@ void TileGenerator::renderMap()
 			pushPixelRows(m_blockPixelAttributes, currentPos.z() - 1);
 		}
 	}
+	if (verboseCoordinates >= 1) {
+		cout
+			<< std::setw(MESSAGE_WIDTH) << std::left
+			<< "Mapped Vertical Range:" << std::right
+			<< std::setw(7) << "x" << ","
+			<< std::setw(7) << m_YMinMapped*16 << ","
+			<< std::setw(7) << "z"
+			<< "  ..  "
+			<< std::setw(7) << "x" << ","
+			<< std::setw(7) << m_YMaxMapped*16+15 << ","
+			<< std::setw(7) << "z"
+			<< "    ("
+			<< std::setw(6) << "x" << ","
+			<< std::setw(6) << m_YMinMapped << ","
+			<< std::setw(6) << "z"
+			<< "  ..  "
+			<< std::setw(6) << "x" << ","
+			<< std::setw(6) << m_YMaxMapped << ","
+			<< std::setw(6) << "z"
+			<< ")\n";
+	}
 	if (verboseStatistics) {
 		cout << "Statistics"
 		     << ":  blocks read/queried: " << m_db->getBlocksReadCount()
@@ -1598,6 +1621,7 @@ inline void TileGenerator::renderMapBlock(const ustring &mapBlock, const BlockPo
 	const unsigned char *mapData = mapBlock.c_str();
 	int minY = (pos.y() < m_reqYMin) ? 16 : (pos.y() > m_reqYMin) ?  0 : m_reqYMinNode;
 	int maxY = (pos.y() > m_reqYMax) ? -1 : (pos.y() < m_reqYMax) ? 15 : m_reqYMaxNode;
+	bool renderedAnything = false;
 	for (int z = 0; z < 16; ++z) {
 		bool rowIsEmpty = true;
 		for (int x = 0; x < 16; ++x) {
@@ -1627,6 +1651,7 @@ inline void TileGenerator::renderMapBlock(const ustring &mapBlock, const BlockPo
 							if (height < m_surfaceDepth) m_surfaceDepth = height;
 						}
 						rowIsEmpty = false;
+						renderedAnything = true;
 						pixel = PixelAttribute(computeMapHeightColor(height), height);
 						m_readedPixels[z] |= (1 << x);
 						break;
@@ -1634,6 +1659,7 @@ inline void TileGenerator::renderMapBlock(const ustring &mapBlock, const BlockPo
 				}
 				else if (m_nodeIDColor[content]) {
 					rowIsEmpty = false;
+					renderedAnything = true;
 					pixel.mixUnder(PixelAttribute(nodeColor, height));
 					if ((m_drawAlpha && nodeColor.a == 0xff) || (!m_drawAlpha && nodeColor.a != 0)) {
 						m_readedPixels[z] |= (1 << x);
@@ -1650,6 +1676,12 @@ inline void TileGenerator::renderMapBlock(const ustring &mapBlock, const BlockPo
 		}
 		if (!rowIsEmpty)
 			m_blockPixelAttributes.attribute(zBegin + 15 - z,xBegin).nextEmpty = false;
+	}
+	if (renderedAnything) {
+		if (pos.y() < m_YMinMapped)
+			m_YMinMapped = pos.y();
+		if (pos.y() > m_YMaxMapped)
+			m_YMaxMapped = pos.y();
 	}
 }
 
