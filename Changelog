@@ -1,14 +1,30 @@
-[]
+[10 mar 2015]
     Enhancements:
-	- Added an optimisation option: --disable-blocklist-prefetch. With this
-		option, minetestmapper does not query the database to make a block
-		list before starting map generation, but directly tries to fetch
-		all possible blocks that might be in the mapped space.
+	- Added an optimisation option: --disable-blocklist-prefetch.
+		With this option, minetestmapper does not query the database to
+		make a block list before starting map generation, but directly
+		tries to fetch all possible blocks that might be in the mapped space.
 
-		This improves speed on large worlds when mapping a small part of
-		them. When mapping a large part of the world, or when not adequately
-		limiting the mapping height (--min-y and --max-y), this option can
-		cause **excessively** long mapping times.
+		This significantly improves speed on large worlds when mapping a
+		small part of them. When mapping a large percentage of the world,
+		or when not adequately limiting the mapping height (--min-y and
+		--max-y), this option can cause **excessively** long mapping times
+		instead.
+
+		Minetestmapper will try and warn about misuse of this option. If
+		possible, it will also suggest changes to parameters to make better
+		use of this option.
+	- Building instructions were improved
+	- Mimimum and maximum *mapped* Y coordinates are now reported, and can be
+		used as a hint for setting --min-y and --max-y. Blocks containing
+		only air are not included.
+		This is mainly of use when using --disable-blocklist-prefetch
+	- Minetestmapper now prints a message and does not generate an image file
+		if the world is empty (i.e. does not contain any blocks at all).
+
+    Bugfixes:
+    	- Generated packages now contain the documentation, albeit not in HTML
+		format yet.
 
 [2 mar 2015]
     Features:
