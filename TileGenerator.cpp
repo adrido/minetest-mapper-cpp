@@ -174,6 +174,7 @@ TileGenerator::TileGenerator():
 	m_reqYMaxNode(15),
 	m_YMinMapped(MAPBLOCK_MAX),
 	m_YMaxMapped(MAPBLOCK_MIN),
+	m_emptyMapArea(0),
 	m_mapXStartNodeOffset(0),
 	m_mapYStartNodeOffset(0),
 	m_mapXEndNodeOffset(0),
@@ -824,7 +825,6 @@ void TileGenerator::loadBlocks()
 	int mapYMin, mapYMax;
 	int mapZMin, mapZMax;
 	int geomYMin, geomYMax;
-	long long world_blocks;
 	long long map_blocks;
 	if (verboseCoordinates >= 2) {
 		bool partialBlocks = (m_mapXStartNodeOffset || m_mapXEndNodeOffset || m_mapYStartNodeOffset || m_mapYEndNodeOffset);
@@ -903,21 +903,21 @@ void TileGenerator::loadBlocks()
 		m_mapYStartNodeOffset = 0;
 		m_mapYEndNodeOffset = 0;
 	}
-	if (progressIndicator)
-	    cout << "Scanning world...\r" << std::flush;
-	mapXMin = INT_MAX/16-1;
-	mapXMax = -INT_MIN/16+1;
-	mapYMin = INT_MAX/16-1;
-	mapYMax = -INT_MIN/16+1;
-	mapZMin = INT_MAX/16-1;
-	mapZMax = -INT_MIN/16+1;
-	geomYMin = INT_MAX/16-1;
-	geomYMax = -INT_MIN/16+1;
-	const DB::BlockPosList &blocks = m_db->getBlockPos();
-	world_blocks = 0;
+	mapXMin = MAPBLOCK_MAX;
+	mapXMax = MAPBLOCK_MIN;
+	mapYMin = MAPBLOCK_MAX;
+	mapYMax = MAPBLOCK_MIN;
+	mapZMin = MAPBLOCK_MAX;
+	mapZMax = MAPBLOCK_MIN;
+	geomYMin = MAPBLOCK_MAX;
+	geomYMax = MAPBLOCK_MIN;
+	m_worldBlocks = 0;
 	map_blocks = 0;
+	if (progressIndicator)
+		cout << "Scanning world (reading block list)...\r" << std::flush;
+	const DB::BlockPosList &blocks = m_db->getBlockPos();
 	for(DB::BlockPosList::const_iterator it = blocks.begin(); it != blocks.end(); ++it) {
-		world_blocks ++;
+		m_worldBlocks++;
 		const BlockPos &pos = *it;
 		m_databaseFormatFound[pos.databaseFormat()]++;
 		if (pos.x() < mapXMin) {
@@ -991,7 +991,7 @@ void TileGenerator::loadBlocks()
 			<< std::setw(6) << mapYMax << ","
 			<< std::setw(6) << mapZMax
 			<< ")    blocks: "
-			<< std::setw(10) << world_blocks << "\n";
+			<< std::setw(10) << m_worldBlocks << "\n";
 	}
 	if (m_shrinkGeometry) {
 		if (m_xMin != m_reqXMin) m_mapXStartNodeOffset = 0;
@@ -1076,7 +1076,7 @@ void TileGenerator::loadBlocks()
 				<< std::setw(MESSAGE_WIDTH) << std::left
 				<< "Database block format(s):" << std::endl
 				<< "    " << std::setw(MESSAGE_WIDTH-4) << std::left << "Total blocks:"
-					  << std::setw(15) << std::right << world_blocks
+					  << std::setw(15) << std::right << m_worldBlocks
 					  << std::endl;
 			if (m_databaseFormatFound[BlockPos::Unknown]) {
 				cout
@@ -1091,7 +1091,7 @@ void TileGenerator::loadBlocks()
 				<< "    " << std::setw(MESSAGE_WIDTH-4) << std::left << "Freeminer-AXYZ:"
 					  << std::setw(15) << std::right << m_databaseFormatFound[BlockPos::AXYZ]
 					  << std::endl;
-				long long other_blocks = world_blocks
+				long long other_blocks = m_worldBlocks
 						- m_databaseFormatFound[BlockPos::Unknown]
 						- m_databaseFormatFound[BlockPos::I64]
 						- m_databaseFormatFound[BlockPos::AXYZ];
@@ -1507,17 +1507,19 @@ void TileGenerator::processMapBlock(const DB::Block &block)
 void TileGenerator::renderMap()
 {
 	int unpackErrors = 0;
-	int blocks_rendered = 0;
+	long long blocks_rendered = 0;
 	int area_rendered = 0;
 	BlockPos currentPos;
 	currentPos.x() = INT_MIN;
-	currentPos.y() = 0;
+	currentPos.y() = INT_MAX;
 	currentPos.z() = INT_MIN;
 	bool allReaded = false;
 	for (std::list<BlockPos>::const_iterator position = m_positions.begin(); position != m_positions.end(); ++position) {
 		const BlockPos &pos = *position;
 		if (currentPos.x() != pos.x() || currentPos.z() != pos.z()) {
 			area_rendered++;
+			if (currentPos.y() == m_yMin)
+				m_emptyMapArea++;
 			if (currentPos.z() != pos.z()) {
 				if (m_scaleFactor > 1) {
 					scalePixelRows(m_blockPixelAttributes, m_blockPixelAttributesScaled, pos.z());
@@ -1542,6 +1544,7 @@ void TileGenerator::renderMap()
 		else if (allReaded) {
 			continue;
 		}
+		currentPos.y() = pos.y();
 		DB::Block block = m_db->getBlockOnPos(pos);
 		if (!block.second.empty()) {
 			try {
@@ -1580,6 +1583,8 @@ void TileGenerator::renderMap()
 		}
 	}
 	if (currentPos.z() != INT_MIN) {
+		if (currentPos.y() == m_yMin)
+			m_emptyMapArea++;
 		if (m_scaleFactor > 1) {
 			scalePixelRows(m_blockPixelAttributes, m_blockPixelAttributesScaled, currentPos.z() - 1);
 			pushPixelRows(m_blockPixelAttributesScaled, currentPos.z() - 1);

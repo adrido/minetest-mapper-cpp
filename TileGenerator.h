@@ -261,6 +261,8 @@ private:
 	int m_reqYMaxNode;		// Node offset within a map block
 	int m_YMinMapped;		// Lowest block number mapped (not empty or air)
 	int m_YMaxMapped;		// Higher block number mapped (not empty or air)
+	long long m_emptyMapArea;	// Number of blocks that are partly empty in the map
+	long long m_worldBlocks;	// Number of blocks in the world (if known)
 	int m_storedWidth;
 	int m_storedHeight;
 	int m_mapXStartNodeOffset;
