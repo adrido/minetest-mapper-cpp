@@ -18,6 +18,8 @@ private:
 	int m_blocksQueriedCount;
 	leveldb::DB *m_db;
 	BlockPosList m_blockPosList;
+	unsigned m_keyFormatI64Usage;
+	unsigned m_keyFormatAXYZUsage;
 };
 
 #endif // _DB_LEVELDB_H

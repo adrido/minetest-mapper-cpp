@@ -18,7 +18,9 @@ inline std::string i64tos(int64_t i) {
 
 DBLevelDB::DBLevelDB(const std::string &mapdir) :
 	m_blocksReadCount(0),
-	m_blocksQueriedCount(0)
+	m_blocksQueriedCount(0),
+	m_keyFormatI64Usage(0),
+	m_keyFormatAXYZUsage(0)
 {
 	leveldb::Options options;
 	options.create_if_missing = false;
@@ -56,9 +58,42 @@ DB::Block DBLevelDB::getBlockOnPos(const BlockPos &pos)
 	std::string datastr;
 	leveldb::Status status;
 
-	m_blocksQueriedCount++;
 
-	status = m_db->Get(leveldb::ReadOptions(), pos.databasePosStr(), &datastr);
+	// If block format is not known, try both alternatives, but prefer
+	// the version that has worked best in recent history
+	if (pos.databaseFormat() == BlockPos::Unknown) {
+		BlockPos::StrFormat format[2];
+		if (m_keyFormatI64Usage > m_keyFormatAXYZUsage) {
+			format[0] = BlockPos::I64;
+			format[1] = BlockPos::AXYZ;
+		}
+		else {
+			format[0] = BlockPos::AXYZ;
+			format[1] = BlockPos::I64;
+		}
+		int i;
+		for (i = 0; i < 2; i++) {
+			m_blocksQueriedCount++;
+			status = m_db->Get(leveldb::ReadOptions(), pos.databasePosStrFmt(format[i]), &datastr);
+			if (status.ok())
+				break;
+		}
+		if (i < 2) {
+			if (format[i] == BlockPos::I64) {
+				m_keyFormatI64Usage = (m_keyFormatI64Usage << 1) | 0x01;
+				m_keyFormatAXYZUsage = (m_keyFormatAXYZUsage >> 1);
+			}
+			else {
+				m_keyFormatAXYZUsage = (m_keyFormatAXYZUsage << 1) | 0x01;
+				m_keyFormatI64Usage = (m_keyFormatI64Usage >> 1);
+			}
+		}
+	}
+	else {
+		m_blocksQueriedCount++;
+		status = m_db->Get(leveldb::ReadOptions(), pos.databasePosStr(), &datastr);
+	}
+
 	if(status.ok()) {
 		m_blocksReadCount++;
 		return Block(pos, ustring(reinterpret_cast<const unsigned char *>(datastr.c_str()), datastr.size()));
