@@ -188,6 +188,7 @@ TileGenerator::TileGenerator():
 	m_surfaceHeight(INT_MIN),
 	m_surfaceDepth(INT_MAX)
 {
+	memset(&m_databaseFormatFound, 0, sizeof(m_databaseFormatFound));
 	// Load default grey colors.
 	m_heightMapColors.push_back(HeightMapColor(INT_MIN, Color(0,0,0), -129, Color(0,0,0)));
 	m_heightMapColors.push_back(HeightMapColor(-128, Color(0,0,0), 127, Color(255,255,255)));
@@ -918,6 +919,7 @@ void TileGenerator::loadBlocks()
 	for(DB::BlockPosList::const_iterator it = blocks.begin(); it != blocks.end(); ++it) {
 		world_blocks ++;
 		const BlockPos &pos = *it;
+		m_databaseFormatFound[pos.databaseFormat()]++;
 		if (pos.x() < mapXMin) {
 			mapXMin = pos.x();
 		}
@@ -1068,6 +1070,39 @@ void TileGenerator::loadBlocks()
 			<< std::setw(10) << map_blocks << "\n";
 	}
 	m_positions.sort();
+	if (m_backend == "leveldb") {
+		if (verboseStatistics >= 3) {
+			cout
+				<< std::setw(MESSAGE_WIDTH) << std::left
+				<< "Database block format(s):" << std::endl
+				<< "    " << std::setw(MESSAGE_WIDTH-4) << std::left << "Total blocks:"
+					  << std::setw(15) << std::right << world_blocks
+					  << std::endl;
+			if (m_databaseFormatFound[BlockPos::Unknown]) {
+				cout
+					<< "    " << std::setw(MESSAGE_WIDTH-4) << std::left << "Unknown:"
+						  << std::setw(15) << std::right << m_databaseFormatFound[BlockPos::Unknown]
+						  << std::endl;
+			}
+			cout
+				<< "    " << std::setw(MESSAGE_WIDTH-4) << std::left << "Minetest-I64:"
+					  << std::setw(15) << std::right << m_databaseFormatFound[BlockPos::I64]
+					  << std::endl
+				<< "    " << std::setw(MESSAGE_WIDTH-4) << std::left << "Freeminer-AXYZ:"
+					  << std::setw(15) << std::right << m_databaseFormatFound[BlockPos::AXYZ]
+					  << std::endl;
+				long long other_blocks = world_blocks
+						- m_databaseFormatFound[BlockPos::Unknown]
+						- m_databaseFormatFound[BlockPos::I64]
+						- m_databaseFormatFound[BlockPos::AXYZ];
+				if (other_blocks) {
+					cout
+					<< "    " << std::setw(MESSAGE_WIDTH-8) << std::left << "Miscounted:"
+						<< std::setw(15) << std::right << other_blocks
+					<< std::endl;
+				}
+		}
+	}
 }
 
 void TileGenerator::scalePixelRows(PixelAttributes &pixelAttributes, PixelAttributes &pixelAttributesScaled, int zPosLimit) {

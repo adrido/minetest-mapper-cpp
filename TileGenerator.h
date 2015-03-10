@@ -241,6 +241,7 @@ private:
 	int m_heightScaleMinor;
 
 	DB *m_db;
+	long long m_databaseFormatFound[BlockPos::STRFORMAT_MAX];
 	gdImagePtr m_image;
 	PixelAttributes m_blockPixelAttributes;
 	PixelAttributes m_blockPixelAttributesScaled;

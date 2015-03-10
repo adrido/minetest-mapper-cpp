@@ -1076,6 +1076,9 @@ Detailed Description of Options
 
 	* database access statistics.
 
+	Using `--verbose=3`, report statistics about block formats found in the database
+	(currently only applicable to leveldb)
+
 ``--version``
 .............
 	Report the version of this instance of minetestmapper.
