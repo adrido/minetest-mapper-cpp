@@ -137,6 +137,7 @@ TileGenerator::TileGenerator():
 	verboseReadColors(0),
 	verboseStatistics(0),
 	progressIndicator(false),
+	m_silenceSuggestions(0),
 	m_heightMap(false),
 	m_heightMapYScale(1),
 	m_seaLevel(0),
@@ -206,6 +207,11 @@ TileGenerator::TileGenerator():
 
 TileGenerator::~TileGenerator()
 {
+}
+
+void TileGenerator::setSilenceSuggestion(unsigned flags)
+{
+	m_silenceSuggestions |= flags;
 }
 
 void TileGenerator::setGenerateNoPrefetch(int enable)

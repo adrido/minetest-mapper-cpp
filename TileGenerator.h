@@ -54,6 +54,8 @@
 #define SCALESIZE_VERT			50
 #define HEIGHTSCALESIZE			60
 
+#define SUGGESTION_ALL			0xffffffff
+
 class TileGenerator
 {
 private:
@@ -109,6 +111,7 @@ public:
 
 	TileGenerator();
 	~TileGenerator();
+	void setSilenceSuggestion(unsigned flags);
 	void setGenerateNoPrefetch(int enable);
 	void setDBFormat(BlockPos::StrFormat format, bool query);
 	void setHeightMap(bool enable);
@@ -217,6 +220,7 @@ public:
 	bool progressIndicator;
 
 private:
+	unsigned m_silenceSuggestions;
 	bool m_heightMap;
 	float m_heightMapYScale;
 	int m_seaLevel;

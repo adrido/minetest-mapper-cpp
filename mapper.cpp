@@ -41,6 +41,7 @@ using namespace std;
 #define OPT_SCALEINTERVAL		0x8f
 #define OPT_NO_BLOCKLIST_PREFETCH	0x90
 #define OPT_DATABASE_FORMAT		0x91
+#define OPT_SILENCE_SUGGESTIONS		0x92
 
 // Will be replaced with the actual name and location of the executable (if found)
 string executableName = "minetestmapper";
@@ -124,6 +125,7 @@ void usage()
 			"  --tilecenter <x>,<y>|world|map\n"
 			"  --scalefactor 1:<n>\n"
 			"  --chunksize <size>\n"
+			"  --silence-suggestions all\n"
 			"  --verbose[=n]\n"
 			"  --verbose-search-colors[=n]\n"
 			"  --progress\n"
@@ -631,6 +633,7 @@ int main(int argc, char *argv[])
 		{"tilebordercolor", required_argument, 0, 'B'},
 		{"scalefactor", required_argument, 0, OPT_SCALEFACTOR},
 		{"chunksize", required_argument, 0, OPT_CHUNKSIZE},
+		{"silence-suggestions", required_argument, 0, OPT_SILENCE_SUGGESTIONS},
 		{"verbose", optional_argument, 0, 'v'},
 		{"verbose-search-colors", optional_argument, 0, OPT_VERBOSE_SEARCH_COLORS},
 		{"progress", no_argument, 0, OPT_PROGRESS_INDICATOR},
@@ -861,6 +864,31 @@ int main(int argc, char *argv[])
 							std::cerr << "Internal error: option " << long_options[option_index].name << " not handled" << std::endl;
 							exit(1);
 						}
+					}
+					break;
+				case OPT_SILENCE_SUGGESTIONS: {
+						for (size_t i = 0; i < strlen(optarg); i++) {
+							optarg[i] = tolower(optarg[i]);
+							if (optarg[i] == ',')
+								optarg[i] = ' ';
+						}
+						std::istringstream iss(optarg);
+						std::string flag;
+						do {
+							iss >> flag >> std::ws;
+							if (iss.fail()) {
+								std::cerr << "Invalid flag(s) to '" << long_options[option_index].name << "': '" << optarg << "'" << std::endl;
+								usage();
+								exit(1);
+							}
+							else if (flag == "all")
+								generator.setSilenceSuggestion(SUGGESTION_ALL);
+							else {
+								std::cerr << "Invalid flag to '" << long_options[option_index].name << "': '" << flag << "'" << std::endl;
+								usage();
+								exit(1);
+							}
+						} while (!iss.eof());
 					}
 					break;
 				case 'v':
