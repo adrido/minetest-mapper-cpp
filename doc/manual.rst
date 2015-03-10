@@ -282,7 +282,7 @@ Feedback / information options:
     * ``--version`` :					Print version ID of minetestmapper
     * ``--verbose[=<n>]`` :				Report world and map statistics (size, dimensions, number of blocks)
     * ``--verbose-search-colors[=n]`` :			Report which colors files are used and/or which locations are searched
-    * ``--silence-suggestions all`` :			Do not bother doing suggestions
+    * ``--silence-suggestions all,prefetch`` :		Do not bother doing suggestions
     * ``--progress`` :					Show a progress indicator while generating the map
 
 Miscellaneous options
@@ -1056,7 +1056,7 @@ Detailed Description of Options
 	.. image:: images/drawscale-both.png
 	.. image:: images/sidescale-interval.png
 
-``--silence-suggestions all``
+``--silence-suggestions all,prefetch``
 ......................................
 	Do not print usage suggestions of the specified types.
 
@@ -1064,6 +1064,8 @@ Detailed Description of Options
 	if that may be advantageous. This option disables such messages.
 
 	    :all:	Silence all existing (and future) suggestions there may be.
+	    :prefetch:	Do not make suggestions a about the use of --disable-blocklist-prefetch,
+			and adjustment of --min-y and --max-y when using --disable-blocklist-prefetch.
 
 ``--sqlite-cacheworldrow``
 ..........................
@@ -1775,7 +1777,7 @@ More information is available:
 .. _--origincolor: `--origincolor <color>`_
 .. _--output: `--output <output_image.png>`_
 .. _--playercolor: `--playercolor <color>`_
-.. _--silence-suggestions: `--silence-suggestions all`_
+.. _--silence-suggestions: `--silence-suggestions all,prefetch`_
 .. _--scalecolor: `--scalecolor <color>`_
 .. _--scalefactor: `--scalefactor 1:<n>`_
 .. _--height-level-0: `--height-level-0 <level>`_

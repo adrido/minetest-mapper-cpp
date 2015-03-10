@@ -55,6 +55,7 @@
 #define HEIGHTSCALESIZE			60
 
 #define SUGGESTION_ALL			0xffffffff
+#define SUGGESTION_PREFETCH		0x00000001
 
 class TileGenerator
 {

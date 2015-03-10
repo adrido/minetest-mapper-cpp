@@ -125,7 +125,7 @@ void usage()
 			"  --tilecenter <x>,<y>|world|map\n"
 			"  --scalefactor 1:<n>\n"
 			"  --chunksize <size>\n"
-			"  --silence-suggestions all\n"
+			"  --silence-suggestions all,prefetch\n"
 			"  --verbose[=n]\n"
 			"  --verbose-search-colors[=n]\n"
 			"  --progress\n"
@@ -883,6 +883,8 @@ int main(int argc, char *argv[])
 							}
 							else if (flag == "all")
 								generator.setSilenceSuggestion(SUGGESTION_ALL);
+							else if (flag == "prefetch")
+								generator.setSilenceSuggestion(SUGGESTION_PREFETCH);
 							else {
 								std::cerr << "Invalid flag to '" << long_options[option_index].name << "': '" << flag << "'" << std::endl;
 								usage();

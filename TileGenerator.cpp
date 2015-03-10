@@ -1908,6 +1908,50 @@ void TileGenerator::renderMap()
 	}
 	if (progressIndicator && eraseProgress)
 		cout << std::setw(50) << "" << "\r";
+
+	if (m_generateNoPrefetch) {
+		double queryFactor = 1.0 * m_db->getBlocksQueriedCount() / m_db->getBlocksReadCount();
+		if (verboseStatistics >= 4) {
+			std::cout << std::fixed << std::setprecision(2);
+			std::cout << "disable-blocklist-prefetch statistics:" << std::endl
+				<< "    Query factor:   " << queryFactor << std::endl;
+		}
+		if (!(m_silenceSuggestions & SUGGESTION_PREFETCH) && queryFactor >= 10) {
+			std::cout << std::fixed << std::setprecision(2);
+			std::cout << "NOTE: amount of database blocks queried exceeds amount read by a factor " << queryFactor << "." << std::endl
+				<< "      This makes --disable-blocklist-prefetch rather inefficient. Consider disabling it, or" << std::endl
+				<< "      adjusting the vertical limits (e.g. --min-y=" << m_YMinMapped * 16 << " --max-y=" << m_YMaxMapped*16+15 << ")" << std::endl;
+		}
+	}
+	else {
+		double blocksFractionMapped = 1.0 * m_db->getBlocksReadCount() / m_worldBlocks;
+		long long worldVolumeMapped = (m_xMax-m_xMin+1) * (m_zMax-m_zMin+1) * (m_YMaxMapped-m_YMinMapped+1);
+
+		if (verboseStatistics >= 4) {
+			std::cout << std::fixed << std::setprecision(2);
+			std::cout << "disable-blocklist-prefetch statistics:" << std::endl
+				<< "    World size (1M Blocks):          " << m_worldBlocks / 1000.0 / 1000
+					<< "  (" << MIN_NOPREFETCH_VOLUME / 1000.0 / 1000 << " .. "
+					<< MAX_NOPREFETCH_VOLUME / 1000.0 / 1000 << ")" << std::endl
+				<< "    Fraction of world blocks mapped: "
+					<< 100 * blocksFractionMapped << "%  (limit: 10%)" << std::endl
+				<< "    Volume mapped:                   "
+					<< worldVolumeMapped / 10000.0 << "%  (" << worldVolumeMapped << ")" << std::endl;
+		}
+
+		if (!(m_silenceSuggestions & SUGGESTION_PREFETCH)
+			&& m_worldBlocks >= MIN_NOPREFETCH_VOLUME
+			&& blocksFractionMapped < 0.1
+			&& worldVolumeMapped < MAX_NOPREFETCH_VOLUME) {
+			std::cout << "NOTE: Mapping speed may improve using the option --disable-blocklist-prefetch,"
+				<< " combined with vertical limits (" << m_YMinMapped * 16 << " .. " << m_YMaxMapped*16+15 << ")" << std::endl;
+			if (m_backend == "leveldb") {
+				std::cout << "      The option --database-format=" << (m_recommendedDatabaseFormat != "" ? m_recommendedDatabaseFormat : "mixed")
+					<< " is also required for the (current) leveldb backend." << std::endl
+					<< "      Use --verbose=2 or --database-format=query for details" << std::endl;
+			}
+		}
+	}
 }
 
 Color TileGenerator::computeMapHeightColor(int height)
