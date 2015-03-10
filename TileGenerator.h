@@ -211,7 +211,7 @@ private:
 public:
 	int verboseCoordinates;
 	int verboseReadColors;
-	bool verboseStatistics;
+	int verboseStatistics;
 	bool progressIndicator;
 
 private:

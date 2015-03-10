@@ -828,14 +828,11 @@ int main(int argc, char *argv[])
 					break;
 				case 'v':
 					if (optarg && isdigit(optarg[0]) && optarg[1] == '\0') {
-						if (optarg[0] == '0')
-							generator.verboseStatistics = false;
-						else
-							generator.verboseStatistics = true;
+						generator.verboseStatistics = optarg[0] - '0';
 						generator.verboseCoordinates = optarg[0] - '0';
 					}
 					else {
-						generator.verboseStatistics = true;
+						generator.verboseStatistics = 1;
 						generator.verboseCoordinates = 1;
 					}
 					break;

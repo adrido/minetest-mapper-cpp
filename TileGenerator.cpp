@@ -131,7 +131,7 @@ struct HeightMapColor
 TileGenerator::TileGenerator():
 	verboseCoordinates(0),
 	verboseReadColors(0),
-	verboseStatistics(false),
+	verboseStatistics(0),
 	progressIndicator(false),
 	m_heightMap(false),
 	m_heightMapYScale(1),
@@ -1553,7 +1553,9 @@ void TileGenerator::renderMap()
 			pushPixelRows(m_blockPixelAttributes, currentPos.z() - 1);
 		}
 	}
+	bool eraseProgress = true;
 	if (verboseCoordinates >= 1) {
+		eraseProgress = false;
 		cout
 			<< std::setw(MESSAGE_WIDTH) << std::left
 			<< "Mapped Vertical Range:" << std::right
@@ -1574,7 +1576,8 @@ void TileGenerator::renderMap()
 			<< std::setw(6) << "z"
 			<< ")\n";
 	}
-	if (verboseStatistics) {
+	if (verboseStatistics >= 1) {
+		eraseProgress = false;
 		cout << "Statistics"
 		     << ":  blocks read/queried: " << m_db->getBlocksReadCount()
 		     << " / " << m_db->getBlocksQueriedCount()
@@ -1586,7 +1589,7 @@ void TileGenerator::renderMap()
 			cout << "  (" << unpackErrors << " errors)";
 		 cout << std::endl;
 	}
-	else if (progressIndicator)
+	if (progressIndicator && eraseProgress)
 		cout << std::setw(50) << "" << "\r";
 }
 
