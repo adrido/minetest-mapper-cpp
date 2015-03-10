@@ -40,6 +40,7 @@ using namespace std;
 #define OPT_SCALEFACTOR			0x8e
 #define OPT_SCALEINTERVAL		0x8f
 #define OPT_NO_BLOCKLIST_PREFETCH	0x90
+#define OPT_DATABASE_FORMAT		0x91
 
 // Will be replaced with the actual name and location of the executable (if found)
 string executableName = "minetestmapper";
@@ -108,6 +109,7 @@ void usage()
 			"  --max-y <y>\n"
 			"  --backend <" USAGE_DATABASES ">\n"
 			"  --disable-blocklist-prefetch[=force]\n"
+			"  --database-format minetest-i64|freeminer-axyz|mixed|query\n"
 			"  --geometry <geometry>\n"
 			"\t(Warning: has a compatibility mode - see README.rst)\n"
 			"  --cornergeometry <geometry>\n"
@@ -621,6 +623,7 @@ int main(int argc, char *argv[])
 		{"max-y", required_argument, 0, 'c'},
 		{"backend", required_argument, 0, 'd'},
 		{"disable-blocklist-prefetch", optional_argument, 0, OPT_NO_BLOCKLIST_PREFETCH},
+		{"database-format", required_argument, 0, OPT_DATABASE_FORMAT},
 		{"sqlite-cacheworldrow", no_argument, 0, OPT_SQLITE_CACHEWORLDROW},
 		{"tiles", required_argument, 0, 't'},
 		{"tileorigin", required_argument, 0, 'T'},
@@ -697,6 +700,23 @@ int main(int argc, char *argv[])
 					}
 					else {
 						generator.setGenerateNoPrefetch(1);
+					}
+					break;
+				case OPT_DATABASE_FORMAT: {
+						std::string opt(optarg);
+						if (opt == "minetest-i64")
+							generator.setDBFormat(BlockPos::I64, false);
+						else if (opt == "freeminer-axyz")
+							generator.setDBFormat(BlockPos::AXYZ, false);
+						else if (opt == "mixed")
+							generator.setDBFormat(BlockPos::Unknown, false);
+						else if (opt == "query")
+							generator.setDBFormat(BlockPos::Unknown, true);
+						else {
+							std::cerr << "Invalid parameter to '" << long_options[option_index].name << "': '" << optarg << "'" << std::endl;
+							usage();
+							exit(1);
+						}
 					}
 					break;
 				case OPT_HEIGHTMAP:

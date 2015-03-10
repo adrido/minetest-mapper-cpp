@@ -289,6 +289,7 @@ Miscellaneous options
 
     * ``--backend auto|sqlite3|leveldb|redis`` :	Specify or override the database backend to use
     * ``--disable-blocklist-prefetch`` :		Do not prefetch a block list - faster when mapping small parts of large worlds.
+    * ``--database-format minetest-i64|freeminer-axyz|mixed|query`` :	Specify the format of the database (needed with --disable-blocklist-prefetch and a leveldb backend).
 
 
 Detailed Description of Options
@@ -377,6 +378,46 @@ Detailed Description of Options
 
 	See also `--geometry`_
 
+``--database-format minetest-i64|freeminer-axyz|mixed|query``
+..................................................................
+	Specify the coordinate format minetest uses in the leveldb database.
+
+	This option is only needed, and has only effect, when
+	``--disable-blocklist-prefetch`` is used, *and* when the database backend
+	is 'leveldb'. Users of other backends can ignore this option.
+
+	A freeminer leveldb database has two possible coordinate formats. Normally,
+	minetestmapper detects which one is used for which block when prefetching
+	a block coordinate list.
+
+	With ``--disable-blocklist-prefetch``, minetestmapper will not start by reading
+	a list of all blocks in the database. It therefore won't be able to detect
+	what format is actually used for the coordinates of every block (which may
+	differ per block).
+
+	Without knowing the format used for a block, the only way to be sure that it
+	is not in the database, is to use two queries, one for each format. Specifying
+	the format allows minetestmapper to avoid the second query, with the risk of
+	overseeing blocks if they do happen to use the other format.
+
+	The default value for this option is ``mixed``, which works in all cases, as
+	it does both queries if needed (at the very least for all blocks that are
+	not in the database), but it is less efficient.
+
+	On minetest worlds, use ``minetest-i64``, as it is the only format used.
+
+	On recent freeminer worlds, use ``freeminer-axyz``, as it is the only format used.
+
+	``Mixed`` format is needed on older freeminer worlds, or on worlds
+	that were migrated from minetest (if such worlds exist ?).
+
+	``Query`` directs minetestmapper to detect and report the coordinate
+	format(s) used in the database. ``--disable-blocklist-prefetch`` must
+	(obviously ?) be *disabled* (or will be disabled) for it to work.
+
+	Specifying ``minetest-i64`` or ``freeminer-axyz`` incorrectly results in all
+	blocks that use the other format not being mapped.
+
 ``--disable-blocklist-prefetch``
 ......................................
 	Do not prefetch a list of block coordinates from the database before commencing
@@ -387,6 +428,9 @@ Detailed Description of Options
 	It is incompatible with, and  disables, the 'shrinking' mode of `--geometrymode`_.
 	It also significantly reduces the amount of information the `--verbose`_ option
 	can report.
+
+	When used with a leveldb backend, the option `--database-format`_ should preferably
+	be used as well.
 
 	Normally, minetestmapper will read a full list of coordinates (not the contents)
 	of existing blocks from the database before starting map generation. This option
@@ -1106,6 +1150,7 @@ Detailed Description of Options
 	* maximum coordinates of the world
 	* world coordinates included the map being generated
 	* number of blocks: in the world, and in the map area.
+	* `--database-format`_ setting if `--disable-blocklist-prefetch`_ is used.
 
 	Using `--verbose=2`, report some more statistics, including:
 
@@ -1697,6 +1742,7 @@ More information is available:
 .. _--chunksize: `--chunksize <size>`_
 .. _--colors: `--colors <file>`_
 .. _--cornergeometry: `--cornergeometry <geometry>`_
+.. _--database-format: `--database-format minetest-i64\|freeminer-axyz\|mixed\|query`_
 .. _--draw[map]<figure>: `--draw[map]<figure> "<geometry> <color> [<text>]"`_
 .. _--draw[map]circle: `--draw[map]circle "<geometry> <color>"`_
 .. _--draw[map]ellipse: `--draw[map]ellipse "<geometry> <color>"`_

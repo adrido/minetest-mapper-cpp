@@ -110,6 +110,7 @@ public:
 	TileGenerator();
 	~TileGenerator();
 	void setGenerateNoPrefetch(int enable);
+	void setDBFormat(BlockPos::StrFormat format, bool query);
 	void setHeightMap(bool enable);
 	void setHeightMapYScale(float scale);
 	void setSeaLevel(int level);
@@ -243,7 +244,11 @@ private:
 
 	DB *m_db;
 	bool m_generateNoPrefetch;
+	bool m_databaseFormatSet;
+	BlockPos::StrFormat m_databaseFormat;
+	std::string m_recommendedDatabaseFormat;
 	long long m_databaseFormatFound[BlockPos::STRFORMAT_MAX];
+	bool m_reportDatabaseFormat;
 	gdImagePtr m_image;
 	PixelAttributes m_blockPixelAttributes;
 	PixelAttributes m_blockPixelAttributesScaled;
