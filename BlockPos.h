@@ -10,6 +10,9 @@
 #include <sstream>
 #include <iomanip>
 #include <stdexcept>
+#include <iterator>
+
+class BlockPosIterator;
 
 struct BlockPos {
 	// m_strFormat is used to record the original format that was obtained
@@ -21,6 +24,7 @@ struct BlockPos {
 		I64,		// Minetest & Freeminer
 		XYZ,
 		AXYZ,		// Freeminer
+		STRFORMAT_MAX
 	};
 	int dimension[3];
 	int &x(void) { return dimension[0]; }
@@ -35,12 +39,13 @@ struct BlockPos {
 //	std::size_t hash(void) const { return databasePosI64() % SIZE_MAX; }
 //#endif
 	BlockPos() : dimension{0, 0, 0}, m_strFormat(Unknown), m_id(INT64_MIN) {}
-	BlockPos(int _x, int _y, int _z) : dimension{_x, _y, _z}, m_strFormat(Unknown), m_id(INT64_MIN) {}
+	BlockPos(int _x, int _y, int _z, StrFormat format = Unknown) : dimension{_x, _y, _z}, m_strFormat(format), m_id(INT64_MIN) {}
 	BlockPos(int _x, int _y, int _z, int64_t id) : dimension{_x, _y, _z}, m_strFormat(Unknown), m_id(id) {}
 	BlockPos(const BlockPos &pos) : dimension{pos.x(), pos.y(), pos.z()}, m_strFormat(pos.m_strFormat), m_id(pos.m_id) {}
 	BlockPos(int64_t i) { operator=(i); }
 	BlockPos(int64_t i, int64_t id) { operator=(i); m_id = id; }
 	BlockPos(const std::string &s) { operator=(s); }
+	StrFormat databaseFormat(void) const { return m_strFormat; }
 	int64_t databasePosI64(void) const { return getDBPos(); }
 	int64_t databasePosId(void) const { return m_id; }
 	bool databasePosIdIsValid(void) const { return m_id != INT64_MIN; }
@@ -67,6 +72,41 @@ private:
 	// WARNING: see comment about m_strFormat above !!
 	StrFormat m_strFormat;
 	int64_t m_id;
+	friend class BlockPosIterator;
+};
+
+// This could be a random access iterator, but it is not needed, and it
+// is more complex to implement
+//class BlockPosIterator : public std::iterator<std::bidirectional_iterator_tag, BlockPos, long long>
+class BlockPosIterator
+{
+public:
+	enum State { Start = -1, Middle = 0, End = 1 };
+	// NOTE: if m_state is initialized to Middle, the value of the iterator will be undefined
+	BlockPosIterator(void) : m_value(0,0,0), m_start(0,0,0), m_end(0,0,0), m_state(Start) {}
+	BlockPosIterator(BlockPos start, BlockPos end, State state = Middle) : m_value(start), m_start(start), m_end(end), m_state(state) {}
+	BlockPosIterator(const BlockPosIterator &i) : m_value(i.m_value), m_start(i.m_start), m_end(i.m_end), m_state(i.m_state) {}
+	BlockPosIterator &operator=(const BlockPosIterator &i);
+	bool operator==(const BlockPosIterator &i) const;
+	bool operator!=(const BlockPosIterator &i) const { return !operator==(i); }
+
+	BlockPos &operator*(void) { return m_value; }
+	BlockPos *operator->(void) { return &m_value; }
+	BlockPosIterator &operator++(void) { stepForward(); return *this; }
+	BlockPosIterator operator++(int) { BlockPosIterator rv(*this); stepForward(); return rv; }
+	BlockPosIterator &operator--(void) { stepReverse(); return *this; }
+	BlockPosIterator operator--(int) { BlockPosIterator rv(*this); stepReverse(); return rv; }
+
+	void breakDim(int i, int step = 1);
+private:
+	BlockPos m_value;
+	BlockPos m_start;
+	BlockPos m_end;
+	State m_state;
+	void printState(const char *message, FILE *file);
+	void stepForward(void);
+	void stepReverse(void);
+	bool stepDim(int i, int step);
 };
 
 struct NodeCoord : BlockPos
@@ -119,65 +159,12 @@ namespace std {
 	};
 }
 
-inline void BlockPos::operator=(const std::string &s)
-{
-	m_id = INT64_MIN;
-	std::istringstream is(s);
-	if (isdigit(is.peek()) || is.peek() == '-' || is.peek() == '+') {
-		int64_t ipos;
-		is >> ipos;
-		if (is.bad() || !is.eof()) {
-			throw std::runtime_error(std::string("Failed to decode i64 (minetest) coordinate string from database (") + s + ")" );
-		}
-		operator=(ipos);
-		m_strFormat = I64;
-	}
-	else if (is.peek() == 'a') {
-		// Freeminer new format (a<x>,<y>,<z>)
-		char c1, c2;
-		is >> c1;
-		is >> x();
-		is >> c1;
-		is >> y();
-		is >> c2;
-		is >> z();
-		if (is.bad() || !is.eof() || c1 != ',' || c2 != ',') {
-			throw std::runtime_error(std::string("Failed to decode axyz (freeminer) coordinate string from database (") + s + ")" );
-		}
-		m_strFormat = AXYZ;
-	}
-	else {
-		throw std::runtime_error(std::string("Failed to detect format of coordinate string from database (") + s + ")" );
-	}
-}
-
 inline std::string BlockPos::databasePosStr(StrFormat defaultFormat) const
 {
 	StrFormat format = m_strFormat;
 	if (format == Unknown)
 		format = defaultFormat;
 	return databasePosStrFmt(format);
-}
-
-
-inline std::string BlockPos::databasePosStrFmt(StrFormat format) const
-{
-	std::ostringstream os;
-	switch(format) {
-	case Unknown:
-		throw std::runtime_error(std::string("Internal error: Converting BlockPos to unknown string type"));
-		break;
-	case I64:
-		os << databasePosI64();
-		break;
-	case XYZ:
-		os << x() << ',' << y() << ',' << z();
-		break;
-	case AXYZ:
-		os << 'a' << x() << ',' << y() << ',' << z();
-		break;
-	}
-	return os.str();
 }
 
 // operator< should order the positions in the
@@ -213,13 +200,48 @@ inline bool BlockPos::operator==(const BlockPos &p) const
 	return true;
 }
 
-inline size_t NodeCoord::hash(void) const
+inline BlockPosIterator &BlockPosIterator::operator=(const BlockPosIterator &i)
 {
-	size_t hash = 0xd3adb33f;
-	for (int i=0; i<3; i++)
-		// Nothing too fancy...
-		hash = ((hash << 8) | (hash >> 24)) ^ (dimension[i] ^ (isBlock[i] ? 0x50000000 : 0));
-	return hash;
+	m_value = i.m_value;
+	m_start = i.m_start;
+	m_end = i.m_end;
+	m_state = i.m_state;
+	return *this;
+}
+
+inline bool BlockPosIterator::operator==(const BlockPosIterator &i) const
+{
+	if (m_state != i.m_state)
+		return false;
+	else
+		return m_value == i.m_value;
+}
+
+inline bool BlockPosIterator::stepDim(int i, int step)
+{
+	bool forward = true;
+	if (step < 0)
+		forward = false;
+	if (m_start.dimension[i] <= m_end.dimension[i] || !forward) {
+		if (m_value.dimension[i] < m_end.dimension[i]) {
+			m_value.dimension[i]++;
+			return true;
+		}
+		else {
+			m_value.dimension[i] = m_start.dimension[i];
+			return false;
+		}
+	}
+	else {
+		if (m_value.dimension[i] > m_end.dimension[i]) {
+			m_value.dimension[i]--;
+			return true;
+		}
+		else {
+			m_value.dimension[i] = m_start.dimension[i];
+			return false;
+		}
+	}
 }
 
 inline bool NodeCoord::operator==(const NodeCoord &coord) const
