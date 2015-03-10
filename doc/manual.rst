@@ -130,8 +130,8 @@ Using a Batch File
 A batch file is an easy way to prepare a minetestmapper command for later execution. While
 batch files have many interesting features, only a simple example is given here.
 
-The basics of batch files can be easily found on internet. Search for ``writing a
-batch file`` if the description below is too succint.
+The basics of batch files can be easily found on internet. Search for '*writing a
+batch file*' if the description below is too succint.
 
 Using notepad, create a file ``mapper.bat``, which contains the command-line, exactly like it
 would be typed at the prompt. For example:
@@ -409,12 +409,12 @@ Detailed Description of Options
 
 	On recent freeminer worlds, use ``freeminer-axyz``, as it is the only format used.
 
-	``Mixed`` format is needed on older freeminer worlds, or on worlds
+	'``Mixed``' format is needed on older freeminer worlds, or on worlds
 	that were migrated from minetest (if such worlds exist ?).
 
-	``Query`` directs minetestmapper to detect and report the coordinate
+	'``Query``' directs minetestmapper to detect and report the coordinate
 	format(s) used in the database. ``--disable-blocklist-prefetch`` must
-	(obviously ?) be *disabled* (or will be disabled) for it to work.
+	(obviously ?) be *disabled* (or it will be disabled) for this to work.
 
 	Specifying ``minetest-i64`` or ``freeminer-axyz`` incorrectly results in all
 	blocks that use the other format not being mapped.
@@ -1149,14 +1149,14 @@ Detailed Description of Options
 
 
 ``--verbose-search-colors[=<n>]``
-...............................
+.................................
 	report the location of the colors file(s) that are being used.
 
 	With ``--verbose-search-colors=2``, report all search locations
 	that are being considered as well.
 
 ``--verbose[=<n>]``
-.................
+...................
 	report some useful / interesting information:
 
 	* maximum coordinates of the world
@@ -1786,5 +1786,5 @@ More information is available:
 .. _--tilecenter: `--tilecenter <x>,<y>\|world\|map`_
 .. _--tileorigin: `--tileorigin <x>,<y>\|world\|map`_
 .. _--tiles: `--tiles <tilesize>[+<border>]\|block\|chunk`_
-.. _--verbose-search-colors: `--verbose-search-colors[=n]`_
-.. _--verbose: `--verbose[=n]`_
+.. _--verbose-search-colors: `--verbose-search-colors[=<n>]`_
+.. _--verbose: `--verbose[=<n>]`_
