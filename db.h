@@ -1,7 +1,7 @@
 #ifndef _DB_H
 #define _DB_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <vector>
 #include <string>
 #include <utility>

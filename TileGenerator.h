@@ -21,7 +21,7 @@
 #endif
 #include <set>
 #include <list>
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include <iostream>
 #include <sstream>

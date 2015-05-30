@@ -8,7 +8,7 @@
  */
 
 #include <zlib.h>
-#include <stdint.h>
+#include <cstdint>
 #include "ZlibDecompressor.h"
 
 ZlibDecompressor::ZlibDecompressor(const unsigned char *data, std::size_t size):

@@ -12,7 +12,7 @@
 
 #include <limits>
 #include <cmath>
-#include <stdint.h>
+#include <cstdint>
 #include <stdexcept>
 #include <cassert>
 #include "config.h"
