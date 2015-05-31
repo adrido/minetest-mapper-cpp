@@ -41,26 +41,6 @@
 
 using namespace std;
 
-static inline int64_t pythonmodulo(int64_t i, int64_t mod)
-{
-	if (i >= 0) {
-		return i % mod;
-	}
-	else {
-		return mod - ((-i) % mod);
-	}
-}
-
-static inline int unsignedToSigned(long i, long max_positive)
-{
-	if (i < max_positive) {
-		return i;
-	}
-	else {
-		return i - 2l * max_positive;
-	}
-}
-
 static inline void checkDataLimit(const char *type, size_t offset, size_t length, size_t dataLength)
 {
 	if (offset + length > dataLength)
