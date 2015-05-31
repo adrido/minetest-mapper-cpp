@@ -859,7 +859,7 @@ void TileGenerator::loadBlocks()
 	if (verboseCoordinates >= 2) {
 		bool partialBlocks = (m_mapXStartNodeOffset || m_mapXEndNodeOffset || m_mapYStartNodeOffset || m_mapYEndNodeOffset);
 		bool adjustedGeom = (m_mapXStartNodeOffsetOrig != m_mapXStartNodeOffset || m_mapYEndNodeOffsetOrig != m_mapYEndNodeOffset
-					|| m_mapXEndNodeOffsetOrig != m_mapXEndNodeOffset || m_mapYStartNodeOffsetOrig != m_mapYStartNodeOffsetOrig);
+					|| m_mapXEndNodeOffsetOrig != m_mapXEndNodeOffset || m_mapYStartNodeOffsetOrig != m_mapYStartNodeOffset);
 		if (partialBlocks || !m_blockGeometry || adjustedGeom) {
 			cout
 				<< std::setw(MESSAGE_WIDTH) << std::left
