@@ -259,6 +259,8 @@ void PixelAttribute::mixUnder(const PixelAttribute &p)
 		}
 		m_h = p.m_h;
 	}
+	else if (m_a == 1)
+		;		// Nothing to do: pixel is already fully opaque.
 	else if ((m_mixMode & AlphaMixCumulative) == AlphaMixCumulative || (m_mixMode == AlphaMixAverage && p.m_a == 1)) {
 		PixelAttribute pp(p);
 #ifdef DEBUG
