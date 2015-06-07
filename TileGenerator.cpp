@@ -1303,6 +1303,8 @@ void TileGenerator::scalePixelRows(PixelAttributes &pixelAttributes, PixelAttrib
 
 void TileGenerator::pushPixelRows(PixelAttributes &pixelAttributes, int zPosLimit) {
 	if (m_shading)
+		// Make shading less pronounced when map is scaled down
+		// (the formula for the emphasis parameter was determined (tuned) experimentally...)
 		pixelAttributes.renderShading(m_scaleFactor < 3 ? 1 : 1 / sqrt(m_scaleFactor), m_drawAlpha);
 	int y;
 	for (y = pixelAttributes.getNextY(); y <= pixelAttributes.getLastY() && y < (worldBlockZ2StoredY(m_zMin - 1) + m_mapYEndNodeOffset) / m_scaleFactor; y++) {
