@@ -1313,7 +1313,6 @@ void TileGenerator::pushPixelRows(PixelAttributes &pixelAttributes, int zPosLimi
 			int mapY = y - m_mapYStartNodeOffset / m_scaleFactor;
 			#define pixel pixelAttributes.attribute(y, x)
 			//PixelAttribute &pixel = pixelAttributes.attribute(y, x);
-			//if (x < 2 && y < 2)
 			if (pixel.nextEmpty) {
 				x += 16 / m_scaleFactor - 1;
 				continue;
