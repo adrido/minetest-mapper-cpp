@@ -90,9 +90,17 @@ while read -r p; do
 	fi
 done < nodes.txt > colors.txt
 # Use nicer colors for water and lava
-sed -re 's/^default:water_([a-z]+) [0-9 ]+$/default:water_\1 39 66 106 128 224/' < colors.txt > tmp$$ && mv tmp$$ colors.txt
-sed -re 's/^default:lava_([a-z]+) [0-9 ]+$/default:lava_\1 255 100 0/' < colors.txt > tmp$$ && mv tmp$$ colors.txt
-sed -re 's/^default:([a-z_]*)glass ([0-9 ]+)$/default:\1glass \2 64 16/' < colors.txt > tmp$$ && mv tmp$$ colors.txt
+sed -r \
+	-e 's/^(default:water_[a-z]+) [0-9 ]+$/\1 39 66 106 128 224/' \
+	-e 's/^(default:river_water_[a-z]+) [0-9 ]+$/\1 59 99 159 192 224/' \
+	-e 's/^(default:lava_[a-z]+) [0-9 ]+$/\1 255 100 0/' \
+	-e 's/^(default:[a-z_]*glass[_a-z0-9]*) ([0-9 ]+)$/\1 \2 64 16/' \
+	-e 's/^(xpanes:bar_[0-9]*) ([0-9 ]+)$/\1 64 64 64/' \
+	-e 's/^(xpanes:pane_[0-9]*) ([0-9 ]+)$/\1 192 192 227 64 16/' \
+	< colors.txt \
+	> tmp$$ \
+&& mv tmp$$ colors.txt
+
 ==INSTRUCTIONS==
 1) Make sure avgcolors.py outputs the usage instructions
 2) Add the dumpnodes mod to Minetest

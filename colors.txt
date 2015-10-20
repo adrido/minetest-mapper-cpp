@@ -2022,3 +2022,96 @@ mesecons_extrawires:crossover_10 0 0 0
 mesecons_extrawires:tjunction_on 0 0 2
 mesecons_extrawires:crossover_off 0 0 0
 mesecons_extrawires:crossover_01 0 0 2
+
+beds:bed_bottom 131 22 22
+beds:bed_top 131 22 22
+beds:fancy_bed_bottom 131 22 22
+beds:fancy_bed_top 131 22 22
+default:acacia_leaves 58 110 3
+default:acacia_sapling 87 150 47
+default:acacia_tree 106 99 92
+default:acacia_wood 164 65 41
+default:desert_cobble 151 94 73
+default:dirt_with_dry_grass 190 151 80
+default:dry_grass_1 211 174 87
+default:dry_grass_2 210 174 87
+default:dry_grass_3 210 174 87
+default:dry_grass_4 215 178 89
+default:dry_grass_5 218 181 92
+default:meselamp 168 168 168
+default:obsidianbrick 11 11 11
+default:pine_needles 11 30 19
+default:pine_sapling 3 55 20
+default:pine_tree 95 85 73
+default:pine_wood 226 191 138
+doors:door_glass_b_1 192 192 227 64 16
+doors:door_glass_b_2 192 192 227 64 16
+doors:door_glass_t_1 192 192 227 64 16
+doors:door_glass_t_2 192 192 227 64 16
+doors:door_obsidian_glass_b_1 16 16 16 64 16
+doors:door_obsidian_glass_b_2 16 16 16 64 16
+doors:door_obsidian_glass_t_1 16 16 16 64 16
+doors:door_obsidian_glass_t_2 16 16 16 64 16
+doors:trapdoor 97 75 39
+doors:trapdoor_open 128 100 57
+farming:desert_sand_soil 199 159 92
+farming:desert_sand_soil_wet 149 118 69
+farming:seed_cotton 84 78 51
+farming:seed_wheat 155 136 70
+farming:straw 196 167 55
+flowers:mushroom_brown 91 63 55
+flowers:mushroom_fertile_brown 91 63 55
+flowers:mushroom_fertile_red 173 65 65
+flowers:mushroom_red 173 65 65
+flowers:mushroom_spores_brown 215 96 0
+flowers:mushroom_spores_red 255 0 0
+stairs:slab_acacia_wood 164 65 41
+stairs:slab_desert_cobble 151 94 73
+stairs:slab_obsidianbrick 11 11 11
+stairs:slab_pine_wood 226 191 138
+stairs:slab_straw 196 167 55
+stairs:stair_acacia_wood 164 65 41
+stairs:stair_desert_cobble 151 94 73
+stairs:stair_obsidianbrick 11 11 11
+stairs:stair_pine_wood 226 191 138
+stairs:stair_straw 196 167 55
+tnt:boom 255 43 0
+tnt:gunpowder 32 32 32
+tnt:gunpowder_burning 60 55 0
+tnt:tnt 207 0 0
+tnt:tnt_burning 207 0 0
+vessels:shelf 143 111 61
+xpanes:bar_1 64 64 64
+xpanes:bar_10 64 64 64
+xpanes:bar_11 64 64 64
+xpanes:bar_12 64 64 64
+xpanes:bar_13 64 64 64
+xpanes:bar_14 64 64 64
+xpanes:bar_15 64 64 64
+xpanes:bar_2 64 64 64
+xpanes:bar_3 64 64 64
+xpanes:bar_4 64 64 64
+xpanes:bar_5 64 64 64
+xpanes:bar_6 64 64 64
+xpanes:bar_7 64 64 64
+xpanes:bar_8 64 64 64
+xpanes:bar_9 64 64 64
+xpanes:pane_1 192 192 227 64 16
+xpanes:pane_10 192 192 227 64 16
+xpanes:pane_11 192 192 227 64 16
+xpanes:pane_12 192 192 227 64 16
+xpanes:pane_13 192 192 227 64 16
+xpanes:pane_14 192 192 227 64 16
+xpanes:pane_15 192 192 227 64 16
+xpanes:pane_2 192 192 227 64 16
+xpanes:pane_3 192 192 227 64 16
+xpanes:pane_4 192 192 227 64 16
+xpanes:pane_5 192 192 227 64 16
+xpanes:pane_6 192 192 227 64 16
+xpanes:pane_7 192 192 227 64 16
+xpanes:pane_8 192 192 227 64 16
+xpanes:pane_9 192 192 227 64 16
+default:river_water_flowing 59 96 154
+default:river_water_source 59 96 154
+default:river_water_flowing 59 96 154 192 224
+default:river_water_source 59 96 154 192 224

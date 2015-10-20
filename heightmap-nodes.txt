@@ -1128,3 +1128,8 @@ wool:dark_green
 wool:red
 farming:soil_wet
 farming:soil
+default:desert_cobble
+default:dirt_with_dry_grass
+default:obsidianbrick
+farming:desert_sand_soil
+farming:desert_sand_soil_wet
