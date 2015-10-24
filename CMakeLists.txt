@@ -236,31 +236,33 @@ set(mapper_SRCS
 	mapper.cpp
 )
 
+set(LINK_LIBRARIES
+	minetestmapper
+	${LIBGD_LIBRARY}
+	${ZLIB_LIBRARY}
+)
+
 if(USE_SQLITE3)
 	set(mapper_SRCS ${mapper_SRCS} db-sqlite3.cpp)
+	set(LINK_LIBRARIES ${LINK_LIBRARIES} ${SQLITE3_LIBRARY})
 endif(USE_SQLITE3)
 
 if(USE_LEVELDB)
 	set(mapper_SRCS ${mapper_SRCS} db-leveldb.cpp)
+	set(LINK_LIBRARIES ${LINK_LIBRARIES} ${LEVELDB_LIBRARY})
 endif(USE_LEVELDB)
 
 if(USE_REDIS)
 	set(mapper_SRCS ${mapper_SRCS} db-redis.cpp)
+	set(LINK_LIBRARIES ${LINK_LIBRARIES} ${REDIS_LIBRARY})
 endif(USE_REDIS)
 
 add_executable(minetestmapper
 	${mapper_SRCS}
 )
-
 target_link_libraries(
-	minetestmapper
-	${SQLITE3_LIBRARY}
-	${LEVELDB_LIBRARY}
-	${REDIS_LIBRARY}
-	${LIBGD_LIBRARY}
-	${ZLIB_LIBRARY}
+	${LINK_LIBRARIES}
 )
-
 
 # CPack
 
