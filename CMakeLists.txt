@@ -278,6 +278,17 @@ set(COLORS_FILES
 	colors-average-alpha.txt
 	colors-cumulative-alpha.txt
 )
+set(DUMPNODES_FILES
+	dumpnodes/README.dumpnodes
+	dumpnodes/init.lua
+)
+set(DUMPNODES_MOD_FILES
+	dumpnodes/init.lua
+)
+set(DUMPNODES_SCRIPTS
+	dumpnodes/avgcolor.py
+	dumpnodes/mkcolors
+)
 
 #set(CPACK_SET_DESTDIR ON)
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Map generator for Minetest")
@@ -313,6 +324,8 @@ if(WIN32)
 	install(FILES ${DOC_RST_FILES} DESTINATION "doc")
 	install(FILES ${DOC_HTML_FILES} DESTINATION "doc")
 	install(FILES ${DOC_IMAGE_FILES} DESTINATION "doc/images")
+	install(FILES ${DUMPNODES_FILES} DESTINATION "dumpnodes")
+	install(PROGRAMS ${DUMPNODES_SCRIPTS} DESTINATION "dumpnodes")
 	install(PROGRAMS "${PROJECT_BINARY_DIR}/minetestmapper.exe" DESTINATION ".")
 
 elseif(CREATE_FLAT_PACKAGE)
@@ -336,6 +349,8 @@ elseif(CREATE_FLAT_PACKAGE)
 	install(FILES ${DOC_RST_FILES} DESTINATION "doc")
 	install(FILES ${DOC_HTML_FILES} DESTINATION "doc")
 	install(FILES ${DOC_IMAGE_FILES} DESTINATION "doc/images")
+	install(FILES ${DUMPNODES_FILES} DESTINATION "dumpnodes")
+	install(PROGRAMS ${DUMPNODES_SCRIPTS} DESTINATION "dumpnodes")
 	install(PROGRAMS "${PROJECT_BINARY_DIR}/minetestmapper" DESTINATION ".")
 
 else(WIN32)
@@ -371,11 +386,16 @@ else(WIN32)
 	install(FILES ${DOC_RST_FILES} DESTINATION "share/doc/${PROJECT_NAME}/doc" COMPONENT mapper)
 	install(FILES ${DOC_HTML_FILES} DESTINATION "share/doc/${PROJECT_NAME}/doc" COMPONENT mapper)
 	install(FILES ${DOC_IMAGE_FILES} DESTINATION "share/doc/${PROJECT_NAME}/doc/images" COMPONENT mapper)
+	install(FILES ${DUMPNODES_FILES} DESTINATION "share/doc/${PROJECT_NAME}/dumpnodes" COMPONENT mapper)
+	install(PROGRAMS ${DUMPNODES_SCRIPTS} DESTINATION "share/doc/${PROJECT_NAME}/dumpnodes" COMPONENT mapper)
 	install(TARGETS minetestmapper RUNTIME DESTINATION bin COMPONENT mapper)
 
 	if(CMAKE_INSTALL_PREFIX STREQUAL "/usr")
 		# Require install prefix to be /usr when building .deb and .rpm packages
 		# (else minetestmapper will not find the default colors.txt file)
+
+		# When installing into /usr, assume minetest is also installed in /usr.
+		install(FILES ${DUMPNODES_MOD_FILES} DESTINATION "share/games/minetest/mods/dumpnodes" COMPONENT mapper)
 
 		# .deb settings
 		# Debian package building needs xxxxx, but cpack doesn't check for it first...

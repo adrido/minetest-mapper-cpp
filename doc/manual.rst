@@ -1730,6 +1730,27 @@ Colors Files Search Locations
     * For compatibility, in the current directory as a last resort.
       This causes a warning message to be printed.
 
+Generating colors.txt files
+---------------------------
+
+While the colors.txt file provided with minetestmapper contains color definitions for a
+large number of nodes of different popular mods, it is not, and cannot be complete.
+
+For users on linux and unix(-like) systems, a few scripts are provided to aid in the
+creation of a colors.txt file based on the actual mods the user is using. Unfortunately,
+these scripts are still a bit unpolished. They may run without any problem, and they
+may generate a perfect colors.txt file on first run. However, it may also require some
+effort to get them to produce a good colors.txt file, and the resulting file may very
+well need some manual modifications of some colors to make them look better.
+
+Please consult `<../dumpnodes/README.dumpnodes>`_ for more information on how to use
+the scripts.
+
+The scripts are not supported on Windows. While it is probably possible to get them
+to work, be prepared to do some research on the subject of getting bash scripts to run
+on windows, and be prepared to invest some time... Alternatively, be prepared to
+rewrite at least the bash script in another scripting language.
+
 More Information
 ================
 
