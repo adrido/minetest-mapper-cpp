@@ -34,7 +34,6 @@ if(RST2HTML_EXECUTABLE)
 
             add_custom_command(OUTPUT ${outfile} COMMAND ${RST2HTML_EXECUTABLE}
                                ARGS ${infile} ${outfile} DEPENDS ${infile})
-            add_custom_target(RstHTMLDocuments_${it} ALL DEPENDS ${outfile})
         endforeach()
     endmacro()
 endif()
