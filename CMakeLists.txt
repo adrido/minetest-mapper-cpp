@@ -147,7 +147,7 @@ set(USE_SQLITE3 0)
 set(USE_LEVELDB 0)
 set(USE_REDIS 0)
 
-OPTION(ENABLE_ANY_DATABASE "Enable any available database backends")
+OPTION(ENABLE_ANY_DATABASE "Enable any available database backends" True)
 OPTION(ENABLE_ALL_DATABASES "Enable all possible database backends")
 OPTION(ENABLE_SQLITE3 "Enable sqlite3 backend" True)
 OPTION(ENABLE_LEVELDB "Enable LevelDB backend")
@@ -217,7 +217,6 @@ if(NOT USE_SQLITE3 AND NOT USE_LEVELDB AND NOT USE_REDIS)
 	message(SEND_ERROR "No database backends are configured, or none could be found")
 endif(NOT USE_SQLITE3 AND NOT USE_LEVELDB AND NOT USE_REDIS)
 
-
 include_directories(
 	"${PROJECT_BINARY_DIR}"
 	"${CMAKE_CURRENT_SOURCE_DIR}"
@@ -264,11 +263,13 @@ target_link_libraries(
 	${LINK_LIBRARIES}
 )
 
+add_subdirectory(doc)
+
 # CPack
 
 file(GLOB META_FILES RELATIVE "${CMAKE_HOME_DIRECTORY}" AUTHORS COPYING LICENSE.* README.rst)
 file(GLOB DOC_RST_FILES RELATIVE "${CMAKE_HOME_DIRECTORY}" doc/*.rst)
-file(GLOB DOC_HTML_FILES RELATIVE "${CMAKE_HOME_DIRECTORY}" doc/*.html)
+string(REPLACE ".rst" ".html" DOC_HTML_FILES "${DOC_RST_FILES}")
 file(GLOB DOC_IMAGE_FILES RELATIVE "${CMAKE_HOME_DIRECTORY}" doc/images/*)
 set(COLORS_FILES
 	colors.txt
