@@ -4,20 +4,25 @@ It reads from the world database directly, and generates a
 map in png format. One world node is rendered as one map pixel.
 
 Features:
-- Standard color mapping file included (which maps node (e.g. default:stone) to desired color)
-- Use custom color mapping files (user-specific, world-specific, command-line)
-- Supports sqlite3, leveldb and redis backends
+- Standard color mapping file included (which maps a node (e.g. default:stone) to the desired color)
+- Easy creation of custom color mapping files (user-specific, world-specific, command-line)
+- Supports all minetest backends (sqlite3, leveldb and redis)
+- Ability to create a regular map or a height-map
+- Ability to draw the map at a reduced scale (up to 1:16)
+- Supports both minetest and freeminer worlds
 Options:
 - Limit the area of the world being rendered (and thus the size of the map)
 - Render nodes transparently or not (e.g. water)
 - Draw player positions on the map
 - Draw a scale on the sides of the map
 - Disable shading (rendering of height differences)
-- Draw a grid to the map
-- Draw geometric figures or text on the map
-- Show actual world and map dimensions and report rendering statistics.
+- Draw a grid on the map
+- Draw geometric figures or text on the map (circle, rectangle, ...)
+- Report actual world and map dimensions and rendering statistics.
 
 Due to limitations of the drawing library, the maximum map size is limited.
 The following numbers were determined by experimentation, and may vary:
 - On 32-bit platforms, to a little over 570 megapixels (e.g. about 24000 x 24000)
 - On 64-bit platforms, to a little over 2.1 gigapixels (e.g. about 46000 x 46000)
+
+Website: https://github.com/Rogier-5/minetest-mapper-cpp

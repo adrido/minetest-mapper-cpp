@@ -14,12 +14,11 @@ Major Features
 * All colors for regular or height maps are configurable
 * Draw player positions
 * Draw different geometric figures, or text on the map
-* Draw the map at a reduced scale. E.g. 1:4.
+* Draw the map at a reduced scale. E.g. 1:4 (max: 1:16).
 * Draw a scale on the left and/or top side of the map,
   and/or a height scale (for height maps) on the bottom.
 * Optionally draw some nodes transparently (e.g. water)
-* User manual
-
+* Includes a user manual
 
 Build Features
 ==============
@@ -41,6 +40,7 @@ Minor Features
 Differences From Stock Minetestmapper
 =====================================
 * Support for the new freeminer database format
+* Ability to draw height-maps
 * Different methods for drawing transparent blocks
   (more than transparency on and off)
 * Different colors can be specified for nodes, in the
@@ -60,7 +60,7 @@ Differences From Stock Minetestmapper
   directory, or in system directories
 * Colors files can include others, so that just a few colors can
   be redefined, and the system colors file used for the others.
-* The map can be draw at a reduced scale.
+* The map can be drawn at a reduced scale (1:1 - 1:16).
   This means that a full world map can now be generated.
 * A grid can be drawn on the map.
 * A number of symbolic colors ('red', ...) are available on the
@@ -68,7 +68,7 @@ Differences From Stock Minetestmapper
 * The scale can be enabled on the left and top side individually
 * Major and minor (tick) intervals are configurable for the scale
 * Block numbers are shown on the scale as well
-* optionally, avoid reading the block list from the database
+* Optionally, avoid reading the block list from the database
   (dramatically speeds up generating maps of small parts of large worlds)
 
 In addition a number bugs have been fixed. As bugs are also getting
