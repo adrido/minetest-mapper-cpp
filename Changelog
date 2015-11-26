@@ -4,6 +4,8 @@
 	 	were recently added to the default minetest game.
 	- Improved the scripts and documentation for generating a colors.txt
 		file.
+	- HTML versions of documentation in doc/ is now generated, and included
+		in the different packages.
     Bugfixes:
         - Fixed possible compilation failure caused by stdint.h
 	- Fixed compilation failure when some database libraries are not installed

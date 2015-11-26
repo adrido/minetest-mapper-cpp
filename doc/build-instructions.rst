@@ -223,6 +223,22 @@ ARCHIVE_PACKAGE_NAME:
 
     The names of ``.deb`` and ``.rpm`` packages are *not* affected by this variable.
 
+REQUIRE_HTML_DOCUMENTATION:
+    Whether HTML documentation must be generated. If enabled, and python-docutils is not
+    installed, building will fail.
+
+    By default, HTML documentation will be generated if python-docutils is found, else
+    it will not be generated.
+
+DISABLE_HTML_DOCUMENTATION:
+    Whether to skip generation of HTML documentation, even if python-docutils could be
+    found.
+
+    Note that if HTML documentation is not generated at build time, it will also not
+    be included in the packages, even if python-docutils is in fact installed and
+    even if the converted documentation is available (e.g. because it was generated
+    manually).
+
 Converting the Documentation
 ============================
 
@@ -231,7 +247,17 @@ Using python-docutils, the manual can be converted to a variety of formats.
 HTML
 ----
 
-Conversion to HTML yields a nice manual:
+By default, documentation is converted to HTML when building minetestmapper,  provided
+python-docutils is installed.
+
+If automatic documentation conversion at build time is disabled, but python-docutils
+is installed, non-automatic conversion is still possible. Either using make:
+
+::
+
+	make hmtldoc
+
+Or by manually invoking ``rst2html``
 
 ::
 
