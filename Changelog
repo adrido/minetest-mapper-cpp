@@ -1,3 +1,16 @@
+[]
+    Enhancements:
+        - Updated the included colors file with colors for the new tiles that
+	 	were recently added to the default minetest game.
+	- Improved the scripts and documentation for generating a colors.txt
+		file.
+    Bugfixes:
+        - Fixed possible compilation failure caused by stdint.h
+	- Fixed compilation failure when some database libraries are not installed
+		Even when support for some of the databases was not enabled,
+		the libraries for those databases still needed to be installed on
+		the system for compilation to succeed. Now the libraries no
+		longer need to be installed if not used.
 [10 mar 2015]
     Enhancements:
 	- Added an optimisation option: --disable-blocklist-prefetch.
