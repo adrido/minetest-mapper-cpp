@@ -29,10 +29,11 @@ cat nodes.txt \
 	fi
 	avgcolor="$(./avgcolor.py "$filename")"
 	if [ -z "$avgcolor" ]; then
-		echo "WARNING: failed to compute average color for node '$node' (tile: $tile)" 1>&2
 		if expr "$node" : "^xpanes:bar_[0-9]\+$" > /dev/null; then
 			# Hack to generate xpanes:bar_* anyway
 			echo "$node 0 0 0"
+		else
+			echo "WARNING: failed to compute average color for node '$node' (tile: $tile)" 1>&2
 		fi
 	else
 		echo "$node $avgcolor"
