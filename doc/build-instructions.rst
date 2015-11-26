@@ -24,6 +24,7 @@ Requirements
 Libraries
 ---------
 
+* zlib
 * libgd
 * sqlite3 (optional - enabled by default, set ENABLE_SQLITE3=0 in CMake to disable)
 * leveldb (optional, set ENABLE_LEVELDB=1 in CMake to enable leveldb support)
@@ -46,6 +47,13 @@ If converting the documentation to HTML, or another format is desired:
 
 * python-docutils
 
+Packaging
+---------
+
+If creation of installation packages is desired:
+
+* fakeroot (for a deb package)
+* rpm-build (for an rpm package)
 
 Install Dependencies
 ====================
@@ -272,7 +280,7 @@ Conversion to unix man format has acceptable, but not perfect results:
 ::
 
 	cd doc
-	rst2html manual.rst > minetestmapper.1
+	rst2man manual.rst > minetestmapper.1
 
 PDF
 ---

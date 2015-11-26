@@ -13,6 +13,7 @@ Quick links (functional on github. Elsewhere possibly not):
 :Github:		`<https://github.com/Rogier-5/minetest-mapper-cpp>`_
 :Bugs:			`<https://github.com/Rogier-5/minetest-mapper-cpp/issues>`_
 :Windows packages:	`<https://github.com/Rogier-5/minetest-mapper-cpp/wiki/Downloads>`_
+:Generating colors.txt: `<dumpnodes/README.dumpnodes>`_
 
 Features (short list)
 =====================
@@ -32,7 +33,8 @@ Map Generation Features
 * Draw a scale on the left and/or top side of the map,
   and/or a height scale (for height maps) on the bottom.
 * Optionally draw some nodes transparently (e.g. water)
-* User Manual
+* Includes User Manual
+* Includes scripts to aid in generating a color definition file.
 
 Build Features
 --------------
@@ -57,8 +59,9 @@ For more detailed instructions, see `<doc/build-instructions.rst>`_.
 
 **Libraries:**
 
+* zlib
 * libgd
-* sqlite3
+* sqlite3 (not mandatory. See `<doc/build-instructions.rst>`_.
 * leveldb (if leveldb support is desired)
 * hiredis (if redis support is desired)
 
@@ -68,6 +71,9 @@ For more detailed instructions, see `<doc/build-instructions.rst>`_.
 * cmake
 * make
 
+**Other:**
+
+* python-docutils (if documentation in html format is desired)
 
 Compile
 -------
