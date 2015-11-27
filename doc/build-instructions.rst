@@ -238,6 +238,8 @@ REQUIRE_HTML_DOCUMENTATION:
     By default, HTML documentation will be generated if python-docutils is found, else
     it will not be generated.
 
+    See also the note below.
+
 DISABLE_HTML_DOCUMENTATION:
     Whether to skip generation of HTML documentation, even if python-docutils could be
     found.
@@ -246,6 +248,34 @@ DISABLE_HTML_DOCUMENTATION:
     be included in the packages, even if python-docutils is in fact installed and
     even if the converted documentation is available (e.g. because it was generated
     manually).
+
+    See also the note below.
+
+HTML Documentation note:
+    If both REQUIRE_HTML_DOCUMENTATION and DISABLE_HTML_DOCUMENTATION are disabled,
+    then the question of whether HTML documentation will be generated depends on
+    whether python-docutils is installed. If installed, then henceforth HTML
+    documentation will be generated. If not installed, then it will not be generated.
+
+    As long as REQUIRE_HTML_DOCUMENTATION and DISABLE_HTML_DOCUMENTATION are both
+    disabled then, for consistency, once python-docutils has been found to be installed
+    and the decision has been made to generate HTML documentation, this decision persists.
+    If subsequently python-docutils is deinstalled, or can no longer be found, later
+    builds will fail, until the situation has been fixed. This can be done in several
+    ways:
+
+    - (Obviously:) Reinstalling python-docutils, or making sure it can be found.
+
+    - Enabling both REQUIRE_HTML_DOCUMENTATION and DISABLE_HTML_DOCUMENTATION. As this
+      is not a sensible combination, the build system will disable both, and it will
+      then also reevaluate the persistent decision to generate HTML documentation.
+
+    - Setting DISABLE_HTML_DOCUMENTATION to True to permanently disable generation of
+      HTML documentation.
+
+    - Setting DISABLE_HTML_DOCUMENTATION to True, running cmake, and then setting it
+      back to false. This will disable HTML generation until python-docutils is
+      available again.
 
 Converting the Documentation
 ============================
