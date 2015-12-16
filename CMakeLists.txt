@@ -231,6 +231,7 @@ set(mapper_SRCS
 	TileGenerator.cpp
 	ZlibDecompressor.cpp
 	Color.cpp
+	Settings.cpp
 	BlockPos.cpp
 	mapper.cpp
 )
