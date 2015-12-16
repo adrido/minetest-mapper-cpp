@@ -22,7 +22,7 @@ Map Generation Features
 -----------------------
 
 * Support for both minetest and freeminer worlds
-* Support for sqlite3, leveldb and redis map databases
+* Support for sqlite3, postgresql, leveldb and redis map databases
 * Generate a subsection of the map, or a full map
   (but note that the size of generated images is limited)
 * Generate regular maps or height-maps
@@ -62,6 +62,7 @@ For more detailed instructions, see `<doc/build-instructions.rst>`_.
 * zlib
 * libgd
 * sqlite3 (not mandatory. See `<doc/build-instructions.rst>`_.
+* postgresql (if postgresql support is desired)
 * leveldb (if leveldb support is desired)
 * hiredis (if redis support is desired)
 

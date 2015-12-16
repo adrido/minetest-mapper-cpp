@@ -6,7 +6,7 @@ Minetestmapper generates maps of minetest and freeminer worlds.
 Major Features
 ==============
 * Support for both minetest and freeminer
-* Support for sqlite3, leveldb and redis map databases
+* Support for sqlite3, postsgresql, leveldb and redis map databases
 * Generate a subsection of the map, or a full map
   (but the size of generated images is limited - see
   'Known Problems' below)

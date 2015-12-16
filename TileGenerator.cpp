@@ -27,6 +27,9 @@
 #if USE_SQLITE3
 #include "db-sqlite3.h"
 #endif
+#if USE_POSTGRESQL
+#include "db-postgresql.h"
+#endif
 #if USE_LEVELDB
 #include "db-leveldb.h"
 #endif
@@ -773,6 +776,14 @@ void TileGenerator::openDb(const std::string &input)
 #if USE_SQLITE3
 		DBSQLite3 *db;
 		m_db = db = new DBSQLite3(input);
+#else
+		unsupported = true;
+#endif
+	}
+	else if (backend == "postgresql") {
+#if USE_POSTGRESQL
+		DBPostgreSQL *db;
+		m_db = db = new DBPostgreSQL(input);
 #else
 		unsupported = true;
 #endif

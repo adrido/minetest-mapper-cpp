@@ -27,11 +27,12 @@ Libraries
 * zlib
 * libgd
 * sqlite3 (optional - enabled by default, set ENABLE_SQLITE3=0 in CMake to disable)
+* postgresql (optional, set ENABLE_POSTGRESQL=1 in CMake to enable postgresql support)
 * leveldb (optional, set ENABLE_LEVELDB=1 in CMake to enable leveldb support)
 * hiredis (optional, set ENABLE_REDIS=1 in CMake to enable redis support)
 
-At least one of ``sqlite3``, ``leveldb`` and ``hiredis`` is required. Check the
-minetest worlds that will be mapped to know which ones should be included.
+At least one of ``sqlite3``, ``postgresql``, ``leveldb`` and ``hiredis`` is required.
+Check the minetest worlds that will be mapped to know which ones should be included.
 
 Build Environment
 -----------------
@@ -86,11 +87,11 @@ In order to make a ``.deb`` package (if desired), install the required tools:
 	apt-get install fakeroot
 
 Finally install the minetestmapper dependencies. At least one of ``libsqlite3-dev``,
-``libleveldb-dev`` and ``libhiredis-dev`` is required.
+``libpq-dev``, ``libleveldb-dev`` and ``libhiredis-dev`` is required.
 
 ::
 
-	apt-get install zlib1g-dev libgd-dev libsqlite3-dev libleveldb-dev libhiredis-dev
+	apt-get install zlib1g-dev libgd-dev libsqlite3-dev libpq-dev libleveldb-dev libhiredis-dev
 
 Fedora and Derivatives
 ----------------------
@@ -120,11 +121,11 @@ In order to make an ``.rpm`` package (if desired), install the required tools:
 	yum install rpm-build
 
 Finally install the minetestmapper dependencies. At least one of ``libsqlite3x-devel``,
-``leveldb-devel`` and ``hiredis-devel`` is required.
+``postgresql-devel``, ``leveldb-devel`` and ``hiredis-devel`` is required.
 
 ::
 
-	yum install zlib-devel gd-devel libsqlite3x-devel leveldb-devel hiredis-devel
+	yum install zlib-devel gd-devel libsqlite3x-devel postgresql-devel leveldb-devel hiredis-devel
 
 Ubuntu
 ------
@@ -192,6 +193,9 @@ CMake Variables
 
 ENABLE_SQLITE3:
     Whether to enable sqlite3 backend support (on by default)
+
+ENABLE_POSTGRESQL:
+    Whether to enable postresql backend support (off by default)
 
 ENABLE_LEVELDB:
     Whether to enable leveldb backend support (off by default)

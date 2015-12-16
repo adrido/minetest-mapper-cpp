@@ -6,7 +6,7 @@ map in png format. One world node is rendered as one map pixel.
 Features:
 - Standard color mapping file included (which maps a node (e.g. default:stone) to the desired color)
 - Easy creation of custom color mapping files (user-specific, world-specific, command-line)
-- Supports all minetest backends (sqlite3, leveldb and redis)
+- Supports all minetest backends (sqlite3, postgresql, leveldb and redis)
 - Ability to create a regular map or a height-map
 - Ability to draw the map at a reduced scale (up to 1:16)
 - Supports both minetest and freeminer worlds

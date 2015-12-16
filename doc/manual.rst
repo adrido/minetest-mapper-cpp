@@ -288,7 +288,7 @@ Feedback / information options:
 Miscellaneous options
 .....................
 
-    * ``--backend auto|sqlite3|leveldb|redis`` :	Specify or override the database backend to use
+    * ``--backend auto|sqlite3|postgresql|leveldb|redis`` :	Specify or override the database backend to use
     * ``--disable-blocklist-prefetch`` :		Do not prefetch a block list - faster when mapping small parts of large worlds.
     * ``--database-format minetest-i64|freeminer-axyz|mixed|query`` :	Specify the format of the database (needed with --disable-blocklist-prefetch and a leveldb backend).
 
@@ -313,8 +313,8 @@ Detailed Description of Options
 .. Contents:: :local:
 
 
-``--backend auto|sqlite3|leveldb|redis``
-..........................................
+``--backend auto|sqlite3|postgresql|leveldb|redis``
+...................................................
 	Set or override the database backend to use.
 
 	By default (``auto``), the database is obtained from the world configuration,
@@ -1768,7 +1768,7 @@ More information is available:
 
 .. _known problems: features.rst#known-problems
 
-.. _--backend: `--backend auto\|sqlite3\|leveldb\|redis`_
+.. _--backend: `--backend auto\|sqlite3\|postgresql\|leveldb\|redis`_
 .. _--bgcolor: `--bgcolor <color>`_
 .. _--blockcolor: `--blockcolor <color>`_
 .. _--centergeometry: `--centergeometry <geometry>`_
