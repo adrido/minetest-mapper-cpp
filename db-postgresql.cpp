@@ -30,6 +30,8 @@ DBPostgreSQL::DBPostgreSQL(const std::string &mapdir) :
 	if (!info_found)
 		throw std::runtime_error("Set postgresql_connection_info or pg_connection_info in world.mt to use the postgresql backend");
 
+	connection_info += "fallback_application_name=minetestmapper " + connection_info;
+
 	m_connection = PQconnectdb(connection_info.c_str());
 	if (PQstatus(m_connection) != CONNECTION_OK) {
 		throw std::runtime_error(std::string("Failed to connect to postgresql database: ")

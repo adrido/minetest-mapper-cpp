@@ -1,4 +1,5 @@
 
+#include <iostream>
 #include "Settings.h"
 
 static std::string trim(const std::string s)
@@ -51,31 +52,16 @@ bool Settings::getGeneric(std::string key, std::string *pvalue)
 	m_file.seekg(0);
 	for (std::getline(m_file,line); m_file.good(); std::getline(m_file,line)) {
 		linenr++;
-		std::istringstream iline;
-		iline.str(line);
-		iline >> std::skipws;
-		std::string variable;
-		std::string eq;
-		iline >> variable;
-		if (variable != key)
+		size_t keylen = line.find_first_of('=');
+		if (keylen == std::string::npos) {
+			std::cerr << "Error parsing config line at " << m_filename << ":" << linenr << ": expected: <name> = <value> ('=' not found)";
+			continue;
+		}
+		if (trim(line.substr(0, keylen)) != key)
 			continue;
 		found = true;
-		iline >> eq;
-		if (m_file.fail() || eq != "=") {
-			std::ostringstream oss;
-			oss << "Error parsing '" << key << "' in file " << m_messageName << " at line " << linenr << " (missing '=')";
-			throw std::runtime_error(oss.str());
-		}
-		if (pvalue) {
-			std::string value;
-			iline >> value;
-			if (m_file.fail()) {
-				std::ostringstream oss;
-				oss << "Error parsing value for '" << key << "' in file " << m_messageName << " at line " << linenr;
-				throw std::runtime_error(oss.str());
-			}
-			*pvalue = trim(value);
-		}
+		if (pvalue)
+			*pvalue = trim(line.substr(keylen + 1));
 	}
 	return found;
 }
