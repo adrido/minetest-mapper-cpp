@@ -9,6 +9,7 @@
 		file.
 	- HTML versions of documentation in doc/ is now generated, and included
 		in the different packages.
+	- Documented concurrent minetest & minetestmapper use.
     Bugfixes:
         - Fixed possible compilation failure caused by stdint.h
 	- Fixed compilation failure when some database libraries are not installed

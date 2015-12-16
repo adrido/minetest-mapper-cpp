@@ -152,6 +152,38 @@ save the file (for example as ``c:\users\John\mapper.bat``), and execute it at t
 And the minetestmapper command-line from the batch file will be executed.
 
 
+Mapping while Minetest is Running
+---------------------------------
+
+Depending on the backend, it is possible to run minetestmapper while minetest
+is also running (and most probably accessing and modifying the database).
+
++---------------+---------------------------------------------------------------+
+|Backend	|Support for online mapping					|
++===============+===============================================================+
+|SQLite3	|Works perfectly since 30 dec 2015, or minetest version		|
+|		|0.4.14 (0.5 ?) and later.					|
+|		|								|
+|		|Minetest versions before 30 dec 2015 (or: version 0.4.13 and	|
+|		|earlier) probably can't handle concurrent mapping, and		|
+|		|may almost certainly crash with error 'database is locked'.	|
+|		|(but different systems may still behave differently...)	|
++---------------+---------------------------------------------------------------+
+|PostgreSQL	|Works perfectly.						|
++---------------+---------------------------------------------------------------+
+|LevelDB	|Not possible. The database can't be accessed by multiple	|
+|		|clients concurrently.						|
++---------------+---------------------------------------------------------------+
+|Redis		|Works perfectly. May affect minetest lag ?			|
++---------------+---------------------------------------------------------------+
+
+When using an SQLite3 database and a minetest version from before 30 dec 2015,
+mapping may be possible while minetest is running, provided no players are online
+and there are no forceloaded blocks (i.e. provided minetest is not accessing the
+database while minetestmapper is running). The older versions of minetest will
+only crash if they find the database temporarily locked when writing (due to
+minetestmapper accessing it). Try at your own risk.
+
 Command-line Options Summary
 ----------------------------
 
