@@ -138,6 +138,7 @@ TileGenerator::TileGenerator():
 	m_drawAir(false),
 	m_shading(true),
 	m_backend(DEFAULT_BACKEND),
+	m_requestedBackend(DEFAULT_BACKEND),
 	m_shrinkGeometry(true),
 	m_blockGeometry(false),
 	m_scaleFactor(1),
@@ -460,7 +461,7 @@ void TileGenerator::parseDataFile(const std::string &fileName, int depth, const 
 
 void TileGenerator::setBackend(std::string backend)
 {
-	m_backend = backend;
+	m_requestedBackend = backend;
 }
 
 void TileGenerator::setChunkSize(int size)
@@ -767,12 +768,12 @@ int TileGenerator::getMapChunkSize(const std::string &input)
 
 void TileGenerator::openDb(const std::string &input)
 {
-	string backend = m_backend;
+	m_backend = m_requestedBackend;
 	bool unsupported = false;
 	if (m_backend == "auto")
-		backend = getWorldDatabaseBackend(input);
+		m_backend = getWorldDatabaseBackend(input);
 
-	if(backend == "sqlite3") {
+	if(m_backend == "sqlite3") {
 #if USE_SQLITE3
 		DBSQLite3 *db;
 		m_db = db = new DBSQLite3(input);
@@ -780,7 +781,7 @@ void TileGenerator::openDb(const std::string &input)
 		unsupported = true;
 #endif
 	}
-	else if (backend == "postgresql") {
+	else if (m_backend == "postgresql") {
 #if USE_POSTGRESQL
 		DBPostgreSQL *db;
 		m_db = db = new DBPostgreSQL(input);
@@ -788,27 +789,27 @@ void TileGenerator::openDb(const std::string &input)
 		unsupported = true;
 #endif
 	}
-	else if (backend == "leveldb") {
+	else if (m_backend == "leveldb") {
 #if USE_LEVELDB
 		m_db = new DBLevelDB(input);
 #else
 		unsupported = true;
 #endif
 	}
-	else if (backend == "redis") {
+	else if (m_backend == "redis") {
 #if USE_REDIS
 		m_db = new DBRedis(input);
 #else
 		unsupported = true;
 #endif
 	}
-	else if (m_backend == "auto")
-		throw std::runtime_error(((std::string) "World uses unrecognised database backend: ") + backend);
+	else if (m_requestedBackend == "auto")
+		throw std::runtime_error(((std::string) "World uses unrecognised database backend: ") + m_backend);
 	else
-		throw std::runtime_error(((std::string) "Internal error: unknown database backend: ") + m_backend);
+		throw std::runtime_error(((std::string) "Internal error: unknown database backend: ") + m_requestedBackend);
 
 	if (unsupported)
-		throw std::runtime_error(((std::string) "World uses backend '") + backend + ", which was not enabled at compile-time.");
+		throw std::runtime_error(((std::string) "World uses backend '") + m_backend + ", which was not enabled at compile-time.");
 }
 
 void TileGenerator::loadBlocks()

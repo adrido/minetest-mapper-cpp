@@ -18,6 +18,11 @@
 		the libraries for those databases still needed to be installed on
 		the system for compilation to succeed. Now the libraries no
 		longer need to be installed if not used.
+	- Fixed backend selection, so that there should no longer be a difference
+		between an automatically selected backend, and the same backend
+		specified manually.
+		(At least one backend-specific (LevelDB-related) option was not
+		 taking effect when LevelDB was auto-selected).
 [10 mar 2015]
     Enhancements:
 	- Added an optimisation option: --disable-blocklist-prefetch.

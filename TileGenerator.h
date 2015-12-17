@@ -238,6 +238,7 @@ private:
 	bool m_drawAir;
 	bool m_shading;
 	std::string m_backend;
+	std::string m_requestedBackend;
 	bool m_shrinkGeometry;
 	bool m_blockGeometry;
 	int m_scaleFactor;
