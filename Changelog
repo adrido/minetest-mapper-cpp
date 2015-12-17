@@ -10,6 +10,7 @@
 	- HTML versions of documentation in doc/ is now generated, and included
 		in the different packages.
 	- Documented concurrent minetest & minetestmapper use.
+	- Documented the different geometries reported with --verbose
     Bugfixes:
         - Fixed possible compilation failure caused by stdint.h
 	- Fixed compilation failure when some database libraries are not installed

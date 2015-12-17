@@ -1203,6 +1203,30 @@ Detailed Description of Options
 	Using `--verbose=3`, report statistics about block formats found in the database
 	(currently only applicable to leveldb)
 
+	Description of possible reported coordinates. Only the values that are
+	applicable and available are printed.
+
+	:Command-line Geometry:		The geometry specified on the command-line, before
+					aligning to map-blocks.
+					If none, then the maximum possible geometry.
+	:Requested Geometry:		The effective geometry requested on the command-line
+					(i.e. after aligninment to map-blocks due to the
+					requested or implicit granularity).
+					If none, then the maximum possible geometry.
+	:Adjusted Geometry:		The geometry after adjustment required by scaling.
+	:Block-aligned Geometry:	The geometry of the area to be loaded from the database
+					(i.e. extended to map-block boundaries).
+	:World Geometry:		The geometry of the entire existing world found in
+					the database.
+	:Minimal Map Geometry:		The minimal possible geometry that shows the same
+					information as the requested geometry.
+	:Map Vertical Limits:		Vertical limits of the world in the area being mapped.
+	:Map Output Geometry:		The Geometry of the map that will be generated.
+	:Mapped Vertical Range:		The actual vertical limits of the blocks that were mapped.
+					(I.e. excluding air and underground blocks that are not
+					visible)
+					This range is currently reported with block granularity.
+
 ``--version``
 .............
 	Report the version of this instance of minetestmapper.
