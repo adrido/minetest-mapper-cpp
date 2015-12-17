@@ -316,6 +316,7 @@ Miscellaneous options
     * ``--backend auto|sqlite3|postgresql|leveldb|redis`` :	Specify or override the database backend to use
     * ``--disable-blocklist-prefetch`` :		Do not prefetch a block list - faster when mapping small parts of large worlds.
     * ``--database-format minetest-i64|freeminer-axyz|mixed|query`` :	Specify the format of the database (needed with --disable-blocklist-prefetch and a LevelDB backend).
+    * ``--prescan-world=full|auto|disabled`` :		Specify whether to prescan the world (compute a list of all blocks in the world).
 
 
 Detailed Description of Options
@@ -461,6 +462,8 @@ Detailed Description of Options
 ......................................
 	Do not prefetch a list of block coordinates from the database before commencing
 	map generation.
+
+	This is synonymous with `--prescan-world=disabled`_.
 
 	This option will probably improve mapping speed when mapping a smaller part
 	of a very large world. In other cases it may actually reduce mapping speed.
@@ -1011,6 +1014,38 @@ Detailed Description of Options
 
 	See also `Color Syntax`_
 
+``--prescan-world=full|auto|disabled``
+........................................
+	Specify whether to prescan the world, i.e. whether to compute
+	a list of which blocks inside the area to be mapped are actually
+	in the database before mapping.
+
+	When ``disabled``, minetestmapper will not compute such a list at
+	all. While mapping, it will just attempt to load every possible
+	block in the section of world determined by geometry and min-y and
+	max-y.  This is synonymous with ``--disable-blocklist-prefetch``.
+	See `--disable-blocklist-prefetch`_ for a discussion, caveats and
+	other important notes.
+
+	When set to ``full``, minetestmapper will always query the database
+	for the complete list of blocks which exist in the entire world. Even
+	if a smaller area could be queried for because of the map geometry,
+	min-y or max-y.
+	This allows the actual world dimensions to be reported, but at the
+	cost of additional processing time, especially if the mapped part
+	of the world is small compared to the existing world size.
+
+	When set to the default value: ``auto``, if possible and sensible,
+	minetestmapper will query the database for just a list of the blocks
+	in the part of the world of interested, depending on geometry,
+	min-y and max-y.  If it does, the actual world dimensions cannot
+	be reported.
+
+	Unfortunately, most database backends do not support querying for a
+	partial block-list, or if they do, it is much less efficient than
+	querying for a full list. Only the PostgreSQL backend supports it
+	efficiently. So for all databases except PostgreSQL, ``auto`` is
+	equivalent to ``full``.
 
 ``--progress``
 ..............
@@ -1207,8 +1242,10 @@ Detailed Description of Options
 ...................
 	report some useful / interesting information:
 
-	* maximum coordinates of the world
-	* world coordinates included the map being generated
+	* maximum coordinates of the world.
+	  With a PostgreSQL backend, these are only reported if
+	  `--prescan-world`_ is set to ``full``.
+	* world coordinates included the map being generated.
 	* number of blocks: in the world, and in the map area.
 	* `--database-format`_ setting if `--disable-blocklist-prefetch`_ is used.
 
@@ -1863,6 +1900,8 @@ More information is available:
 .. _--origincolor: `--origincolor <color>`_
 .. _--output: `--output <output_image.png>`_
 .. _--playercolor: `--playercolor <color>`_
+.. _--prescan-world: `--prescan-world=full\|auto\|disabled`_
+.. _--prescan-world=disabled: `--prescan-world=full\|auto\|disabled`_
 .. _--silence-suggestions: `--silence-suggestions all,prefetch`_
 .. _--scalecolor: `--scalecolor <color>`_
 .. _--scalefactor: `--scalefactor 1:<n>`_

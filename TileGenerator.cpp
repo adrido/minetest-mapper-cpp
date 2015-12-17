@@ -110,6 +110,9 @@ static inline int readBlockContent(const unsigned char *mapData, int version, in
 static const ColorEntry nodeColorNotDrawnObject;
 const ColorEntry *TileGenerator::NodeColorNotDrawn = &nodeColorNotDrawnObject;
 
+const BlockPos TileGenerator::BlockPosLimitMin(MAPBLOCK_MIN, MAPBLOCK_MIN, MAPBLOCK_MIN);
+const BlockPos TileGenerator::BlockPosLimitMax(MAPBLOCK_MAX, MAPBLOCK_MAX, MAPBLOCK_MAX);
+
 struct HeightMapColor
 {
 	int height[2];
@@ -139,6 +142,7 @@ TileGenerator::TileGenerator():
 	m_shading(true),
 	m_backend(DEFAULT_BACKEND),
 	m_requestedBackend(DEFAULT_BACKEND),
+	m_scanEntireWorld(false),
 	m_shrinkGeometry(true),
 	m_blockGeometry(false),
 	m_scaleFactor(1),
@@ -464,6 +468,11 @@ void TileGenerator::setBackend(std::string backend)
 	m_requestedBackend = backend;
 }
 
+void TileGenerator::setScanEntireWorld(bool enable)
+{
+	m_scanEntireWorld = enable;
+}
+
 void TileGenerator::setChunkSize(int size)
 {
 	m_chunkSize = size;
@@ -777,6 +786,7 @@ void TileGenerator::openDb(const std::string &input)
 #if USE_SQLITE3
 		DBSQLite3 *db;
 		m_db = db = new DBSQLite3(input);
+		m_scanEntireWorld = true;
 #else
 		unsupported = true;
 #endif
@@ -792,6 +802,7 @@ void TileGenerator::openDb(const std::string &input)
 	else if (m_backend == "leveldb") {
 #if USE_LEVELDB
 		m_db = new DBLevelDB(input);
+		m_scanEntireWorld = true;
 #else
 		unsupported = true;
 #endif
@@ -799,6 +810,7 @@ void TileGenerator::openDb(const std::string &input)
 	else if (m_backend == "redis") {
 #if USE_REDIS
 		m_db = new DBRedis(input);
+		m_scanEntireWorld = true;
 #else
 		unsupported = true;
 #endif
@@ -911,8 +923,8 @@ void TileGenerator::loadBlocks()
 		m_reportDatabaseFormat = false;
 	}
 	if (m_reportDatabaseFormat && m_generateNoPrefetch) {
-		std::cerr << "WARNING: querying database format cannot be combined with '--disable-blocklist-prefetch'. Prefetch disabled" << std::endl;
-		m_generateNoPrefetch = false;
+		std::cerr << "WARNING: querying database format: ignoring '--disable-blocklist-prefetch' and/or '--prescan-world=disabled'." << std::endl;
+		m_generateNoPrefetch = 0;
 	}
 	if (m_generateNoPrefetch && !m_databaseFormatSet && m_backend == "leveldb") {
 		throw(std::runtime_error("When using --disable-blocklist-prefetch with a leveldb backend, database format must be set (--database-format)"));
@@ -922,14 +934,16 @@ void TileGenerator::loadBlocks()
 			long long volume = (long long)(m_reqXMax - m_reqXMin + 1) * (m_reqYMax - m_reqYMin + 1) * (m_reqZMax - m_reqZMin + 1);
 			if (volume > MAX_NOPREFETCH_VOLUME) {
 				std::ostringstream oss;
-				oss << "Requested map volume is excessive for --disable-blocklist-prefetch: " << volume
+				// Note: the 'force' variants of the options are intentionally undocumented.
+				oss << "Requested map volume is excessive for --disable-blocklist-prefetch or --prescan-world=disabled: " << std::endl
+				    << " Volume is: " << volume
 					    << " (" << (m_reqXMax - m_reqXMin + 1)
 					    << " x " << (m_reqYMax - m_reqYMin + 1)
 					    << " x " << (m_reqZMax - m_reqZMin + 1)
 					    << " blocks of 16x16x16 nodes);"
-					    << "\n"
-					    << " Mapping will be slow. Use --disable-blocklist-prefetch='force' for more than " << MAX_NOPREFETCH_VOLUME << " blocks"
-					    << " (e.g. " << MAX_NOPREFETCH_VOLUME_EXAMPLE << " nodes)";
+					    << std::endl
+				    << " Mapping will be slow. Use '--disable-blocklist-prefetch=force' or '--prescan-world=disabled-force'" << std::endl
+				    << " to force this for more than " << MAX_NOPREFETCH_VOLUME << " blocks (i.e. " << MAX_NOPREFETCH_VOLUME_EXAMPLE << " nodes)";
 				throw(std::runtime_error(oss.str()));
 			}
 		}
@@ -947,7 +961,16 @@ void TileGenerator::loadBlocks()
 	else {
 		if (progressIndicator)
 			cout << "Scanning world (reading block list)...\r" << std::flush;
-		const DB::BlockPosList &blocks = m_db->getBlockPos();
+		const DB::BlockPosList *bp;
+		BlockPos posMin(m_reqXMin, m_reqYMin, m_reqZMin);
+		BlockPos posMax(m_reqXMax, m_reqYMax, m_reqZMax);
+		if (!m_scanEntireWorld && (posMin != BlockPosLimitMin || posMax != BlockPosLimitMax))
+			bp = &m_db->getBlockPosList(BlockPos(m_reqXMin, m_reqYMin, m_reqZMin), BlockPos(m_reqXMax, m_reqYMax, m_reqZMax));
+		else {
+			m_scanEntireWorld = true;
+			bp = &m_db->getBlockPosList();
+		}
+		const DB::BlockPosList &blocks = *bp;
 		for(DB::BlockPosList::const_iterator it = blocks.begin(); it != blocks.end(); ++it) {
 			m_worldBlocks++;
 			const BlockPos &pos = *it;
@@ -1003,7 +1026,7 @@ void TileGenerator::loadBlocks()
 			}
 			m_positions.push_back(pos);
 		}
-		if (verboseCoordinates >= 1) {
+		if (verboseCoordinates >= 1 && m_scanEntireWorld) {
 			if (mapXMin <= mapXMax || mapYMin <= mapYMax || mapZMin <= mapZMax) {
 				cout
 					<< std::setw(MESSAGE_WIDTH) << std::left

@@ -59,7 +59,7 @@ int DBRedis::getBlocksQueriedCount(void)
 }
 
 
-const DB::BlockPosList &DBRedis::getBlockPos()
+const DB::BlockPosList &DBRedis::getBlockPosList()
 {
 	redisReply *reply;
 	reply = (redisReply*) redisCommand(ctx, "HKEYS %s", hash.c_str());

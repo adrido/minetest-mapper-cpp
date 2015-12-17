@@ -151,6 +151,7 @@ public:
 	void parseHeightMapNodesFile(const std::string &fileName);
 	void parseHeightMapColorsFile(const std::string &fileName);
 	void setBackend(std::string backend);
+	void setScanEntireWorld(bool enable);
 	void setChunkSize(int size);
 	void generate(const std::string &input, const std::string &output);
 	Color computeMapHeightColor(int height);
@@ -215,6 +216,9 @@ private:
 		int linenr, const std::string &filename);
 
 public:
+	static const BlockPos BlockPosLimitMin;
+	static const BlockPos BlockPosLimitMax;
+
 	int verboseCoordinates;
 	int verboseReadColors;
 	int verboseStatistics;
@@ -239,6 +243,7 @@ private:
 	bool m_shading;
 	std::string m_backend;
 	std::string m_requestedBackend;
+	bool m_scanEntireWorld;
 	bool m_shrinkGeometry;
 	bool m_blockGeometry;
 	int m_scaleFactor;

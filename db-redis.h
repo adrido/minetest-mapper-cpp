@@ -9,7 +9,7 @@ public:
 	DBRedis(const std::string &mapdir);
 	virtual int getBlocksQueriedCount(void);
 	virtual int getBlocksReadCount(void);
-	virtual const BlockPosList &getBlockPos();
+	virtual const BlockPosList &getBlockPosList();
 	virtual Block getBlockOnPos(const BlockPos &pos);
 	~DBRedis();
 private:

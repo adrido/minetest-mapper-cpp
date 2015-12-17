@@ -43,7 +43,7 @@ int DBLevelDB::getBlocksQueriedCount(void)
 	return m_blocksQueriedCount;
 }
 
-const DB::BlockPosList &DBLevelDB::getBlockPos() {
+const DB::BlockPosList &DBLevelDB::getBlockPosList() {
 	m_blockPosList.clear();
 	leveldb::Iterator* it = m_db->NewIterator(leveldb::ReadOptions());
 	for (it->SeekToFirst(); it->Valid(); it->Next()) {

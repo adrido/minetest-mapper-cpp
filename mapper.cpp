@@ -21,6 +21,7 @@
 #include <sys/types.h>
 #include "TileGenerator.h"
 #include "PixelAttributes.h"
+#include "db-postgresql.h"
 
 using namespace std;
 
@@ -42,6 +43,7 @@ using namespace std;
 #define OPT_NO_BLOCKLIST_PREFETCH	0x90
 #define OPT_DATABASE_FORMAT		0x91
 #define OPT_SILENCE_SUGGESTIONS		0x92
+#define OPT_PRESCAN_WORLD		0x93
 
 // Will be replaced with the actual name and location of the executable (if found)
 string executableName = "minetestmapper";
@@ -131,6 +133,7 @@ void usage()
 			"  --backend <" USAGE_DATABASES ">\n"
 			"  --disable-blocklist-prefetch[=force]\n"
 			"  --database-format minetest-i64|freeminer-axyz|mixed|query\n"
+			"  --prescan-world=full|auto|disabled\n"
 			"  --geometry <geometry>\n"
 			"\t(Warning: has a compatibility mode - see README.rst)\n"
 			"  --cornergeometry <geometry>\n"
@@ -646,6 +649,7 @@ int main(int argc, char *argv[])
 		{"backend", required_argument, 0, 'd'},
 		{"disable-blocklist-prefetch", optional_argument, 0, OPT_NO_BLOCKLIST_PREFETCH},
 		{"database-format", required_argument, 0, OPT_DATABASE_FORMAT},
+		{"prescan-world", required_argument, 0, OPT_PRESCAN_WORLD},
 		{"sqlite-cacheworldrow", no_argument, 0, OPT_SQLITE_CACHEWORLDROW},
 		{"tiles", required_argument, 0, 't'},
 		{"tileorigin", required_argument, 0, 'T'},
@@ -735,6 +739,24 @@ int main(int argc, char *argv[])
 							generator.setDBFormat(BlockPos::Unknown, false);
 						else if (opt == "query")
 							generator.setDBFormat(BlockPos::Unknown, true);
+						else {
+							std::cerr << "Invalid parameter to '" << long_options[option_index].name << "': '" << optarg << "'" << std::endl;
+							usage();
+							exit(1);
+						}
+					}
+					break;
+				case OPT_PRESCAN_WORLD: {
+						std::string opt(optarg);
+						generator.setGenerateNoPrefetch(0);
+						if (opt == "disabled-force")
+							generator.setGenerateNoPrefetch(2);
+						else if (opt == "disabled")
+							generator.setGenerateNoPrefetch(1);
+						else if (opt == "auto")
+							generator.setScanEntireWorld(false);
+						else if (opt == "full")
+							generator.setScanEntireWorld(true);
 						else {
 							std::cerr << "Invalid parameter to '" << long_options[option_index].name << "': '" << optarg << "'" << std::endl;
 							usage();

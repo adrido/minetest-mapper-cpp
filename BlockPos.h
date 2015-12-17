@@ -54,6 +54,7 @@ struct BlockPos {
 
 	bool operator<(const BlockPos& p) const;
 	bool operator==(const BlockPos& p) const;
+	bool operator!=(const BlockPos& p) const { return !operator==(p); }
 	void operator=(const BlockPos &p) { x() = p.x(); y() = p.y(); z() = p.z(); m_strFormat = p.m_strFormat; m_id = p.m_id; }
 	void operator=(int64_t i) { setFromDBPos(i); m_strFormat = I64; m_id = INT64_MIN; }
 	void operator=(const std::string &s);

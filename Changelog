@@ -11,6 +11,9 @@
 		in the different packages.
 	- Documented concurrent minetest & minetestmapper use.
 	- Documented the different geometries reported with --verbose
+	- The option --prescan-world was added to force or disable scanning the
+		entire world (i.e. reading a full blocklist)
+		(useful for postgresql, which doesn't do this by default).
     Bugfixes:
         - Fixed possible compilation failure caused by stdint.h
 	- Fixed compilation failure when some database libraries are not installed

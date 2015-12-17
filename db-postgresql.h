@@ -23,7 +23,8 @@ public:
 	DBPostgreSQL(const std::string &mapdir);
 	virtual int getBlocksQueriedCount(void);
 	virtual int getBlocksReadCount(void);
-	virtual const BlockPosList &getBlockPos();
+	virtual const BlockPosList &getBlockPosList();
+	virtual const BlockPosList &getBlockPosList(BlockPos minPos, BlockPos maxPos);
 	virtual Block getBlockOnPos(const BlockPos &pos);
 	~DBPostgreSQL();
 private:
@@ -32,10 +33,13 @@ private:
 	PGconn *m_connection;
 	BlockPosList m_blockPosList;
 
-	uint32_t m_getBlockParams[3];
-	char const *m_getBlockParamList[3];
-	int m_getBlockParamLengths[3];
-	int m_getBlockParamFormats[3];
+	#define POSTGRESQL_MAXPARAMS 6
+	uint32_t m_getBlockParams[POSTGRESQL_MAXPARAMS];
+	char const *m_getBlockParamList[POSTGRESQL_MAXPARAMS];
+	int m_getBlockParamLengths[POSTGRESQL_MAXPARAMS];
+	int m_getBlockParamFormats[POSTGRESQL_MAXPARAMS];
+
+	const BlockPosList &processBlockPosListQueryResult(PGresult *result);
 };
 
 #endif // _DB_POSTGRESQL_H

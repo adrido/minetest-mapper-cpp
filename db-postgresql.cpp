@@ -5,8 +5,9 @@
 #include "Settings.h"
 #include "types.h"
 
-#define BLOCKPOSLIST_QUERY	"SELECT x, y, z FROM blocks"
-#define BLOCK_QUERY		"SELECT data FROM blocks WHERE x = $1 AND y = $2 AND z = $3"
+#define BLOCKPOSLIST_QUERY		"SELECT x, y, z FROM blocks"
+#define BLOCKPOSLISTBOUNDED_QUERY	"SELECT x, y, z FROM blocks WHERE x BETWEEN $1 AND $2 AND y BETWEEN $3 AND $4 AND z BETWEEN $5 AND $6"
+#define BLOCK_QUERY			"SELECT data FROM blocks WHERE x = $1 AND y = $2 AND z = $3"
 
 // From pg_type.h
 #define PG_INT4OID		23
@@ -39,9 +40,16 @@ DBPostgreSQL::DBPostgreSQL(const std::string &mapdir) :
 	}
 
 	PGresult *result;
+
 	result = PQprepare(m_connection, "GetBlockPosList", BLOCKPOSLIST_QUERY, 0, NULL);
 	if (!result || PQresultStatus(result) != PGRES_COMMAND_OK)
 		throw std::runtime_error(std::string("Failed to prepare PostgreSQL statement (GetBlockPosList): ")
+			+ (result ? PQresultErrorMessage(result) : "(result was NULL)"));
+	PQclear(result);
+
+	result = PQprepare(m_connection, "GetBlockPosListBounded", BLOCKPOSLISTBOUNDED_QUERY, 0, NULL);
+	if (!result || PQresultStatus(result) != PGRES_COMMAND_OK)
+		throw std::runtime_error(std::string("Failed to prepare PostgreSQL statement (GetBlockPosListBounded): ")
 			+ (result ? PQresultErrorMessage(result) : "(result was NULL)"));
 	PQclear(result);
 
@@ -51,7 +59,7 @@ DBPostgreSQL::DBPostgreSQL(const std::string &mapdir) :
 			+ (result ? PQresultErrorMessage(result) : "(result was NULL)"));
 	PQclear(result);
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < POSTGRESQL_MAXPARAMS; i++) {
 		m_getBlockParamList[i] = reinterpret_cast<char const *>(m_getBlockParams + i);
 		m_getBlockParamLengths[i] = sizeof(int32_t);
 		m_getBlockParamFormats[i] = 1;
@@ -73,10 +81,25 @@ int DBPostgreSQL::getBlocksQueriedCount(void)
 	return m_blocksQueriedCount;
 }
 
-const DB::BlockPosList &DBPostgreSQL::getBlockPos() {
+const DB::BlockPosList &DBPostgreSQL::getBlockPosList()
+{
+	PGresult *result = PQexecPrepared(m_connection, "GetBlockPosList", 0, NULL, NULL, NULL, 1);
+	return processBlockPosListQueryResult(result);
+}
+
+const DB::BlockPosList &DBPostgreSQL::getBlockPosList(BlockPos minPos, BlockPos maxPos)
+{
+	for (int i = 0; i < 3; i++) {
+		m_getBlockParams[2*i] = htonl(minPos.dimension[i]);
+		m_getBlockParams[2*i+1] = htonl(maxPos.dimension[i]);
+	}
+	PGresult *result = PQexecPrepared(m_connection, "GetBlockPosListBounded", 6, m_getBlockParamList, m_getBlockParamLengths, m_getBlockParamFormats, 1);
+	return processBlockPosListQueryResult(result);
+}
+
+const DB::BlockPosList &DBPostgreSQL::processBlockPosListQueryResult(PGresult *result) {
 	m_blockPosList.clear();
 
-	PGresult *result = PQexecPrepared(m_connection, "GetBlockPosList", 0, NULL, NULL, NULL, 1);
 	if (!result || PQresultStatus(result) != PGRES_TUPLES_OK)
 		throw std::runtime_error(std::string("Failed to read block-pos list from database: ")
 			+ (result ? PQresultErrorMessage(result) : "(result was NULL)"));

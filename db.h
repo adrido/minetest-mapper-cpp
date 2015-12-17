@@ -14,7 +14,8 @@ class DB {
 public:
 	typedef std::pair<BlockPos, ustring> Block;
 	typedef std::vector<BlockPos>  BlockPosList;
-	virtual const BlockPosList &getBlockPos()=0;
+	virtual const BlockPosList &getBlockPosList()=0;
+	virtual const BlockPosList &getBlockPosList(BlockPos, BlockPos) { return getBlockPosList(); }
 	virtual int getBlocksQueriedCount(void)=0;
 	virtual int getBlocksReadCount(void)=0;
 	virtual Block getBlockOnPos(const BlockPos &pos)=0;

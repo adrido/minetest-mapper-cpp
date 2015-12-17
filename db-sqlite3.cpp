@@ -48,7 +48,7 @@ int DBSQLite3::getBlocksQueriedCount(void)
 	return m_blocksQueriedCount;
 }
 
-const DB::BlockPosList &DBSQLite3::getBlockPos() {
+const DB::BlockPosList &DBSQLite3::getBlockPosList() {
 	m_BlockPosList.clear();
 	int result = 0;
 	while (true) {
