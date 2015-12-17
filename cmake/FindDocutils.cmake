@@ -32,8 +32,17 @@ if(RST2HTML_EXECUTABLE)
             set(infile ${CMAKE_CURRENT_SOURCE_DIR}/${it})
             set(outfile ${CMAKE_CURRENT_BINARY_DIR}/${basename}.html)
 
-            add_custom_command(OUTPUT ${outfile} COMMAND ${RST2HTML_EXECUTABLE}
-                               ARGS ${infile} ${outfile} DEPENDS ${infile})
+	    # Unfortunately, cmake does not remove any generated target of a
+	    # failed build. So a build with with warnings that are considered
+	    # fatal (--exit-status=2) will not be retried.
+	    # Execute the command twice to get a full list of warnings and errors,
+	    # but to avoid generating the target if there were warnings or errors.
+	    add_custom_command( OUTPUT ${outfile}
+				COMMAND ${RST2HTML_EXECUTABLE}
+				    ARGS ${RST2HTML_FLAGS} --halt=4 ${infile} /dev/null
+				COMMAND ${RST2HTML_EXECUTABLE}
+				    ARGS ${RST2HTML_FLAGS} --quiet ${infile} ${outfile}
+				DEPENDS ${infile})
         endforeach()
     endmacro()
 endif()
