@@ -22,6 +22,7 @@
 #include "TileGenerator.h"
 #include "PixelAttributes.h"
 #include "db-postgresql.h"
+#include "util.h"
 
 using namespace std;
 
@@ -218,8 +219,7 @@ void parseDataFile(TileGenerator &generator, const string &input, string dataFil
 		size_t binpos = executablePath.find_last_of(PATH_SEPARATOR);
 		if (binpos != string::npos) {
 			string lastDir = executablePath.substr(binpos + 1);
-			for (size_t i=0; i < lastDir.size(); i++)
-				lastDir[i] = tolower(lastDir[i]);
+			lastDir = strlower(lastDir);
 			if (lastDir == "bin") {
 				colorPaths.push_back(executablePath.substr(0, binpos) + PATH_SEPARATOR + "colors");
 				colorPaths.push_back(executablePath.substr(0, binpos));
@@ -769,10 +769,7 @@ int main(int argc, char *argv[])
 					heightMap = true;
 					if (optarg && *optarg) {
 						loadHeightMapColorsFile = false;
-						std::string color = optarg;
-						int l = color.length();
-						for (int i = 0; i < l; i++)
-							color[i] = tolower(color[i]);
+						std::string color = strlower(optarg);
 						if (color == "grey" || color == "gray")
 							generator.setHeightMapColor(Color(0, 0, 0), Color(255, 255, 255));
 						else if (color == "black")
@@ -832,13 +829,14 @@ int main(int argc, char *argv[])
 					break;
 				case 'S':
 					if (optarg && *optarg) {
-						if (0 == strcasecmp(optarg,"left"))
+						std::string opt = strlower(optarg);
+						if (opt == "left")
 							generator.setDrawScale(DRAWSCALE_LEFT);
-						else if (0 == strcasecmp(optarg,"top"))
+						else if (opt == "top")
 							generator.setDrawScale(DRAWSCALE_TOP);
-						else if (0 == strcasecmp(optarg,"left,top"))
+						else if (opt == "left,top")
 							generator.setDrawScale(DRAWSCALE_LEFT | DRAWSCALE_TOP);
-						else if (0 == strcasecmp(optarg,"top,left"))
+						else if (opt == "top,left")
 							generator.setDrawScale(DRAWSCALE_LEFT | DRAWSCALE_TOP);
 						else {
 							std::cerr << "Invalid parameter to '" << long_options[option_index].name

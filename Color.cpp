@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <cctype>
 #include "Color.h"
+#include "util.h"
 
 class ColorTable : public std::map<std::string, Color>
 {
@@ -57,9 +58,7 @@ Color::Color(std::string color, int alpha)
 		colormod = color.substr(pos);
 	do {
 		if (basecolor[0] != '#') {
-			int l = basecolor.length();
-			for (int i = 0; i < l; i++)
-				basecolor[i] = tolower(basecolor[i]);
+			basecolor = strlower(basecolor);
 			if (colorTable.count(basecolor) > 0) {
 				*this = colorTable[basecolor];
 				break;
