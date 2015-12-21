@@ -717,7 +717,7 @@ int main(int argc, char *argv[])
 					break;
 				case OPT_NO_BLOCKLIST_PREFETCH:
 					if (optarg && *optarg) {
-						if (std::string(optarg) == "force")
+						if (strlower(optarg) == "force")
 							generator.setGenerateNoPrefetch(2);
 						else {
 							std::cerr << "Invalid parameter to '" << long_options[option_index].name << "'; expected 'force' or nothing." << std::endl;
@@ -730,7 +730,7 @@ int main(int argc, char *argv[])
 					}
 					break;
 				case OPT_DATABASE_FORMAT: {
-						std::string opt(optarg);
+						std::string opt = strlower(optarg);
 						if (opt == "minetest-i64")
 							generator.setDBFormat(BlockPos::I64, false);
 						else if (opt == "freeminer-axyz")
@@ -747,7 +747,7 @@ int main(int argc, char *argv[])
 					}
 					break;
 				case OPT_PRESCAN_WORLD: {
-						std::string opt(optarg);
+						std::string opt = strlower(optarg);
 						generator.setGenerateNoPrefetch(0);
 						if (opt == "disabled-force")
 							generator.setGenerateNoPrefetch(2);
@@ -955,15 +955,15 @@ int main(int argc, char *argv[])
 					generator.setDrawAlpha(true);
 					if (!optarg || !*optarg)
 						PixelAttribute::setMixMode(PixelAttribute::AlphaMixAverage);
-					else if (string(optarg) == "cumulative" || string(optarg) == "nodarken")
+					else if (string(optarg) == "cumulative" || strlower(optarg) == "nodarken")
 						// "nodarken" is supported for backwards compatibility
 						PixelAttribute::setMixMode(PixelAttribute::AlphaMixCumulative);
-					else if (string(optarg) == "darken" || string(optarg) == "cumulative-darken")
+					else if (string(optarg) == "darken" || strlower(optarg) == "cumulative-darken")
 						// "darken" is supported for backwards compatibility
 						PixelAttribute::setMixMode(PixelAttribute::AlphaMixCumulativeDarken);
-					else if (string(optarg) == "average")
+					else if (strlower(optarg) == "average")
 						PixelAttribute::setMixMode(PixelAttribute::AlphaMixAverage);
-					else if (string(optarg) == "none")
+					else if (strlower(optarg) == "none")
 						generator.setDrawAlpha(false);
 					else {
 						std::cerr << "Invalid parameter to '" << long_options[option_index].name << "': '" << optarg << "'" << std::endl;
@@ -1044,7 +1044,7 @@ int main(int argc, char *argv[])
 					break;
 				case 't': {
 						istringstream tilesize;
-						tilesize.str(optarg);
+						tilesize.str(strlower(optarg));
 						if (tilesize.str() == "block") {
 							generator.setTileSize(BLOCK_SIZE, BLOCK_SIZE);
 							generator.setTileOrigin(TILECORNER_AT_WORLDCENTER, TILECORNER_AT_WORLDCENTER);
@@ -1078,7 +1078,7 @@ int main(int argc, char *argv[])
 				case 'T': {
 						bool origin = long_options[option_index].name[4] == 'o';
 						istringstream iss;
-						iss.str(optarg);
+						iss.str(strlower(optarg));
 						NodeCoord coord;
 						if (iss.str() == "world") {
 							if (origin)
@@ -1126,8 +1126,10 @@ int main(int argc, char *argv[])
 							generator.setBlockGeometry(true);
 					}
 					else if (optarg && *optarg) {
-						for (char *c = optarg; *c; c++)
+						for (char *c = optarg; *c; c++) {
+							*c = tolower(*c);
 							if (*c == ',') *c = ' ';
+						}
 						istringstream iss;
 						iss.str(optarg);
 						iss >> std::skipws;
@@ -1312,7 +1314,7 @@ int main(int argc, char *argv[])
 					}
 					break;
 				case 'd':
-					generator.setBackend(optarg);
+					generator.setBackend(strlower(optarg));
 					break;
 				default:
 					exit(1);

@@ -14,6 +14,7 @@
 	- The option --prescan-world was added to force or disable scanning the
 		entire world (i.e. reading a full blocklist)
 		(useful for postgresql, which doesn't do this by default).
+	- Command-line options are now all case-agnostic wrt their parameters.
     Bugfixes:
         - Fixed possible compilation failure caused by stdint.h
 	- Fixed compilation failure when some database libraries are not installed
