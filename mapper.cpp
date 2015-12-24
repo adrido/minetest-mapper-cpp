@@ -46,6 +46,8 @@ using namespace std;
 #define OPT_SILENCE_SUGGESTIONS		0x92
 #define OPT_PRESCAN_WORLD		0x93
 
+#define DRAW_ARROW_LENGTH		10
+#define DRAW_ARROW_ANGLE		30
 // Will be replaced with the actual name and location of the executable (if found)
 string executableName = "minetestmapper";
 string executablePath;			// ONLY for use on windows
@@ -124,6 +126,7 @@ void usage()
 			"  --drawair\n"
 			"  --draw[map]point \"<x>,<y> color\"\n"
 			"  --draw[map]line \"<geometry> color\"\n"
+			"  --draw[map]line \"<x>,<y> <angle> <length>[np] color\"\n"
 			"  --draw[map]circle \"<geometry> color\"\n"
 			"  --draw[map]ellipse \"<geometry> color\"\n"
 			"  --draw[map]rectangle \"<geometry> color\"\n"
@@ -433,6 +436,29 @@ static void convertDimensionToCornerCoordinates(NodeCoord &coord1, NodeCoord &co
 	}
 }
 
+static void convertPolarToCartesianCoordinates(NodeCoord &coord1, NodeCoord &coord2, double angle, double length)
+{
+	angle *= M_PI / 180;
+	double dxf = sin(angle) * length;
+	int dx = (dxf < 0 ? -1 : 1) * int(fabs(dxf + (dxf < 0 ? -0.5 : 0.5)));
+	dx -= dx < 0 ? -1 : dx > 0 ? +1 : 0;
+	double dyf = cos(angle) * length;
+	int dy = (dyf < 0 ? -1 : 1) * int(fabs(dyf + (dyf < 0 ? -0.5 : 0.5)));
+	dy -= dy < 0 ? -1 : dy > 0 ? +1 : 0;
+	coord2.x() = coord1.x() + dx;
+	coord2.y() = coord1.y() + dy;
+}
+
+static void convertCartesianToPolarCoordinates(NodeCoord &coord1, NodeCoord &coord2, double &angle, double &length)
+{
+	int lx = coord2.x() - coord1.x();
+	lx += lx < 0 ? -1 : lx > 0 ? 1 : 0;
+	int ly = coord2.y() - coord1.y();
+	ly += ly < 0 ? -1 : ly > 0 ? 1 : 0;
+	length = sqrt(lx*lx + ly*ly);
+	angle = atan2(lx, ly) / M_PI * 180;
+}
+
 static void orderCoordinateDimensions(NodeCoord &coord1, NodeCoord &coord2, int n)
 {
 	for (int i = 0; i < n; i++)
@@ -454,6 +480,7 @@ static void orderCoordinateDimensions(NodeCoord &coord1, NodeCoord &coord2, int 
 //	(center of the area, and dimensions)
 // <x>[,:]<y>+<w>+<h>
 //	(corner of the area, and dimensions)
+// <x>,<y>@<angle>+<length>
 static bool parseGeometry(istream &is, NodeCoord &coord1, NodeCoord &coord2, NodeCoord &dimensions, bool &legacy, bool &centered, int n, FuzzyBool expectDimensions, int wildcard = 0)
 {
 	int pos;
@@ -525,6 +552,44 @@ static bool parseGeometry(istream &is, NodeCoord &coord1, NodeCoord &coord2, Nod
 			else {
 				return false;
 			}
+		}
+		else if (safePeekStream(is) == '@') {
+			// <x>,<y>@<angle>+<length>[np]
+			if (n != 2)
+				return false;
+			centered = false;
+			is.ignore(1);
+			double angle;
+			double length;
+			bool world_relative = false;
+
+			is >> angle;
+			if (safePeekStream(is) != '+' && safePeekStream(is) != '-')
+				return false;
+			if (safePeekStream(is) == '+')
+				is.ignore(1);
+			is >> length;
+			if (!validStreamAtEof(is)) {
+				switch (safePeekStream(is)) {
+					case 'n' :
+						is.ignore(1);
+						world_relative = true;
+						break;
+					case 'p' :
+						is.ignore(1);
+						world_relative = false;
+						break;
+				}
+			}
+			if (!validStreamAtWsOrEof(is))
+				return false;
+			convertPolarToCartesianCoordinates(coord1, coord2, angle, length);
+			if (!world_relative) {
+				convertCornerToDimensionCoordinates(coord1, coord2, dimensions, n);
+				coord2.x() = NodeCoord::Invalid;
+				coord2.y() = NodeCoord::Invalid;
+			}
+			return true;
 		}
 		else {
 			// <x>,<y>+<w>+<h>

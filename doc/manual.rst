@@ -570,6 +570,11 @@ Detailed Description of Options
 	   as world-coordinates, but the dimensions will be interpreted relative
 	   to the image. I.e. they won't scale with the map.
 
+	*  If the geometry is specified using an angle and length, and if the
+	   length is specified in nodes (e.g. '20n'), the size will scale. If
+	   the length is specified in pixels (e.g. '20p') or if no unit is
+	   specified, then the size will not scale.
+
 	In practise this means that two identically-sized figures in a full-scale
 	map, may have different sizes after scaling, depending on how their
 	geometry was specified. The jury is still out as to whether this is
@@ -1384,6 +1389,7 @@ Geometry Syntax
     * As the corners of the area
     * As the lower-left corner, and the area's dimensions
     * As the center of the are, and the area's dimensions
+    * As a corner and an angle and distance to the second corner
     * Using legacy format (compatible with standard minetestmapper)
 
     **Granularity**
@@ -1500,6 +1506,40 @@ Geometry Using Center and Dimensions
     For backward compatibility, if the ``--cornergeometry``
     option is used with a center-style geometry, then that geometry is
     interpreted as a corner geometry instead.
+
+Geometry using Corner and Angle with Length
+-------------------------------------------
+
+    A geometry using one corner (or endpoint of the line) and an
+    angle with a line length is specified as follows::
+
+	--drawline <xcorner>,<ycorner>@<angle>+<length>[np]
+
+    This syntax is only supported for 2-dimensional geometries
+    (e.g. when drawing figures on the map).
+
+    where ``xcorner,ycorner`` are the coordinates of one corner,
+    ``angle`` is the angle, or compass direction, in degrees of the
+    line or second corner, and ``length`` is the length of the
+    line, or the distance to the second corner.
+
+    An angle of 0° is north, 90° is east, 180° is south and 270° is
+    west. Negative values are accepted as well: -90° is also west,
+    for instance.
+
+    When the map is scaled, the length may or may not need to be
+    scaled. Where scaling is possible, a suffix 'n' specifies
+    that the length is in nodes, and so it scales. A suffix 'p'
+    specifies a length in pixels, which do not scale.
+
+    Scaling is not possible for figures that are drawn on the map,
+    e.g. using '--drawmapline'. Use '--drawline' instead if
+    a figure must scale with the map.
+
+    Example::
+
+	--drawline 100,100@20+100p
+
 
 Legacy Geometry Format
 -----------------------
