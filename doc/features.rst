@@ -40,6 +40,7 @@ Minor Features
 Differences From Stock Minetestmapper
 =====================================
 * Support for the new freeminer database format
+* Support for the unofficial postgresql backend.
 * Ability to draw height-maps
 * Different methods for drawing transparent blocks
   (more than transparency on and off)

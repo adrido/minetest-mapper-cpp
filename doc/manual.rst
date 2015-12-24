@@ -215,7 +215,7 @@ Basic options:
     * ``--version`` :					Print version ID of minetestmapper
     * ``--input <world-dir>`` :				Specify the world directory (mandatory)
     * ``--output <image filename>`` :			Specify the map file name (mandatory)
-    * ``--colors <filename>`` :				Specify the colors file name.
+    * ``--colors <filename>`` :				Specify the colors file location and/or name.
     * ``--heightmap[=<color>]`` :			Generate a height map instead of a regular map
     * ``--heightmap-nodes <filename>`` :		Specify the nodes list for the height map
     * ``--heightmap-colors <filename>`` :		Specify the color definition file for the height map
@@ -236,7 +236,7 @@ Area options:
     * ``--max-y <y>`` :					Specify the maximum height of nodes to be included
     * ``--geometrymode pixel,block,fixed,shrink`` :	Specify granularity and whether to shrink the map if possible
 
-Height map-related options:
+Height map related options:
 ...........................
 
     * ``--heightmap[=<color>]`` :			Generate a height map instead of a regular map
@@ -315,7 +315,7 @@ Miscellaneous options
 
     * ``--backend auto|sqlite3|postgresql|leveldb|redis`` :	Specify or override the database backend to use
     * ``--disable-blocklist-prefetch`` :		Do not prefetch a block list - faster when mapping small parts of large worlds.
-    * ``--database-format minetest-i64|freeminer-axyz|mixed|query`` :	Specify the format of the database (needed with --disable-blocklist-prefetch and a leveldb backend).
+    * ``--database-format minetest-i64|freeminer-axyz|mixed|query`` :	Specify the format of the database (needed with --disable-blocklist-prefetch and a LevelDB backend).
 
 
 Detailed Description of Options
@@ -358,7 +358,7 @@ Detailed Description of Options
 ........................
 	Specify the color for empty mapblocks. See `Color Syntax`_ below.
 
-	An empty mapblock exists in the database, and contains only air or *ignore*
+	An empty mapblock exists in the database, but contains only *air* or *ignore*
 	nodes. It is normally not visible, even if no other mapblocks exist above
 	or below it. This color makes such blocks visible if no nodes other than
 	air or ignore are above or below it.
@@ -390,11 +390,11 @@ Detailed Description of Options
 
 ``--colors <file>``
 ...................
-	Specify the name of the 'colors.txt' file to use.
+	Specify the location and name of the 'colors.txt' file to use.
 
 	See `Colors and Nodes Files`_ and `Colors.txt Syntax`_.
 
-	Minetestmapper will attempt to automatically find a suitable
+	By default, minetestmapper will attempt to automatically find a suitable
 	colors.txt file. See `Colors Files Search Locations`_.
 
 ``--cornergeometry <geometry>``
@@ -406,40 +406,53 @@ Detailed Description of Options
 
 ``--database-format minetest-i64|freeminer-axyz|mixed|query``
 ..................................................................
-	Specify the coordinate format minetest uses in the leveldb database.
+	Specify the coordinate format minetest uses in the LevelDB database.
 
 	This option is only needed, and has only effect, when
-	``--disable-blocklist-prefetch`` is used, *and* when the database backend
+	`--disable-blocklist-prefetch`_ is used, *and* when the database backend
 	is 'leveldb'. Users of other backends can ignore this option.
 
-	A freeminer leveldb database has two possible coordinate formats. Normally,
-	minetestmapper detects which one is used for which block when prefetching
-	a block coordinate list.
+	**Background**
 
-	With ``--disable-blocklist-prefetch``, minetestmapper will not start by reading
-	a list of all blocks in the database. It therefore won't be able to detect
-	what format is actually used for the coordinates of every block (which may
-	differ per block).
+	A freeminer LevelDB database has two possible coordinate formats. Normally,
+	minetestmapper detects which one is used for which block when prefetching
+	a block coordinate list.  With ``--disable-blocklist-prefetch``, minetestmapper
+	will not start by reading a list of all blocks in the database. It therefore
+	won't be able to detect what format is actually used for the coordinates of
+	every block (which might differ per block).
 
 	Without knowing the format used for a block, the only way to be sure that it
 	is not in the database, is to use two queries, one for each format. Specifying
 	the format allows minetestmapper to avoid the second query, with the risk of
 	overseeing blocks if they do happen to use the other format.
 
-	The default value for this option is ``mixed``, which works in all cases, as
-	it does both queries if needed (at the very least for all blocks that are
-	not in the database), but it is less efficient.
+	**Values**
 
-	On minetest worlds, use ``minetest-i64``, as it is the only format used.
+	:``mixed``:	(default) This works in all cases, as both queries are
+			performed if needed (at the very least for all blocks that are
+			not in the database), but it is less efficient.
 
-	On recent freeminer worlds, use ``freeminer-axyz``, as it is the only format used.
+			Use this on older freeminer worlds, and on worlds that were
+			migrated from minetest (if such worlds exist ?).
 
-	'``Mixed``' format is needed on older freeminer worlds, or on worlds
-	that were migrated from minetest (if such worlds exist ?).
+	:``minetest-i64``:
+			The ``i64`` format used by minetest. Specify this for minetest
+			worlds, as it is, and has always been, the only format used.
 
-	'``Query``' directs minetestmapper to detect and report the coordinate
-	format(s) used in the database. ``--disable-blocklist-prefetch`` must
-	(obviously ?) be *disabled* (or it will be disabled) for this to work.
+	:``freeminer-axyz``:
+			The ``axyz`` format used by freeminer since april 2014. Specify
+			this for freeminer worlds that are known not to contain ``i64``
+			blocks. This includes all worlds created by a freeminer version
+			that dates from after april 2014.
+
+	:``query``:	Directs minetestmapper to detect and report the coordinate
+			format(s) used in the database. This requires that full block list
+			be fetched from the database, so ``--disable-blocklist-prefetch``
+			must be not be set, and ``--prescan-world`` must not be ``disabled``.
+
+			Once the actual coordinate format(s) are known, the most appropriate
+			value can be selected.
+
 
 	Specifying ``minetest-i64`` or ``freeminer-axyz`` incorrectly results in all
 	blocks that use the other format not being mapped.
@@ -455,12 +468,14 @@ Detailed Description of Options
 	It also significantly reduces the amount of information the `--verbose`_ option
 	can report.
 
-	When used with a leveldb backend, the option `--database-format`_ should preferably
+	When used with a LevelDB backend, the option `--database-format`_ should preferably
 	be used as well.
+
+	**Background**
 
 	Normally, minetestmapper will read a full list of coordinates (not the contents)
 	of existing blocks from the database before starting map generation. This option
-	disables this query, and instead, causes and all blocks that are in the mapped
+	disables such a query, and instead, causes and all blocks that are in the mapped
 	space to be requested individually, whether or not they are in the database.
 
 	Querying the database for a block coordinate list beforehand is time-consuming
@@ -489,17 +504,17 @@ Detailed Description of Options
 	Possible figures are:
 
 	* circle
-	* ellipse (which is synonymous for circle)
+	* ellipse (which is a synonym for circle)
 	* line
 	* point (which uses simple coordinates (x,y) instead of a geometry)
 	* rectangle
 	* text (which uses simple coordinates (x,y) instead of a geometry)
 
 	If ``--draw<figure>`` is used, the geometry specifies world coordinates;
-	If ``--drawmap<figure>`` is used, the geometry specifies map (image)
+	if ``--drawmap<figure>`` is used, the geometry specifies map (i.e. image)
 	coordinates, where 0,0 is the top-left corner of the map-part of
 	the image, and coordinates increase to the right and down. Any points
-	on the left and top scale (if present) have negative coordinates.
+	in the left and top scale area (if present) have negative coordinates.
 
 	Note that the combination of geometry and color (and text if applicable)
 	must be a single argument.  This means that they *must* be enclosed
@@ -520,23 +535,24 @@ Detailed Description of Options
 
 	If the map is scaled, figures could either keep the same size in pixels,
 	or the same size relative to the world, which would make them appear
-	smaller, like the entire map.
+	smaller like the entire map. Whether they scale of not depends on how
+	they are drawn:
 
-	Figures which are drawn using map (image) coordinates are never scaled.
-	It is assumed that it was the intention to draw them on the image to
-	begin with, and not in the world.
+	 * Figures which are drawn using map (i.e. image) coordinates are never scaled.
+	   It is assumed that it was the intention to draw them on the image to
+	   begin with, and not in the world.
 
 	At the moment, figures which are drawn using world coordinates may or
 	may not scale with the world.
 
-	If the geometry of a figure is specified using 2 corners, then these
-	coordinates obviously scale with the world, and the resulting figure
-	will be visually smaller as well.
+	*  If the geometry of a figure is specified using 2 corners, then the distance
+	   between the coordinates obviously scales with the world, and the resulting
+	   figure will be visually smaller as well.
 
-	If the geometry of a figure is specified using a corner or the center
-	and dimensions, then the corner or center is obviously also interpreted
-	as world-coordinates, but the dimensions will be interpreted relative
-	to the image. I.e. they won't scale with the map.
+	*  If the geometry of a figure is specified using a corner or the center
+	   and dimensions, then the corner or center is obviously also interpreted
+	   as world-coordinates, but the dimensions will be interpreted relative
+	   to the image. I.e. they won't scale with the map.
 
 	In practise this means that two identically-sized figures in a full-scale
 	map, may have different sizes after scaling, depending on how their
@@ -597,7 +613,7 @@ Detailed Description of Options
 ............................................
 	Write text on the map, at the specified location, using the given color.
 
-	The text can consist of any number of words. be careful when using
+	The text can consist of any number of words. Be careful when using
 	characters that the command shell may interpret, like '``"``',
 	'``$``', etc. On unix-like systems, use single quotes to avoid
 	interpretation of most characters (except for ``'`` itself).
@@ -646,7 +662,7 @@ Detailed Description of Options
 
 ``--drawalpha[=cumulative|cumulative-darken|average|none]``
 ...........................................................
-	Specify how to render the alpha (transparency) value of nodes.
+	Specify how to render the transparency (defined by the alpha value) of nodes.
 
 	    :none: don't render transparency. This is the same as
 		    omitting this option.
@@ -719,7 +735,7 @@ Detailed Description of Options
 
 ``--drawplayers``
 .................
-	Draw circles at the positions of players
+	Draw circles and player names at the positions of players
 
 	The color can be set with `--origincolor`_.
 
@@ -815,8 +831,8 @@ Detailed Description of Options
 
 	See `Colors and Nodes Files`_ and `Heightmap-colors.txt Syntax`_.
 
-	Minetestmapper will attempt to automatically find a suitable
-	heightmap-colors.txt file. See `Colors Files Search Locations`_.
+	By default, minetestmapper will attempt to automatically find a
+	suitable heightmap-colors.txt file. See `Colors Files Search Locations`_.
 
 ``--heightmap-nodes <file>``
 ............................
@@ -824,7 +840,7 @@ Detailed Description of Options
 
 	See `Colors and Nodes Files`_ and `Heightmap-nodes.txt Syntax`_.
 
-	Minetestmapper will attempt to automatically find a suitable
+	By default, Minetestmapper will attempt to automatically find a suitable
 	heightmap-nodes.txt file. See `Colors Files Search Locations`_.
 
 ``--heightmap-yscale <factor>``
@@ -849,7 +865,7 @@ Detailed Description of Options
 	For the same effect, a modified colors file could be used.
 	``--heightmap-yscale`` is easier and quicker.
 
-	Two images with a different y scale:
+	Two images with a different y-scale:
 
 	.. image:: images/heightmap-scale.png
 	.. image:: images/heightmap-yscale.png
@@ -899,13 +915,13 @@ Detailed Description of Options
 
 	When specified as 'major:minor', 'minor' specifies the number of subdivisions
 	of the major interval. In that case, major should be divisible by minor.
-	E.g.: ``10:2`` is OK (equivalent to ``10,5``), ``10:3`` is not.
+	E.g.: ``10:2`` is OK (equivalent to ``10,5``), ``10:3`` is not OK.
 
 	By default, the major interval is calculated based on the available space
 	and the range of heights in the map.
 	The default minor interval is 0 (i.e. no minor ticks)
 
-	A custom height scale interval:
+	The default height scale interval and a custom interval:
 
 	.. image:: images/heightmap-scale.png
 	.. image:: images/heightmap-scale-interval.png
@@ -988,7 +1004,8 @@ Detailed Description of Options
 	Specify the color to use for drawing player locations
 
 	An alpha value can be specified, but due to a bug in the
-	drawing library, it will not have the desired effect.
+	drawing library, it will not have the desired effect for
+	the circles.
 
 	Use `--drawplayers`_ to enable drawing players.
 
@@ -1024,9 +1041,11 @@ Detailed Description of Options
 	* if the map image would be too large to be generated
 	  (see `Known Problems`_).
 
-	An other advantage of generating scaled maps directly, is that
-	minetestmapper does not scale all parts of the map, like for instance
-	the scales on the side.
+	Another advantage of generating scaled maps directly, instead of using
+	an external application, is that minetestmapper does not scale all
+	parts of the image, just the world-area. The scales on the side for instance
+	are not scaled, and neither is the thickness of lines (e.g. tile borders,
+	figures, player names, etc.).
 
 	The following scale factors are supported:
 
@@ -1072,12 +1091,12 @@ Detailed Description of Options
 
 	When specified as 'major:minor', 'minor' specifies the number of subdivisions
 	of the major interval. In that case, major should be divisible by minor.
-	E.g.: ``100:20`` is OK (equivalent to ``100,5``), ``100:33`` is not.
+	E.g.: ``100:20`` is OK (equivalent to ``100,5``), ``100:33`` is not OK.
 
 	By default, the major interval is 64 for a ``1:1`` map, 128 for a ``1:2`` map etc.
 	The default minor interval is 0 (i.e. no minor ticks)
 
-	Default side scale, and custom version:
+	The default side scale interval, and a custom interval:
 
 	.. image:: images/drawscale-both.png
 	.. image:: images/sidescale-interval.png
@@ -1098,6 +1117,9 @@ Detailed Description of Options
 	This option is no longer supported, as minetestmapper performed
 	consistently worse with it than without it, as tested on a few
 	large worlds.
+
+	It is still recognised for compatibility with existing scripts,
+	but it has no effect.
 
 ``--tilebordercolor <color>``
 .............................
@@ -1195,7 +1217,7 @@ Detailed Description of Options
 	* database access statistics.
 
 	Using `--verbose=3`, report statistics about block formats found in the database
-	(currently only applicable to leveldb)
+	(currently only applicable to LevelDB)
 
 	Description of possible reported coordinates. Only the values that are
 	applicable and available are printed.
@@ -1231,25 +1253,30 @@ Detailed Description of Options
 Color Syntax
 ============
 
-    For a number of command-line parameters, a color argument it needed. Such
+    For a number of command-line parameters, a color argument is needed. Such
     colors are specified as follows:
 
 Color Codes
 -----------
 
-    Colors can be specified using color codes::
+    Colors can be specified using hexadecimal color codes::
 
 	#[<alpha>]<red><green><blue>
 
-    E.g.: ``#ff34c1``
+    where every component is a hexadecimal (base 16) number between hexadecimal
+    0 and ff (i.e. between 0 and 255).
+    The components must all be 1 digit wide or all 2 digits wide.
+    E.g.: ``#ff34c1``, ``#8123``
 
     The alpha component is optional in some cases, and not allowed in others. It
     defaults to opaque (``ff``).
 
-    The color components can also be specified using a single digit per color,
-    which are duplicated to obtain the full value. E.g.
+    If the color components are specified using a single digit per color, that
+    digit is duplicated to obtain the full value. E.g.:
 
-	``#4c2 --> #44cc22``
+	``#4c2`` --> ``#44cc22``
+
+	``#8123`` --> ``#88112233``
 
 Symbolic Colors
 ---------------
@@ -1307,7 +1334,7 @@ Geometry Syntax
     * As the corners of the area
     * As the lower-left corner, and the area's dimensions
     * As the center of the are, and the area's dimensions
-    * Legacy format (compatible with stock minetestmapper)
+    * Using legacy format (compatible with standard minetestmapper)
 
     **Granularity**
 
@@ -1328,7 +1355,7 @@ Geometry Syntax
 
     Alternatively, the map size can be automatically reduced to
     remove empty blocks at its edges. This is the behavior of
-    the stock minetestmapper.
+    the standard version of minetestmapper.
 
     Use `--geometrymode`_ if non-default behavior is desired.
 
@@ -1340,7 +1367,7 @@ Geometry Syntax
 
     Note that this differs from the image coordinates, which are 0,0
     in the top-left corner of the map-part of the image, and increase towards
-    the bottom-right.  Coordinates in the left and top scale areas of
+    the bottom-right.  Image coordinates in the left and top scale areas of
     the image are negative.
 
 Geometry Using Two Corners
@@ -1427,8 +1454,8 @@ Geometry Using Center and Dimensions
 Legacy Geometry Format
 -----------------------
 
-    The legacy format, compatible with stock minetestmapper is
-    also still supported::
+    The legacy format, compatible with standard version of
+    minetestmapper is also still supported::
 
 	<xoffset>:<yoffset>+<width>+<height>
 
@@ -1438,12 +1465,13 @@ Legacy Geometry Format
 
     **Compatibility mode**
 
-    This format has a compatibility mode with stick minetestmapper.
+    This format has a compatibility mode with the standard version of
+    minetestmapper.
 
     If the very first geometry option on the command-line is ``--geometry``,
     *and* uses this syntax, then block granularity and map shrinking
-    are enabled, just like stock minetest would. If this is not desired,
-    then use a different geometry format, or use the option
+    are enabled, just like standard minetestmapper would. If this is not
+    desired, then use a different geometry format, or use the option
     ``--geometrymode`` to change the behavior.
 
     Block granularity is also enabled when the obsolete (and otherwise
@@ -1472,7 +1500,7 @@ Advanced coordinate specification
 
 	``1#2``: node 2 in block 1, i.e. coordinate 16+2 = 18
 
-	``-10#6``: node 6 in block -10, i.e. coordinate -160+2 = -158
+	``-10#6``: node 6 in block -10, i.e. coordinate -160+6 = -154
 
 	``-3#11``: node 11 in block -3, i.e. coordinate -48+11 = -37
 
@@ -1508,18 +1536,21 @@ Colors and Nodes Files
 
     All three types of files have some commonalities with respect to where minetest
     looks form them by default, and with respect to comments and file inclusion. These are
-    documented in separate paragraphs below (`Colors Files Common Syntax`_,
-    `Colors Files Search Locations`_)
+    documented in separate paragraphs below: `Colors Files Common Syntax`_,
+    `Colors Files Search Locations`_
 
 Colors.txt Syntax
 -----------------
 
     The colors.txt file contains a list of minetest node names and associated
-    colors. A minetest world node is converted to at most one pixel on the map.
+    colors. A minetest world node is converted to at most one pixel on the map,
+    with a color as specified in the colors.txt file.
 
     Lines in the colors.txt file have the following syntax::
 
 	<node-name> <red> <green> <blue> [<alpha> [<t>]]
+
+    Where ``red``, ``green``, ``blue``, ``alpha`` and ``t`` are numbers from 0 to 255.
 
     Examples::
 
@@ -1530,8 +1561,8 @@ Colors.txt Syntax
 
     **Alpha**
 
-    If a node has an alpha (transparency) value *and* if the value is not 255,
-    then it will be drawn transparently if `--drawalpha`_ is enabled. The effect
+    If a node has an alpha (opacity) value *and* if the value is not 255,
+    then it will be drawn transparently when `--drawalpha`_ is enabled. The effect
     is that the colors of nodes below it shine through.
 
     Water for instance, is defined as transparent. With transparency enabled,
@@ -1552,7 +1583,7 @@ Colors.txt Syntax
 
     There is one exception to this rule: if one color is opaque (no alpha, or
     alpha = 255), and one is transparent (alpha < 255), the former will be selected when
-    ``--drawalpha`` is disabled, and the latter will be selected when ``drawalpha``
+    ``--drawalpha`` is disabled, and the latter will be selected when ``--drawalpha``
     is enabled::
 
 	# Entry that will be used without 'drawalpha':
@@ -1584,12 +1615,12 @@ Heightmap-nodes.txt Syntax
 --------------------------
 
     The heightmap-nodes.txt file contains a list of minetest node names that
-    determine the ground height for a height map.
+    are used to determine the ground height for a height map.
 
     The highest node of any of the types in this file determines the height at
-    that point. Any nodes that should be ignored, like obviously air, but
-    probably also default:water_source, and default:grass_1, or default:torch,
-    should not be in this file.
+    that point. Any nodes that should be ignored when determining the height,
+    like obviously air, but probably also default:water_source, and
+    default:grass_1, or default:torch, should not be in this file.
 
     As a general directive, plants, trees and any special nodes should not
     be included in the file. Stone, sand, gravel, minerals, etc. are the
@@ -1695,7 +1726,7 @@ Colors Files Common Syntax
 	@include /usr/share/minetestmapper/colors.txt
 
 	# Water is undefined. Minetestmapper will complain
-	# about it and not draw water nodes.
+	# that there are undefined nodes, and not draw water nodes.
 	default:water_source	-
 	default:water_flowing	-
 
@@ -1704,21 +1735,26 @@ Colors Files Common Syntax
 	#default:water_source	78 132 212 0
 	#default:water_flowing	78 132 212 0
 
+	# A different, more efficient, alternative may be to flag the
+	# nodes as 'ignore-type' nodes. Minetest will not complain either.
+	#default:water_source	78 132 212 225 ignore
+	#default:water_flowing	78 132 212 225 ignore
+
 Colors Files Search Locations
 -----------------------------
 
     When minetestmapper needs a colors file (colors.txt, heightmap-nodes.txt and
     heightmap-colors.txt), it will search for it in a few predefined locations, which
     depend on the system it was built for, and the way minetestmapper was built.
-    In general, the following locations can be searched (ordered from most preferred
+    In general, the locations specified below can be searched (ordered from most preferred
     to least preferred):
 
     In order to find out exactly where a specific copy of minetestmapper did look
-    for its files, use the option ``--verbose-search-colors=2``,
+    for its files, use the option ``--verbose-search-colors=2``.
 
     * The file specified on the command line. If a colors file of the appropriate type
       was specified on the command-line, that file is used and no further locations
-      are searched, even if it does not exist, or cannot be found.
+      are searched, even if the file does not exist, or cannot be found.
 
     * The directory of the world being mapped
 
@@ -1729,12 +1765,13 @@ Colors Files Search Locations
     * The user's private minetest directory (``$HOME/.minetest``) - if the environment
       variable ``$HOME`` exists. (it would probably be called ``%HOME%`` on Windows).
 
-      NOTE: on Windows, it would be more sensible to use ``%USERPROFILE%``, and search
-      another subdirectory than ``.minetest``. Please advise me about a suitable directory
-      to search - if at all (I am not a Windows user - I don't even own a copy of Windows...).
+.. NOTE:: on Windows, it would be more sensible to use ``%USERPROFILE%``, and search
+	  another subdirectory than ``.minetest``. Please advise me about a suitable directory
+	  to search - if at all (I am not a Windows user - I don't even own a copy of Windows...).
+..
 
-    * On Windows only: if minetestmapper can determine its own location, which would
-      have one of the following formats::
+    * On Windows only: if minetestmapper can determine its own location, which is
+      expected to have one of the following formats::
 
 	<path-with-drive>\bin\minetestmapper.exe
 	<path-with-drive>\minetestmapper.exe
@@ -1754,21 +1791,22 @@ Colors Files Search Locations
       or ``/usr/local/share/games/minetestmapper/``. This location was configured
       at *compile time*: moving minetestmapper around will not affect the search location.
 
-    * For compatibility, in the current directory as a last resort.
+    * For compatibility: in the current directory as a last resort.
       This causes a warning message to be printed.
 
 Generating colors.txt files
 ---------------------------
 
 While the colors.txt file provided with minetestmapper contains color definitions for a
-large number of nodes of different popular mods, it is not, and cannot be complete.
+large number of nodes of different popular mods, it is not, and cannot ever be complete.
 
-For users on linux and unix(-like) systems, a few scripts are provided to aid in the
-creation of a colors.txt file based on the actual mods the user is using. Unfortunately,
-these scripts are still a bit unpolished. They may run without any problem, and they
-may generate a perfect colors.txt file on first run. However, it may also require some
-effort to get them to produce a good colors.txt file, and the resulting file may very
-well need some manual modifications of some colors to make them look better.
+For users on linux and unix(-like) systems (probably including OSX), a few scripts are
+provided to aid in the creation of a colors.txt file based on the actual mods the user
+is using. Unfortunately, these scripts are still a bit unpolished. They may run without
+any problem, and they may generate a perfect colors.txt file on first run. However, it
+may also require some effort to get them to produce a good colors.txt file, and the
+resulting file may very well need some manual modifications of some colors to make them
+look better.
 
 Please consult `<../dumpnodes/README.dumpnodes>`_ for more information on how to use
 the scripts.
