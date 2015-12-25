@@ -48,6 +48,7 @@ using namespace std;
 
 #define DRAW_ARROW_LENGTH		10
 #define DRAW_ARROW_ANGLE		30
+
 // Will be replaced with the actual name and location of the executable (if found)
 string executableName = "minetestmapper";
 string executablePath;			// ONLY for use on windows
@@ -130,6 +131,8 @@ void usage()
 			"  --draw[map]circle \"<geometry> color\"\n"
 			"  --draw[map]ellipse \"<geometry> color\"\n"
 			"  --draw[map]rectangle \"<geometry> color\"\n"
+			"  --draw[map]arrow \"<x>,<y> <x>,<y> color\"\n"
+			"  --draw[map]arrow \"<x>,<y> <angle> <length>[np] color\"\n"
 			"  --draw[map]text \"<x>,<y> color text\"\n"
 			"  --noshading\n"
 			"  --min-y <y>\n"
@@ -436,6 +439,16 @@ static void convertDimensionToCornerCoordinates(NodeCoord &coord1, NodeCoord &co
 	}
 }
 
+static void convertCornerToDimensionCoordinates(NodeCoord &coord1, NodeCoord &coord2, NodeCoord &dimensions, int n)
+{
+	for (int i = 0; i < n; i++) {
+		if (coord2.dimension[i] < coord1.dimension[i])
+			dimensions.dimension[i] = coord2.dimension[i] - coord1.dimension[i] - 1;
+		else
+			dimensions.dimension[i] = coord2.dimension[i] - coord1.dimension[i] + 1;
+	}
+}
+
 static void convertPolarToCartesianCoordinates(NodeCoord &coord1, NodeCoord &coord2, double angle, double length)
 {
 	angle *= M_PI / 180;
@@ -696,12 +709,14 @@ int main(int argc, char *argv[])
 		{"drawcircle", required_argument, 0, OPT_DRAW_OBJECT},
 		{"drawellipse", required_argument, 0, OPT_DRAW_OBJECT},
 		{"drawrectangle", required_argument, 0, OPT_DRAW_OBJECT},
+		{"drawarrow", required_argument, 0, OPT_DRAW_OBJECT},
 		{"drawtext", required_argument, 0, OPT_DRAW_OBJECT},
 		{"drawmappoint", required_argument, 0, OPT_DRAW_OBJECT},
 		{"drawmapline", required_argument, 0, OPT_DRAW_OBJECT},
 		{"drawmapcircle", required_argument, 0, OPT_DRAW_OBJECT},
 		{"drawmapellipse", required_argument, 0, OPT_DRAW_OBJECT},
 		{"drawmaprectangle", required_argument, 0, OPT_DRAW_OBJECT},
+		{"drawmaparrow", required_argument, 0, OPT_DRAW_OBJECT},
 		{"drawmaptext", required_argument, 0, OPT_DRAW_OBJECT},
 		{"noshading", no_argument, 0, 'H'},
 		{"geometry", required_argument, 0, 'g'},
@@ -1282,6 +1297,9 @@ int main(int argc, char *argv[])
 						case 'c' :
 							drawObject.type = TileGenerator::DrawObject::Ellipse;
 							break;
+						case 'a' :
+							drawObject.type = TileGenerator::DrawObject::Line;
+							break;
 						case 't' :
 							drawObject.type = TileGenerator::DrawObject::Text;
 							break;
@@ -1372,6 +1390,31 @@ int main(int argc, char *argv[])
 						}
 
 						generator.drawObject(drawObject);
+						if (object == 'a') {
+							if (drawObject.haveCenter) {
+								std::cerr << "Arrow cannot use a centered dimension."
+								    << " Specify at least one corner." << std::endl;
+								exit(1);
+							}
+							bool useDimensions = drawObject.haveDimensions;
+
+							if (drawObject.haveDimensions)
+								convertDimensionToCornerCoordinates(drawObject.corner1, drawObject.corner2, drawObject.dimensions, 2);
+							double angle, length;
+							convertCartesianToPolarCoordinates(drawObject.corner1, drawObject.corner2, angle, length);
+							convertPolarToCartesianCoordinates(drawObject.corner1, drawObject.corner2, angle + DRAW_ARROW_ANGLE, DRAW_ARROW_LENGTH);
+							if (useDimensions) {
+								convertCornerToDimensionCoordinates(drawObject.corner1, drawObject.corner2, drawObject.dimensions, 2);
+								drawObject.haveDimensions = useDimensions;
+							}
+							generator.drawObject(drawObject);
+							convertPolarToCartesianCoordinates(drawObject.corner1, drawObject.corner2, angle - DRAW_ARROW_ANGLE, DRAW_ARROW_LENGTH);
+							if (useDimensions) {
+								convertCornerToDimensionCoordinates(drawObject.corner1, drawObject.corner2, drawObject.dimensions, 2);
+								drawObject.haveDimensions = useDimensions;
+							}
+							generator.drawObject(drawObject);
+						}
 					}
 					break;
 				case 'd':

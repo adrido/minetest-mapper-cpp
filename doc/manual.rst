@@ -286,6 +286,7 @@ Drawing figures on the map
 
     * ``--drawpoint "<x>,<y> <color>"`` :		Draw a point (single pixel) on the map
     * ``--drawline "<geometry> <color>"`` :		Draw a line on the map
+    * ``--drawarrow "<geometry> <color>"`` :		Draw an arrow on the map
     * ``--drawcircle "<geometry> <color>"`` :		Draw a circle on the map
     * ``--drawellipse "<geometry> <color>"`` :		Draw an ellipse on the map
     * ``--drawrectangle "<geometry> <color>"`` :	Draw a rectangle on the map
@@ -295,6 +296,7 @@ Drawing figures on the map
 
     * ``--drawmappoint "<x>,<y> <color>"`` :		Draw a point (single pixel) on the map
     * ``--drawmapline "<geometry> <color>"`` :		Draw a line on the map
+    * ``--drawmaparrow "<geometry> <color>"`` :		Draw an arrow on the map
     * ``--drawmapcircle "<geometry> <color>"`` :	Draw a circle on the map
     * ``--drawmapellipse "<geometry> <color>"`` :	Draw an ellipse on the map
     * ``--drawmaprectangle "<geometry> <color>"`` :	Draw a rectangle on the map
@@ -522,6 +524,7 @@ Detailed Description of Options
 	* circle
 	* ellipse (which is a synonym for circle)
 	* line
+	* arrow
 	* point (which uses simple coordinates (x,y) instead of a geometry)
 	* rectangle
 	* text (which uses simple coordinates (x,y) instead of a geometry)
@@ -608,6 +611,16 @@ Detailed Description of Options
 	An example line:
 
 	.. image:: images/drawline.png
+
+``--draw[map]arrow "<geometry> <color>"``
+.........................................
+	Draw an arrow on the map, with the given geometry and color.
+
+	See `--draw[map]<figure>`_ for details.
+
+	An example arrow:
+
+	.. image:: images/drawarrow.png
 
 ``--draw[map]point "<x>,<y> <color>"``
 ......................................
