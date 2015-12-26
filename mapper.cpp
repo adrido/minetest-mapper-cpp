@@ -72,6 +72,26 @@ const FuzzyBool FuzzyBool::Yes = 1;
 const FuzzyBool FuzzyBool::Maybe = 0;
 const FuzzyBool FuzzyBool::No = -1;
 
+static inline bool validStreamAtWsOrEof(std::istream &is)
+{
+	// May need to peek before knowing it's EOF.
+	// However, peeking twice results in fail()...
+	return !is.fail() && (is.eof() || is.peek() == ' ' || is.eof() || is.peek() == '\t');
+}
+
+static inline bool validStreamAtEof(std::istream &is)
+{
+	// May need to peek before knowing it's EOF.
+	// However, peeking twice at eof results in fail()...
+	return !is.fail() && (is.eof() || (is.peek(), is.eof()));
+}
+
+static inline int safePeekStream(std::istream &is)
+{
+	// Don't peek at EOF, else stream fails...
+	return is.eof() ? EOF : is.peek();
+}
+
 void usage()
 {
 	const char *options_text = "[options]\n"
@@ -279,7 +299,7 @@ static bool parseNodeCoordinate(istream &is, int &coord, bool &isBlockCoord, int
 	int i;
 	char s;
 
-	s = c = is.peek();
+	s = c = safePeekStream(is);
 	if (c == '*') {
 		if (wildcard) {
 			i = wildcard;
@@ -303,18 +323,18 @@ static bool parseNodeCoordinate(istream &is, int &coord, bool &isBlockCoord, int
 		return false;
 	coord = i;
 	isBlockCoord = false;
-	if (is.eof())
+	if (validStreamAtEof(is))
 		return true;
 
 	// Check if this is a block number, and so: if it has a node number.
-	c = is.peek();
+	c = safePeekStream(is);
 	if (c == '#' || c == '.') {
 		// coordinate read was a block number
 		is.ignore(1);
 		if (wildcard) {
 			return false;	// wildcards are generic
 		}
-		else if (isdigit(is.peek())) {
+		else if (isdigit(safePeekStream(is))) {
 			// has a node number / offset
 			is >> i;
 			if (!is.fail()) {
@@ -446,19 +466,19 @@ static bool parseGeometry(istream &is, NodeCoord &coord1, NodeCoord &coord2, Nod
 	if (expectDimensions >= FuzzyBool::Maybe && parseCoordinates(is, dimensions, n, 0, 'x')) {
 		convertBlockToNodeCoordinates(dimensions, 0, n);
 		// <w>x<h>[+<x>+<y>]
-		if (is.eof()) {
+		if (validStreamAtEof(is)) {
 			centered = true;
 			for (int i = 0; i < n; i++) {
 				coord1.dimension[i] = 0;
 				coord1.isBlock[i] = false;
 			}
-			return (is.eof() || is.peek() == ' ' || is.peek() == '\t');
+			return validStreamAtWsOrEof(is);
 		}
 		else {
 			centered = false;
 			if (parseCoordinates(is, coord1, n, 0, '\0')) {
 				convertBlockToNodeCoordinates(coord1, 0, n);
-				return (is.eof() || is.peek() == ' ' || is.peek() == '\t');
+				return validStreamAtWsOrEof(is);
 			}
 			else
 				return false;
@@ -471,23 +491,23 @@ static bool parseGeometry(istream &is, NodeCoord &coord1, NodeCoord &coord2, Nod
 		coord1.x() = coord1.y() = coord1.z() = 0;
 	}
 	if (parseCoordinates(is, coord1, n, wildcard, ',')) {
-		if (expectDimensions == FuzzyBool::No || (expectDimensions == FuzzyBool::Maybe && (is.eof() || is.peek() == ' ' || is.peek() == '\t'))) {
+		if (expectDimensions == FuzzyBool::No || (expectDimensions == FuzzyBool::Maybe && validStreamAtWsOrEof(is))) {
 			// Just coordinates were specified
 			centered = false;
-			return (is.eof() || is.peek() == ' ' || is.peek() == '\t');
+			return validStreamAtWsOrEof(is);
 		}
 		else if (wildcard && (coord1.x() == wildcard || coord1.y() == wildcard || coord1.z() == wildcard)) {
 			// wildcards are only allowed for plain coordinates (i.e. no dimensions)
 			return false;
 		}
-		else if (is.peek() == ':') {
+		else if (safePeekStream(is) == ':') {
 			is.ignore(1);
 			pos = is.tellg();
 			if (parseCoordinates(is, coord2, n, 0, ',')) {
 				// <x1>,<y1>:<x2>,<y2>
 				centered = false;
 				convertBlockToNodeCoordinates(coord1, coord2, n);
-				return (is.eof() || is.peek() == ' ' || is.peek() == '\t');
+				return validStreamAtWsOrEof(is);
 			}
 			is.clear();
 			is.seekg(pos);
@@ -497,7 +517,7 @@ static bool parseGeometry(istream &is, NodeCoord &coord1, NodeCoord &coord2, Nod
 				centered = true;
 				convertBlockToNodeCoordinates(coord1, 8, n);
 				convertBlockToNodeCoordinates(dimensions, 0, n);
-				return (is.eof() || is.peek() == ' ' || is.peek() == '\t');
+				return validStreamAtWsOrEof(is);
 			}
 			else {
 				return false;
@@ -509,7 +529,7 @@ static bool parseGeometry(istream &is, NodeCoord &coord1, NodeCoord &coord2, Nod
 			if (parseCoordinates(is, dimensions, n, 0, '\0')) {
 				convertBlockToNodeCoordinates(coord1, 0, n);
 				convertBlockToNodeCoordinates(dimensions, 0, n);
-				return (is.eof() || is.peek() == ' ' || is.peek() == '\t');
+				return validStreamAtWsOrEof(is);
 			}
 			else {
 				return false;
@@ -526,7 +546,7 @@ static bool parseGeometry(istream &is, NodeCoord &coord1, NodeCoord &coord2, Nod
 		if (parseCoordinates(is, dimensions, n, 0, '\0')) {
 			convertBlockToNodeCoordinates(coord1, 0, n);
 			convertBlockToNodeCoordinates(dimensions, 0, n);
-			return (is.eof() || is.peek() == ' ' || is.peek() == '\t');
+			return validStreamAtWsOrEof(is);
 		}
 		return false;
 	}
