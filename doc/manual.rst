@@ -151,6 +151,15 @@ save the file (for example as ``c:\users\John\mapper.bat``), and execute it at t
 
 And the minetestmapper command-line from the batch file will be executed.
 
+Graphical Interface
+-------------------
+
+A nice graphical interface is also available for minetestmapper. It can be obtained
+from `<https://bitbucket.org/adrido/minetestmappergui>`_. It runs both on Windows and
+on Linux.
+
+	.. image:: images/gui-1.png
+	.. image:: images/gui-2.png
 
 Mapping while Minetest is Running
 ---------------------------------
