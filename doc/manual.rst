@@ -346,6 +346,19 @@ Detailed Description of Options
 	By default (``auto``), the database is obtained from the world configuration,
 	and there is no need to set it,
 
+	PostgreSQL support is currently (january 2016) not officially available
+	in minetest.  Two different unofficial patches exist: one by ShadowNinja, and
+	one by johnnyjoy. Minetestmapper supports both implementations.
+
+	Git tree for ShadowNinja's version:
+
+	    https://github.com/ShadowNinja/minetest/tree/PostgreSQL
+
+	Pull request for johnnyjoy's version:
+
+	    https://github.com/minetest/minetest/pull/2912
+
+
 ``--bgcolor <color>``
 .....................
 	Specify the background color for the image. See `Color Syntax`_ below.
