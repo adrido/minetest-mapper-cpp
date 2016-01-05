@@ -914,14 +914,9 @@ int main(int argc, char *argv[])
 						}
 						std::istringstream iss(optarg);
 						std::string flag;
-						do {
-							iss >> flag >> std::ws;
-							if (iss.fail()) {
-								std::cerr << "Invalid flag(s) to '" << long_options[option_index].name << "': '" << optarg << "'" << std::endl;
-								usage();
-								exit(1);
-							}
-							else if (flag == "all")
+						iss >> std::skipws >> flag;
+						while (!iss.fail()) {
+							if (flag == "all")
 								generator.setSilenceSuggestion(SUGGESTION_ALL);
 							else if (flag == "prefetch")
 								generator.setSilenceSuggestion(SUGGESTION_PREFETCH);
@@ -930,7 +925,8 @@ int main(int argc, char *argv[])
 								usage();
 								exit(1);
 							}
-						} while (!iss.eof());
+							iss >> flag;
+						}
 					}
 					break;
 				case 'v':
@@ -1132,10 +1128,9 @@ int main(int argc, char *argv[])
 						}
 						istringstream iss;
 						iss.str(optarg);
-						iss >> std::skipws;
 						string flag;
+						iss >> std::skipws >> flag;
 						while (!iss.eof() && !iss.fail()) {
-							iss >> flag;
 							if (flag == "")
 								(void) true;	// Empty flag - ignore
 							else if (flag == "pixel")
@@ -1153,6 +1148,7 @@ int main(int argc, char *argv[])
 							}
 							if (flag == "fixed" || flag == "shrink")
 								setFixedOrShrinkGeometry = true;
+							iss >> flag;
 						}
 						if (iss.fail()) {
 							// Don't know when / if this could happen...
