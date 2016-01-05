@@ -21,14 +21,18 @@ struct Color {
 };
 
 struct ColorEntry {
-	ColorEntry(): r(0), g(0), b(0), a(0), t(0) {};
-	ColorEntry(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t t): r(r), g(g), b(b), a(a), t(t) {};
+	enum flags {
+		FlagNone	= 0x00,
+	};
+	ColorEntry(): r(0), g(0), b(0), a(0), t(0), f(0) {};
+	ColorEntry(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t t, uint8_t f): r(r), g(g), b(b), a(a), t(t), f(f) {};
 	inline Color to_color() const { return Color(r, g, b, a); }
 	uint8_t r;
 	uint8_t g;
 	uint8_t b;
 	uint8_t a;
 	uint8_t t;
+	uint8_t f;
 };
 
 inline Color &Color::operator=(const Color &c)

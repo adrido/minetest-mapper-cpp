@@ -606,17 +606,19 @@ void TileGenerator::parseDataStream(std::istream &in, const std::string &filenam
 
 void TileGenerator::parseNodeColorsLine(const std::string &line, std::string name, istringstream &iline, int linenr, const std::string &filename)
 {
+	iline >> std::ws >> std::skipws;
 	if (iline.good() && iline.peek() == '-') {
 		char c;
 		iline >> c >> std::ws;
-		if (iline.bad() || !iline.eof()) {
+		if (iline.fail() || !iline.eof()) {
 			std::cerr << filename << ":" << linenr << ": bad line in colors file (" << line << ")" << std::endl;
 			return;
 		}
 		m_nodeColors.erase(name);
 	}
 	else {
-		int r, g, b, a, t;
+		int r, g, b, a, t, f;
+		std::string flags;
 		ColorEntry color;
 		iline >> r;
 		iline >> g;
@@ -626,10 +628,28 @@ void TileGenerator::parseNodeColorsLine(const std::string &line, std::string nam
 			return;
 		}
 		a = 0xff;
-		iline >> a;
+		iline >> std::ws;
+		if (iline.good() && isdigit(iline.peek()))
+			iline >> a >> std::ws;
 		t = 0;
-		iline >> t;
-		color = ColorEntry(r,g,b,a,t);
+		if (iline.good() && isdigit(iline.peek()))
+			iline >> t >> std::ws;
+		if (iline.good() && !isdigit(iline.peek()))
+			iline >> flags >> std::ws;
+		f = 0;
+		if (!iline.fail() && flags != "") {
+			for(size_t i = 0; i < flags.length(); i++) {
+				if (flags[i] == ',')
+					flags[i]= ' ';
+			}
+			istringstream iflags(flags);
+			std::string flag;
+			iflags >> flag;
+			while (!iflags.fail()) {
+				iflags >> flag;
+			}
+		}
+		color = ColorEntry(r,g,b,a,t,f);
 		if ((m_drawAlpha && a == 0xff) || (!m_drawAlpha && a != 0xff)) {
 			// If drawing alpha, and the colors file contains both
 			// an opaque entry and a non-opaque entry for a name, prefer
@@ -717,7 +737,7 @@ void TileGenerator::parseHeightMapNodesLine(const std::string &line, std::string
 		m_nodeColors.erase(name);
 	}
 	else {
-		m_nodeColors[name] = ColorEntry(0,0,0,255,1);		// Dummy entry - but must not be transparent
+		m_nodeColors[name] = ColorEntry(0,0,0,255,1,0);		// Dummy entry - but must not be transparent
 	}
 	// Don't care if not at eof (== really eol). We might be reading a colors.txt file...
 	if (iline.bad()) {
