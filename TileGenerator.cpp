@@ -646,6 +646,8 @@ void TileGenerator::parseNodeColorsLine(const std::string &line, std::string nam
 			std::string flag;
 			iflags >> flag;
 			while (!iflags.fail()) {
+				if (flag == "ignore")
+					f |= ColorEntry::FlagIgnore;
 				iflags >> flag;
 			}
 		}
@@ -1665,7 +1667,12 @@ void TileGenerator::processMapBlock(const DB::Block &block)
 			}
 			else {
 				if (color != m_nodeColors.end()) {
-					m_nodeIDColor[nodeId] = &color->second;
+					if ((color->second.f & ColorEntry::FlagIgnore)) {
+						m_nodeIDColor[nodeId] = NodeColorNotDrawn;
+					}
+					else {
+						m_nodeIDColor[nodeId] = &color->second;
+					}
 				}
 				else {
 					m_nameMap[nodeId] = name;
