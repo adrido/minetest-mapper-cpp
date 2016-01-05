@@ -26,9 +26,7 @@ Basic Usage (Linux / BSD / ...)
 	characters.
 
 
-After installation, minetestmapper is started as follows:
-
-::
+After installation, minetestmapper is started as follows::
 
     minetestmapper \
 	--input <world-directory> \
@@ -38,9 +36,7 @@ If the world is not too large, and if minetestmapper is installed in
 a  system directory, it will most likely work as expected.
 
 Possibly, minetestmapper will not be able to find a colors.txt file. If that happens,
-the colors.txt file can be specified on the command-line:
-
-::
+the colors.txt file can be specified on the command-line::
 
     minetestmapper \
 	--input <world-directory> \
@@ -50,9 +46,7 @@ the colors.txt file can be specified on the command-line:
 Or copy the colors.txt to a location where minetestmapper will automatically find it.
 A colors.txt file (named ``colors.txt``, in lowercase) in the world's directory will certainly
 be found.  Depending on the system and the configuration, a number of other locations are
-searched as well. Use the following command to find out which:
-
-::
+searched as well. Use the following command to find out which::
 
     minetestmapper \
 	--input <world-directory> \
@@ -89,18 +83,14 @@ Basic Usage (Windows)
 From the Command-line
 .....................
 
-After installation, minetestmapper is started as follows from the command-line:
-
-::
+After installation, minetestmapper is started as follows from the command-line::
 
     c:\games\minetestmapper\bin\minetestmapper.exe ^
 	--input <world-directory> ^
 	--output <image-file-name.png>
 
 Possibly, minetestmapper will not be able to find the colors.txt file. If that happens, either
-specify its location on the command-line:
-
-::
+specify its location on the command-line::
 
     c:\games\minetestmapper\bin\minetestmapper.exe ^
 	--input <world-directory> ^
@@ -110,9 +100,7 @@ specify its location on the command-line:
 Or copy the colors.txt to a location where minetestmapper will automatically find it.
 A colors.txt file (named ``colors.txt``, in lowercase) in the world's directory will certainly
 be found.  Depending on the system and the configuration, a number of other locations are
-searched as well. Use the following command to find out which:
-
-::
+searched as well. Use the following command to find out which::
 
     c:\games\minetestmapper\bin\minetestmapper ^
 	--input <world-directory> ^
@@ -134,18 +122,14 @@ The basics of batch files can be easily found on internet. Search for '*writing 
 batch file*' if the description below is too succint.
 
 Using notepad, create a file ``mapper.bat``, which contains the command-line, exactly like it
-would be typed at the prompt. For example:
-
-::
+would be typed at the prompt. For example::
 
     c:\games\minetestmapper\bin\minetestmapper ^
 	--input c:\games\minetest\worlds\myworld ^
 	--output c:\games\minetest\worlds\myworld\map.png ^
 	--colors c:\games\colors.txt
 
-save the file (for example as ``c:\users\John\mapper.bat``), and execute it at the command-prompt:
-
-::
+save the file (for example as ``c:\users\John\mapper.bat``), and execute it at the command-prompt::
 
     c:\> c:\users\John\mapper.bat
 
@@ -522,9 +506,9 @@ Detailed Description of Options
 	in quotes together on the command-line, else they will be misinterpreted
 	as two or more command-line arguments.
 
-	Example:
+	Example::
 
-		``minetestmapper --drawcircle "10,10:6x6 red"``
+		minetestmapper --drawcircle "10,10:6x6 red"
 
 	For the color of figures, an alpha value can be specified. Note that
 	due to a bug in the drawing library, this has not the expected effect
@@ -623,9 +607,9 @@ Detailed Description of Options
 	together on the command-line, else they will be misinterpreted as three
 	command-line arguments.
 
-	Example:
+	Example::
 
-		``minetestmapper --drawtext "20,-10 red This text will be on the map"``
+		minetestmapper --drawtext "20,-10 red This text will be on the map"
 
 	See also `--draw[map]<figure>`_ for more details.
 
@@ -1010,6 +994,7 @@ Detailed Description of Options
 
 	See also `Color Syntax`_
 
+
 ``--progress``
 ..............
 	Show a progress indicator while generating the map.
@@ -1252,9 +1237,9 @@ Color Syntax
 Color Codes
 -----------
 
-    Colors can be specified using color codes:
+    Colors can be specified using color codes::
 
-	``#[<alpha>]<red><green><blue>``
+	#[<alpha>]<red><green><blue>
 
     E.g.: ``#ff34c1``
 
@@ -1291,13 +1276,13 @@ Symbolic Colors
     :azure:		``#007fff``
     :brown:		``#7f3f00``
 
-Lighter or Darker Colors
-------------------------
+Advanced usage: Lighter or Darker Colors
+----------------------------------------
 
     As an additional feature, any color can lightened or darkened, or in general,
-    be mixed with a basic color using the following syntax:
+    be mixed with a basic color using the following syntax::
 
-	``<color>[+-][wkrgbcmy]<value>``
+	<color>[+-][wkrgbcmy]<value>
 
     Where '+' mixes in, and '-' mixes out. one of the colors white (w), black (k), red (r), green (g), blue (b),
     cyan (c), magenta (m), yellow (y). The value specifies the amount, ranging from 0 (mix in/out no color) to
@@ -1361,9 +1346,9 @@ Geometry Syntax
 Geometry Using Two Corners
 --------------------------
 
-    A geometry using two corners of the area is specified as follows:
+    A geometry using two corners of the area is specified as follows::
 
-	``<xcorner1>,<ycorner1>:<xcorner2>,<ycorner2>``
+	<xcorner1>,<ycorner1>:<xcorner2>,<ycorner2>
 
     where ``xcorner1,ycorner1`` are the coordinates of
     one corner, and ``xcorner2,ycorner2`` are the coordinates
@@ -1372,17 +1357,17 @@ Geometry Using Two Corners
     The coordinates are interpreted as inclusive: both
     the first and the second coordinate will be in the map.
 
-    Example:
+    Example::
 
-	``--geometry -200,-100:200,200``
+	--geometry -200,-100:200,200
 
 Geometry Using Corner and Dimensions
 ------------------------------------
 
     A geometry using a corner of the area and its dimensions is
-    specified as follows:
+    specified as follows::
 
-	``<xoffset>,<yoffset>+<width>+<height>``
+	<xoffset>,<yoffset>+<width>+<height>
 
     where ``xoffset,yoffset`` are the coordinates of the
     lower-left corner of the area, and ``width`` and ``height``
@@ -1391,30 +1376,26 @@ Geometry Using Corner and Dimensions
     Note that ``width`` and/or ``height`` can be negative, making
     ``xoffset,yoffset`` another corner of the image. For ease
     of using in scripting, the sign of a dimension does not need
-    to replace the '+'. E.g. the following are valid and equivalent:
+    to replace the '+'. E.g. the following are valid and equivalent::
 
-	``--geometry -10,-10+11+11``
+	--geometry -10,-10+11+11
+	--geometry -10,10+11-11
+	--geometry -10,10+11+-11
+	--geometry 10,10-11+-11
+	--geometry -10,-10:10,10
 
-	``--geometry -10,10+11-11``
+    The following alternate syntax is also supported::
 
-	``--geometry -10,10+11+-11``
-
-	``--geometry 10,10-11+-11``
-
-	``--geometry -10,-10:10,10``
-
-    The following alternate syntax is also supported:
-
-	``<width>x<height>[<+|-xoffset><+|-yoffset>]``
+	<width>x<height>[<+|-xoffset><+|-yoffset>]
 
     where ``xoffset,yoffset`` are the coordinates of the lower-left
     corner of the area. In this case, the offsets can be omitted,
     resulting in a map of the requested dimensions, centered at 0,0.
 
-    Examples:
+    Examples::
 
-	``--geometry 1000x1200``
-	``--geometry 1000x1200-500+500``
+	--geometry 1000x1200
+	--geometry 1000x1200-500+500
 
     **Compatibility**
 
@@ -1426,16 +1407,16 @@ Geometry Using Center and Dimensions
 ------------------------------------
 
     A geometry using the center of the area and its dimensions
-    is specified as follows
+    is specified as follows::
 
-	``<xcenter>,<ycenter>:<width>x<height>``
+	<xcenter>,<ycenter>:<width>x<height>
 
     where ``xcenter,ycenter`` are the coordinates of the center
     of the area, and ``width`` and ``height`` are its dimensions.
 
-    Example:
+    Example::
 
-	``--geometry 100,100:300x150``
+	--geometry 100,100:300x150
 
     **Compatibility**
 
@@ -1447,9 +1428,9 @@ Legacy Geometry Format
 -----------------------
 
     The legacy format, compatible with stock minetestmapper is
-    also still supported:
+    also still supported::
 
-	``<xoffset>:<yoffset>+<width>+<height>``
+	<xoffset>:<yoffset>+<width>+<height>
 
     where ``xoffset,yoffset`` are the coordinates of the lower-left
     corner of the area, and ``width`` and ``height`` specify its
@@ -1471,18 +1452,18 @@ Legacy Geometry Format
 Advanced coordinate specification
 ---------------------------------
 
-    Coordinates are normally specified as node coordinates. E.g.:
+    Coordinates are normally specified as node coordinates. E.g.::
 
-	``--geometry -100,-100:100,100``
+	--geometry -100,-100:100,100
 
     Minetestmapper also supports another way to specify coordinate values:
     specifying the minetest block number, and a node. Blocks are 16x16 nodes.
     There are two variants:
 
     The first variant specifies the block number, and a node within that block.
-    The node must be a value between 0 and 15:
+    The node must be a value between 0 and 15::
 
-	``<block>#<node>``
+	<block>#<node>
 
     E.g.:
 
@@ -1497,9 +1478,9 @@ Advanced coordinate specification
 
     The second variant specifies a block and a node offset in the
     same direction. I.e. for negative block numbers, the offset is
-    in the negative direction as well.
+    in the negative direction as well::
 
-	``<block>.<offset>``
+	<block>.<offset>
 
     E.g.:
 
@@ -1536,19 +1517,16 @@ Colors.txt Syntax
     The colors.txt file contains a list of minetest node names and associated
     colors. A minetest world node is converted to at most one pixel on the map.
 
-    Lines in the colors.txt file have the following syntax:
+    Lines in the colors.txt file have the following syntax::
 
-	``<node-name> <red> <green> <blue> [<alpha> [<t>]]``
+	<node-name> <red> <green> <blue> [<alpha> [<t>]]
 
-    Examples:
+    Examples::
 
-	``default:apple 50 0 0``
-
-	``default:sandstonebrick 160 144 108``
-
-	``default:copperblock 110 86 60``
-
-	``default:water_flowing 49 82 132 192 224``
+	default:apple 50 0 0
+	default:sandstonebrick 160 144 108
+	default:copperblock 110 86 60
+	default:water_flowing 49 82 132 192 224
 
     **Alpha**
 
@@ -1575,15 +1553,13 @@ Colors.txt Syntax
     There is one exception to this rule: if one color is opaque (no alpha, or
     alpha = 255), and one is transparent (alpha < 255), the former will be selected when
     ``--drawalpha`` is disabled, and the latter will be selected when ``drawalpha``
-    is enabled:
+    is enabled::
 
-	``# Entry that will be used without 'drawalpha':``
+	# Entry that will be used without 'drawalpha':
+	default:water_source	39 66 106
 
-	``default:water_source	39 66 106``
-
-	``# Entry that will be used with 'drawalpha':``
-
-	``default:water_source	78 132 212 64 224``
+	# Entry that will be used with 'drawalpha':
+	default:water_source	78 132 212 64 224
 
     This is useful, as colors that look nice in a map without transparency
     don't always look nice in a map with transparency.
@@ -1622,19 +1598,16 @@ Heightmap-nodes.txt Syntax
 
     This file *can* have the same syntax as the colors.txt file, but the
     actual colors will be ignored. Alternatively, a simple list of node
-    names also suffices:
+    names also suffices::
 
-	``<node-name 1>``
+	<node-name 1>
+	<node-name 2>
+	[...]
 
-	``<node-name 2>``
+    Examples::
 
-	``[...]``
-
-    Examples:
-
-	``default:sandstonebrick``
-
-	``default:copperblock``
+	default:sandstonebrick
+	default:copperblock
 
     **Default**
 
@@ -1650,29 +1623,27 @@ Heightmap-colors.txt Syntax
     or a multi-color map can be generated.
 
     For a multi-color map, a heightmap-colors.txt is needed, which
-    describes which colors to use. It has lines with the following syntax:
+    describes which colors to use. It has lines with the following syntax::
 
-	``<height 1>	<height 2>	<color 1>	<color 2>``
+	<height 1>	<height 2>	<color 1>	<color 2>
 
     Where the heights are a number, or the special values ``-oo`` or ``oo`` (for
     negative and positive infinity).
 
-    For example:
+    For example::
 
-	``-50	50	255 0 0		0 255 0``
-
-	``50	100	0 255 0		0 0 255``
+	-50	50	255 0 0		0 255 0
+	50	100	0 255 0		0 0 255
 
     Which signifies that between height -50 to 50, the color of the nodes will
     slowly change from red to green, and between 50 and 100, the color will slowly
     change from green to blue.
 
     It is possible to specify overlapping ranges. The colors they specify will
-    be averaged:
+    be averaged::
 
-	``-50	50	255 0 0		0 255 0``
-
-	``-50	50	0 255 0		0 0 255``
+	-50	50	255 0 0		0 255 0
+	-50	50	0 255 0		0 0 255
 
     Between the heights -50 and 50, the colors will change from ``#7f7f00`` to ``#007f7f``.
     (and *not* ``#ffff00`` to ``#00ffff``: the colors are *averaged*)
@@ -1702,9 +1673,7 @@ Colors Files Common Syntax
     In addition, a colors file may include another colors file using ``@include`` on a line. Any
     color definitions from the included file override earlier definitions; any color definitions
     after the inclusion point override the colors from the included file. For example in the
-    following colors.txt file:
-
-::
+    following colors.txt file::
 
 	# Defining default:stone here is useless, as the color from the system
 	# colors file will override this.
@@ -1718,12 +1687,8 @@ Colors Files Common Syntax
 	# one from the system file
 	default:dirt_with_grass	82 117 54
 
-..
-
     The colors.txt file also supports undefining colors (so that minetestmapper will complain
-    about unknown nodes). This is achieved by specifying '-' instead of a color:
-
-::
+    about unknown nodes). This is achieved by specifying '-' instead of a color::
 
 	# Get all colors from the system colors file
 	# (your system colors file may be located elsewhere!)
@@ -1738,8 +1703,6 @@ Colors Files Common Syntax
 	# to have an alpha of 0. Minetest will not complain.
 	#default:water_source	78 132 212 0
 	#default:water_flowing	78 132 212 0
-
-..
 
 Colors Files Search Locations
 -----------------------------
@@ -1771,11 +1734,10 @@ Colors Files Search Locations
       to search - if at all (I am not a Windows user - I don't even own a copy of Windows...).
 
     * On Windows only: if minetestmapper can determine its own location, which would
-      have one of the following formats:
+      have one of the following formats::
 
-	``<path-with-drive>\bin\minetestmapper.exe``
-
-	``<path-with-drive>\minetestmapper.exe``
+	<path-with-drive>\bin\minetestmapper.exe
+	<path-with-drive>\minetestmapper.exe
 
       It searches the following directories:
 
