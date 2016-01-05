@@ -15,6 +15,7 @@
 		entire world (i.e. reading a full blocklist)
 		(useful for postgresql, which doesn't do this by default).
 	- Command-line options are now all case-agnostic wrt their parameters.
+	- Allow nodes to be defined as air-type or ignore-type in colors.txt
     Bugfixes:
         - Fixed possible compilation failure caused by stdint.h
 	- Fixed compilation failure when some database libraries are not installed

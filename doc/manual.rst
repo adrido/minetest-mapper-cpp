@@ -1651,7 +1651,7 @@ Colors.txt Syntax
 
     Lines in the colors.txt file have the following syntax::
 
-	<node-name> <red> <green> <blue> [<alpha> [<t>]]
+	<node-name> <red> <green> <blue> [<alpha> [<t>]] [flags]
 
     Where ``red``, ``green``, ``blue``, ``alpha`` and ``t`` are numbers from 0 to 255.
 
@@ -1678,6 +1678,38 @@ Colors.txt Syntax
     are any other (types of) nodes below it, then that is what will happen.
     If there are not, then that node *will* however be made visible. See
     the option `--drawair`_ for a use for this feature.
+
+    **Flags**
+
+    Nodes defined in the colors.txt file can have additional flags, which may
+    allow them to be treated specially. Flags are specified as a comma-separated
+    list without spaces. E.g.::
+
+	example:flags_node	220 255 255	0	air,ignore
+
+    Currently, two flags are defined:
+
+    :air: The `air` flag causes the node to be treated like '``air``' nodes:
+	by default, such nodes are ignored. The option `--drawair`_ allows
+	them to be drawn instead.
+
+    :ignore: The `ignore` flag causes the node to be treated like '``ignore``' nodes:
+	they are simply ignored.
+
+    Examples::
+
+	# Default color for air
+	air			220 220 255	0
+
+	# Special air variants
+	specialmod:air		220 220 255	0	air
+	specialmod:red_air	255 220 220	0	air
+	specialmod:green_air	220 255 220	0	air
+	specialmod:blue_air	200 200 255	0	air
+
+	# Nodes to be ignored altogether
+	default:water_source	39 66 106	224	ignore
+	default:water_flowing	39 66 106	224	ignore
 
     **Duplicate Entries**
 
