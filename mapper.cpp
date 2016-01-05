@@ -1245,7 +1245,7 @@ int main(int argc, char *argv[])
 						iss.str(optarg);
 						string flag;
 						iss >> std::skipws >> flag;
-						while (!iss.eof() && !iss.fail()) {
+						while (!iss.fail()) {
 							if (flag == "")
 								(void) true;	// Empty flag - ignore
 							else if (flag == "pixel")
@@ -1264,12 +1264,6 @@ int main(int argc, char *argv[])
 							if (flag == "fixed" || flag == "shrink")
 								setFixedOrShrinkGeometry = true;
 							iss >> flag;
-						}
-						if (iss.fail()) {
-							// Don't know when / if this could happen...
-							std::cerr << "Error parsing geometry mode flags" << std::endl;
-							usage();
-							exit(1);
 						}
 					}
 					foundGeometrySpec = true;
