@@ -648,6 +648,8 @@ void TileGenerator::parseNodeColorsLine(const std::string &line, std::string nam
 			while (!iflags.fail()) {
 				if (flag == "ignore")
 					f |= ColorEntry::FlagIgnore;
+				else if (flag == "air")
+					f |= ColorEntry::FlagAir;
 				iflags >> flag;
 			}
 		}
@@ -1667,9 +1669,18 @@ void TileGenerator::processMapBlock(const DB::Block &block)
 			}
 			else {
 				if (color != m_nodeColors.end()) {
+					// Colors marked 'ignore' take precedence over 'air'
 					if ((color->second.f & ColorEntry::FlagIgnore)) {
 						m_nodeIDColor[nodeId] = NodeColorNotDrawn;
 					}
+					// If the color is marked 'air', then treat it accordingly.
+					else if ((color->second.f & ColorEntry::FlagAir)) {
+						if (m_drawAir)
+							m_nodeIDColor[nodeId] = &color->second;
+						else
+							m_nodeIDColor[nodeId] = NodeColorNotDrawn;
+					}
+					// Regular node.
 					else {
 						m_nodeIDColor[nodeId] = &color->second;
 					}

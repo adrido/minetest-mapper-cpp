@@ -24,6 +24,7 @@ struct ColorEntry {
 	enum flags {
 		FlagNone	= 0x00,
 		FlagIgnore	= 0x01,
+		FlagAir		= 0x02,
 	};
 	ColorEntry(): r(0), g(0), b(0), a(0), t(0), f(0) {};
 	ColorEntry(uint8_t r, uint8_t g, uint8_t b, uint8_t a, uint8_t t, uint8_t f): r(r), g(g), b(b), a(a), t(t), f(f) {};
