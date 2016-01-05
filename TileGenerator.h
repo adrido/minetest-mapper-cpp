@@ -133,6 +133,7 @@ public:
 	void setHeightScaleInterval(int major, int minor);
 	void setDrawAlpha(bool drawAlpha);
 	void setDrawAir(bool drawAir);
+	void setDrawIgnore(bool drawIgnore);
 	void drawObject(const DrawObject &object) { m_drawObjects.push_back(object); }
 	void setShading(bool shading);
 	void setGeometry(const NodeCoord &corner1, const NodeCoord &corner2);
@@ -240,6 +241,7 @@ private:
 	int m_drawScale;
 	bool m_drawAlpha;
 	bool m_drawAir;
+	bool m_drawIgnore;
 	bool m_shading;
 	std::string m_backend;
 	std::string m_requestedBackend;

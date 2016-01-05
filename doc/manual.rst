@@ -268,6 +268,8 @@ Map features:
     * ``--drawplayers`` :				Draw circles at player positions on the map
     * ``--drawalpha[=cumulative|cumulative-darken|average|none]`` :	Enable drawing transparency for some nodes (e.g. water)
     * ``--drawair`` :					Draw air nodes (read the warnings first!)
+    * ``--drawnodes [no-]air,[no-]ignore`` :		Draw (or ignore) types of nodes (read the warnings first!)
+    * ``--ignorenodes [no-]air,[no-]ignore`` :		Ignore (or draw) types of nodes (read the warnings first!)
     * ``--noshading`` :					Disable shading that accentuates height differences
 
 Tiles:
@@ -671,28 +673,7 @@ Detailed Description of Options
 .............
 	Draw air nodes, as if they were regular nodes.
 
-	The color of air will be obtained from the colors file.
-
-	WARNING 1:
-	    the color of air nodes should most probably have an alpha value of
-	    0, so that it is fully transparent. The effect will be, that
-	    air nodes are only visible if nothing else is below them.
-
-	    Setting alpha to anything other than 0, will most probably cause
-	    all non-air nodes to be obscured by all of the air that is
-	    above them.
-
-	WARNING 2:
-	    Drawing air nodes instead of ignoring them will have a significant
-	    performance impact (unless they happen to be defined as opaque).
-	    Use this with consideration.
-
-	Two images, one with air, the other without. Look inside the rectangle:
-
-	.. image:: images/background-white.png
-	.. image:: images/drawair.png
-	.. image:: images/drawair-detail-0.png
-	.. image:: images/drawair-detail.png
+	This option is synonymous with `--drawnodes air`_.
 
 ``--drawalpha[=cumulative|cumulative-darken|average|none]``
 ...........................................................
@@ -756,6 +737,53 @@ Detailed Description of Options
 	A height map with scale:
 
 	.. image:: images/heightmap-scale.png
+
+``--drawnodes [no-]air,[no-]ignore``
+....................................
+	Draw air-type or ignore-type nodes, as if they were regular nodes.
+	By default they are not drawn.
+
+	A prefix of '``no-``' inverts the effect, so that the nodes are ignored
+	instead.
+
+	Air-type nodes are the node named '``air``', and any node that has the
+	`air` flag in the colors file.
+	Ignore-type nodes are the node named '``ignore``', and any node that has the
+	`ignore` flag in the colors file.
+	See `Colors.txt Syntax`_.
+
+	If a node has both the `air` flag and the `ignore` flag, the `ignore` flag
+	takes precedence. I.e. the `air` flag will be ignored.
+
+	If drawing `air` and/or `ignore` nodes, they must obviously have an entry
+	in the colors file.
+
+	WARNING 1:
+	    The color of air-type and ignore-type nodes should most probably have an
+	    alpha value of 0, so that they are fully transparent. The effect will be,
+	    that they nodes are only visible if nothing else is below them.
+
+	    Setting alpha to anything other than 0, will most probably cause
+	    all non-air / non-ignore nodes to be obscured by all of the air/ignore
+	    nodes that are above them.
+
+	WARNING 2:
+	    Drawing '``air``' or '``ignore``' nodes instead of ignoring them will have a
+	    significant performance impact (unless they happen to be defined as opaque).
+	    Use this with consideration.
+
+	    Instead of enabling the drawing of '``air``' or '``ignore``' nodes, it may be
+	    possible to achieve a similar result, with a negligible performance impact,
+	    by using the option `--blockcolor`_.
+
+	This option is the inverse of `--ignorenodes`_.
+
+	Two images, one with air drawn, the other without. Look inside the rectangle:
+
+	.. image:: images/background-white.png
+	.. image:: images/drawair.png
+	.. image:: images/drawair-detail-0.png
+	.. image:: images/drawair-detail.png
 
 ``--draworigin``
 ................
@@ -979,6 +1007,23 @@ Detailed Description of Options
 ``--help``
 ..........
 	Print the option summary.
+
+``--ignorenodes [no-]air,[no-]ignore``
+......................................
+	Ignore air-type or ignore-type nodes, so that they are not drawn at all.
+
+	A prefix of '``no-``' inverts the effect, so that the nodes are drawn
+	like regular nodes.
+
+	This option is the inverse of `--drawnodes`_. E.g.::
+
+	    --ignorenodes no-air,ignore
+
+	is equivalent to::
+
+	    --drawnodes air,no-ignore
+
+	See `--drawnodes`_ for more information.
 
 ``--input <world_path>``
 ........................
@@ -1690,11 +1735,12 @@ Colors.txt Syntax
     Currently, two flags are defined:
 
     :air: The `air` flag causes the node to be treated like '``air``' nodes:
-	by default, such nodes are ignored. The option `--drawair`_ allows
-	them to be drawn instead.
+	by default, such nodes are ignored. The options `--drawair`_
+	and `--drawnodes air`_ allow them to be drawn instead.
 
     :ignore: The `ignore` flag causes the node to be treated like '``ignore``' nodes:
-	they are simply ignored.
+	by default, such nodes are ignored. The option `--drawnodes ignore`_
+	allows them to be drawn instead.
 
     Examples::
 
@@ -1976,6 +2022,10 @@ More information is available:
 .. _--colors: `--colors <file>`_
 .. _--cornergeometry: `--cornergeometry <geometry>`_
 .. _--database-format: `--database-format minetest-i64\|freeminer-axyz\|mixed\|query`_
+.. _--drawnodes: `--drawnodes [no-]air,[no-]ignore`_
+.. _--ignorenodes: `--ignorenodes [no-]air,[no-]ignore`_
+.. _--drawnodes air: `--drawnodes [no-]air,[no-]ignore`_
+.. _--drawnodes ignore: `--drawnodes [no-]air,[no-]ignore`_
 .. _--draw[map]<figure>: `--draw[map]<figure> "<geometry> <color> [<text>]"`_
 .. _--draw[map]circle: `--draw[map]circle "<geometry> <color>"`_
 .. _--draw[map]ellipse: `--draw[map]ellipse "<geometry> <color>"`_

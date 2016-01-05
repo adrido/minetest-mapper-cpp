@@ -139,6 +139,7 @@ TileGenerator::TileGenerator():
 	m_drawScale(DRAWSCALE_NONE),
 	m_drawAlpha(false),
 	m_drawAir(false),
+	m_drawIgnore(false),
 	m_shading(true),
 	m_backend(DEFAULT_BACKEND),
 	m_requestedBackend(DEFAULT_BACKEND),
@@ -358,6 +359,11 @@ void TileGenerator::setDrawAlpha(bool drawAlpha)
 void TileGenerator::setDrawAir(bool drawAir)
 {
 	m_drawAir = drawAir;
+}
+
+void TileGenerator::setDrawIgnore(bool drawIgnore)
+{
+	m_drawIgnore = drawIgnore;
 }
 
 void TileGenerator::setShading(bool shading)
@@ -1664,14 +1670,18 @@ void TileGenerator::processMapBlock(const DB::Block &block)
 			if (name == "air" && !(m_drawAir && color != m_nodeColors.end())) {
 				m_nodeIDColor[nodeId] = NodeColorNotDrawn;
 			}
-			else if (name == "ignore") {
+			else if (name == "ignore" && !(m_drawIgnore && color != m_nodeColors.end())) {
 				m_nodeIDColor[nodeId] = NodeColorNotDrawn;
 			}
 			else {
 				if (color != m_nodeColors.end()) {
+					// If the color is marked 'ignore', then treat it accordingly.
 					// Colors marked 'ignore' take precedence over 'air'
 					if ((color->second.f & ColorEntry::FlagIgnore)) {
-						m_nodeIDColor[nodeId] = NodeColorNotDrawn;
+						if (m_drawIgnore)
+							m_nodeIDColor[nodeId] = &color->second;
+						else
+							m_nodeIDColor[nodeId] = NodeColorNotDrawn;
 					}
 					// If the color is marked 'air', then treat it accordingly.
 					else if ((color->second.f & ColorEntry::FlagAir)) {

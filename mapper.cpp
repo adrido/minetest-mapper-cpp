@@ -45,6 +45,7 @@ using namespace std;
 #define OPT_DATABASE_FORMAT		0x91
 #define OPT_SILENCE_SUGGESTIONS		0x92
 #define OPT_PRESCAN_WORLD		0x93
+#define OPT_DRAWNODES			0x94
 
 #define DRAW_ARROW_LENGTH		10
 #define DRAW_ARROW_ANGLE		30
@@ -125,6 +126,8 @@ void usage()
 			"  --draworigin\n"
 			"  --drawalpha[=cumulative|cumulative-darken|average|none]\n"
 			"  --drawair\n"
+			"  --drawnodes [no-]air,[no-]ignore\n"
+			"  --ignorenodes [no-]air,[no-]ignore\n"
 			"  --draw[map]point \"<x>,<y> color\"\n"
 			"  --draw[map]line \"<geometry> color\"\n"
 			"  --draw[map]line \"<x>,<y> <angle> <length>[np] color\"\n"
@@ -704,6 +707,8 @@ int main(int argc, char *argv[])
 		{"heightscale-interval", required_argument, 0, OPT_SCALEINTERVAL},
 		{"drawalpha", optional_argument, 0, 'e'},
 		{"drawair", no_argument, 0, OPT_DRAWAIR},
+		{"drawnodes", required_argument, 0, OPT_DRAWNODES},
+		{"ignorenodes", required_argument, 0, OPT_DRAWNODES},
 		{"drawpoint", required_argument, 0, OPT_DRAW_OBJECT},
 		{"drawline", required_argument, 0, OPT_DRAW_OBJECT},
 		{"drawcircle", required_argument, 0, OPT_DRAW_OBJECT},
@@ -1049,6 +1054,36 @@ int main(int argc, char *argv[])
 					break;
 				case OPT_DRAWAIR:
 					generator.setDrawAir(true);
+					break;
+				case OPT_DRAWNODES: {
+						bool draw = long_options[option_index].name[0] == 'd';
+						for (char *c = optarg; *c; c++) {
+							*c = tolower(*c);
+							if (*c == ',') *c = ' ';
+						}
+						istringstream iss(optarg);
+						string flag;
+						iss >> std::skipws >> flag;
+						while (!iss.fail()) {
+							bool enable = draw;
+							if (flag.substr(0,3) == "no-") {
+								flag = flag.substr(3);
+								enable = !enable;
+							}
+							if (flag == "")
+								(void) true;	// Empty flag - ignore
+							else if (flag == "ignore")
+								generator.setDrawIgnore(enable);
+							else if (flag == "air")
+								generator.setDrawAir(enable);
+							else {
+								std::cerr << "Invalid " << long_options[option_index].name << " flag '" << flag << "'" << std::endl;
+								usage();
+								exit(1);
+							}
+							iss >> flag;
+						}
+					}
 					break;
 				case 'H':
 					generator.setShading(false);
