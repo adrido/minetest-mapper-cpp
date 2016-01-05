@@ -1248,7 +1248,7 @@ int main(int argc, char *argv[])
 						string colorStr;
 						iss >> std::ws >> colorStr;
 						if (iss.fail()) {
-							std::cerr << "Invalid color specification for "
+							std::cerr << "Missing color for "
 								<< long_options[option_index].name
 								<< " '" << optarg << "'" << std::endl;
 							usage();
