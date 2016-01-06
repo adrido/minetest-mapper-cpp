@@ -25,6 +25,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include "CharEncodingConverter.h"
 #include "types.h"
 #include "PixelAttributes.h"
 #include "BlockPos.h"
@@ -317,6 +318,8 @@ private:
 	uint16_t m_readedPixels[16];
 	std::set<std::string> m_unknownNodes;
 	std::vector<DrawObject> m_drawObjects;
+
+	CharEncodingConverter *m_gdStringConv;
 }; /* -----  end of class TileGenerator  ----- */
 
 #endif /* end of include guard: TILEGENERATOR_H_JJNUCARH */

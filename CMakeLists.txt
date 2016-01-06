@@ -1,4 +1,4 @@
-project(minetestmapper CXX)
+project(minetestmapper CXX C)
 cmake_minimum_required(VERSION 2.6)
 cmake_policy(SET CMP0003 NEW)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -139,6 +139,21 @@ if(NOT ZLIB_LIBRARY OR NOT ZLIB_INCLUDE_DIR)
 	message(SEND_ERROR "zlib not found!")
 endif(NOT ZLIB_LIBRARY OR NOT ZLIB_INCLUDE_DIR)
 
+# Find iconv
+OPTION(ENABLE_ICONV "Enable character encoding conversion of text written on the map" True)
+if(ENABLE_ICONV)
+	find_package(Iconv)
+	if(ICONV_FOUND)
+		set(USE_ICONV 1)
+		set(MAPPER_SRCS_ICONV CharEncodingConverterIConv.cpp)
+		message (STATUS "iconv libraries: ${ICONV_LIBRARIES}")
+	else(ICONV_FOUND)
+		message (SEND_ERROR "iconv libraries not found")
+	endif(ICONV_FOUND)
+else(ENABLE_ICONV)
+	set(USE_ICONV 0)
+endif(ENABLE_ICONV)
+
 find_package(PkgConfig)
 include(FindPackageHandleStandardArgs)
 
@@ -245,6 +260,7 @@ include_directories(
 	"${CMAKE_CURRENT_BINARY_DIR}"
 	${LIBGD_INCLUDE_DIR}
 	${ZLIB_INCLUDE_DIR}
+	${ICONV_INCLUDE_DIR}
 )
 
 set(mapper_SRCS
@@ -256,12 +272,15 @@ set(mapper_SRCS
 	Settings.cpp
 	BlockPos.cpp
 	mapper.cpp
+	CharEncodingConverter.cpp
+	${MAPPER_SRCS_ICONV}
 )
 
 set(LINK_LIBRARIES
 	minetestmapper
 	${LIBGD_LIBRARY}
 	${ZLIB_LIBRARY}
+	${ICONV_LIBRARIES}
 )
 
 if(USE_SQLITE3)

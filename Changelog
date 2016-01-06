@@ -17,9 +17,14 @@
 	- Command-line options are now all case-agnostic wrt their parameters.
 	- Allow nodes to be defined as air-type or ignore-type in colors.txt
 	- Added an option to draw 'ignore'-nodes.
+	- Text drawn on the map is now converted to the ISO8859-2 encoding. Due
+		to limited font support in the drawing library, characters not
+		in the ISO8859-2 set are not supported.
+		Minetestmapper will attempt to render unsupported characters
+		sensibly if it can.
     Bugfixes:
         - Fixed possible compilation failure caused by stdint.h
-	- Fixed compilation failure when some database libraries are not installed
+	- Fixed compilation failure when some database libraries are not installed.
 		Even when support for some of the databases was not enabled,
 		the libraries for those databases still needed to be installed on
 		the system for compilation to succeed. Now the libraries no

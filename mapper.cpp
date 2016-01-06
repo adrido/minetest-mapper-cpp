@@ -758,6 +758,8 @@ int main(int argc, char *argv[])
 	string heightMapNodesFile;
 	bool foundGeometrySpec = false;
 	bool setFixedOrShrinkGeometry = false;
+	CharEncodingConverter *charConvUTF8;
+	charConvUTF8 = CharEncodingConverter::createStandardConverter("UTF-8");
 
 	TileGenerator generator;
 	try {
@@ -1408,14 +1410,16 @@ int main(int argc, char *argv[])
 
 						if (object == 't') {
 							iss >> std::ws;
-							std::getline(iss, drawObject.text);
-							if (drawObject.text.empty() || iss.fail()) {
+							std::string localizedText;
+							std::getline(iss, localizedText);
+							if (localizedText.empty() || iss.fail()) {
 								std::cerr << "Invalid or missing text for "
 									<< long_options[option_index].name
 									<< " '" << optarg << "'" << std::endl;
 								usage();
 								exit(1);
 							}
+							drawObject.text = charConvUTF8->convert(localizedText);
 						}
 
 						generator.drawObject(drawObject);

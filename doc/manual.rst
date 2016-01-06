@@ -654,6 +654,11 @@ Detailed Description of Options
 	'``$``', etc. On unix-like systems, use single quotes to avoid
 	interpretation of most characters (except for ``'`` itself).
 
+	Due to a limitation of the drawing library, currently only text that
+	can be represented in (i.e. converted to) the ISO8859-2 character set is
+	supported. Text that uses non-compatible characters will not be rendered
+	correctly.
+
 	Note that the combination of geometry, color and text should be a
 	single argument.  This means that they must be enclosed in quotes
 	together on the command-line, else they will be misinterpreted as three
@@ -800,6 +805,9 @@ Detailed Description of Options
 	Draw circles and player names at the positions of players
 
 	The color can be set with `--origincolor`_.
+
+	Just like for text drawn with `--draw[map]text`_, characters that cannot be converted
+	to the ISO8859-2 character set will not be rendered correctly.
 
 	An image with a few players:
 

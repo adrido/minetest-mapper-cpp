@@ -110,3 +110,7 @@ Known Problems
   ``#4x91a1`` on another system)
 
   The cause of this difference has not been determined yet.
+
+* The drawing library supports ISO8859-2 fonts only. Characters in text and
+  player names that cannot be converted to the ISO8859-2 character set will
+  not be rendered correctly.

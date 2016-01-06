@@ -186,8 +186,13 @@ TileGenerator::TileGenerator():
 	m_tileMapXOffset(0),
 	m_tileMapYOffset(0),
 	m_surfaceHeight(INT_MIN),
-	m_surfaceDepth(INT_MAX)
+	m_surfaceDepth(INT_MAX),
+	m_gdStringConv(NULL)
 {
+	// Libgd requires ISO8859-2 :-(
+	// Internally, we use UTF-8. Assume minetest does the same... (if not, it's probably broken)
+	m_gdStringConv = CharEncodingConverter::createStandardConverter("ISO8859-2", "UTF-8");
+
 	memset(&m_databaseFormatFound, 0, sizeof(m_databaseFormatFound));
 	// Load default grey colors.
 	m_heightMapColors.push_back(HeightMapColor(INT_MIN, Color(0,0,0), -129, Color(0,0,0)));
@@ -2239,9 +2244,10 @@ void TileGenerator::renderPlayers(const std::string &inputPath)
 	for (PlayerAttributes::Players::iterator player = players.begin(); player != players.end(); ++player) {
 		int imageX = worldX2ImageX(player->x / 10);
 		int imageY = worldZ2ImageY(player->z / 10);
+		std::string displayName = m_gdStringConv->convert(player->name);
 
 		gdImageArc(m_image, imageX, imageY, 5, 5, 0, 360, color);
-		gdImageString(m_image, gdFontGetMediumBold(), imageX + 2, imageY + 2, reinterpret_cast<unsigned char *>(const_cast<char *>(player->name.c_str())), color);
+		gdImageString(m_image, gdFontGetMediumBold(), imageX + 2, imageY + 2, reinterpret_cast<unsigned char *>(const_cast<char *>(displayName.c_str())), color);
 	}
 }
 
@@ -2376,8 +2382,11 @@ void TileGenerator::renderDrawObjects(void)
 		case DrawObject::Rectangle:
 			gdImageRectangle(m_image, o->corner1.x(), o->corner1.y(), o->corner2.x(), o->corner2.y(), o->color.to_libgd());
 			break;
-		case DrawObject::Text:
-			gdImageString(m_image, gdFontGetMediumBold(), o->center.x(), o->center.y(), reinterpret_cast<unsigned char *>(const_cast<char *>(o->text.c_str())), o->color.to_libgd());
+		case DrawObject::Text: {
+				std::string displayText = m_gdStringConv->convert(o->text.c_str());
+				gdImageString(m_image, gdFontGetMediumBold(), o->center.x(), o->center.y(),
+					reinterpret_cast<unsigned char *>(const_cast<char *>(displayText.c_str())), o->color.to_libgd());
+			}
 			break;
 		default:
 #ifdef DEBUG
