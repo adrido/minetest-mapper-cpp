@@ -7,8 +7,8 @@ void BlockPos::operator=(const std::string &s)
 	std::istringstream is(s);
 	if (isdigit(is.peek()) || is.peek() == '-' || is.peek() == '+') {
 		int64_t ipos;
-		is >> ipos;
-		if (is.bad() || !is.eof()) {
+		is >> ipos >> std::ws;
+		if (is.fail() || !is.eof()) {
 			throw std::runtime_error(std::string("Failed to decode i64 (minetest) coordinate string from database (") + s + ")" );
 		}
 		operator=(ipos);
@@ -23,7 +23,8 @@ void BlockPos::operator=(const std::string &s)
 		is >> y();
 		is >> c2;
 		is >> z();
-		if (is.bad() || !is.eof() || c1 != ',' || c2 != ',') {
+		is >> std::ws;
+		if (is.fail() || !is.eof() || c1 != ',' || c2 != ',') {
 			throw std::runtime_error(std::string("Failed to decode axyz (freeminer) coordinate string from database (") + s + ")" );
 		}
 		m_strFormat = AXYZ;
