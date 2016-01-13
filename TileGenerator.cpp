@@ -706,7 +706,7 @@ void TileGenerator::parseHeightMapColorsLine(const std::string &line, std::strin
 			iline.clear();
 			iline >> std::ws;
 			iline >> value >> std::ws;
-			if (iline.good()) {
+			if (!iline.fail()) {
 				if (value == "-oo" || (c == '-' && value=="oo"))
 					height[i] = INT_MIN;
 				else if (value == "oo" || value == "+oo")
@@ -755,7 +755,7 @@ void TileGenerator::parseHeightMapNodesLine(const std::string &line, std::string
 		m_nodeColors[name] = ColorEntry(0,0,0,255,1,0);		// Dummy entry - but must not be transparent
 	}
 	// Don't care if not at eof (== really eol). We might be reading a colors.txt file...
-	if (iline.bad()) {
+	if (iline.fail()) {
 		std::cerr << filename << ":" << linenr << ": bad line in heightmap nodes file (" << line << ")" << std::endl;
 		return;
 	}
