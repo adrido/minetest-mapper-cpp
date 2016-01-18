@@ -21,7 +21,6 @@
 #include <sys/types.h>
 #include "TileGenerator.h"
 #include "PixelAttributes.h"
-#include "db-postgresql.h"
 #include "util.h"
 
 using namespace std;
