@@ -14,12 +14,14 @@ static inline int64_t stoi64(const std::string &s)
 }
 
 
+#if 0
 static inline std::string i64tos(int64_t i)
 {
 	std::ostringstream os;
 	os << i;
 	return os.str();
 }
+#endif
 
 DBRedis::DBRedis(const std::string &mapdir) :
 	m_blocksReadCount(0),
