@@ -248,4 +248,5 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
+MSVC/versioninfo.h
 minetestmapper.VC.db

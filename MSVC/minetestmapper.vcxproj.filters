@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="resource.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="..\BlockPos.h">
       <Filter>Header files</Filter>
     </ClInclude>
@@ -98,6 +95,18 @@
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="..\ZlibDecompressor.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\leveldb-single-file.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\snappy-single-file.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\crc32c.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="wingetopt\src\getopt.c">
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="..\Settings.cpp">
