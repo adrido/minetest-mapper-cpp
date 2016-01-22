@@ -8,9 +8,9 @@ Not all platforms receive the same amount of testing:
 
 * Gcc and clang builds on Linux are frequently tested.
 * The BSD family should also give little trouble. It is not tested that I know of.
-* Windows building using MinGW is also regularly tested and should work.
-* MSVC on Windows has not been tested recently.
-* Building on OSX has not been tested recently.
+* MSVC on Windows is tested.
+* Windows building using MinGW is tested intermittently and should work.
+* Building on OSX has not been tested recently and may not work.
 
 Please let me know how you fared on your platform (when you encounter problems,
 but also when you're successful - so I can update this text with the latest
@@ -34,12 +34,18 @@ Libraries
 At least one of ``sqlite3``, ``postgresql``, ``leveldb`` and ``hiredis`` is required.
 Check the minetest worlds that will be mapped to know which ones should be included.
 
+Not all database backend libraries may be obtainable for all platforms (in particular
+for Windows).
+
+The current build scripts for MSVC on windows support the SQLite3 and LevelDB backends out
+of the box. Compiling with Redis or PostgreSQL support will require some extra work.
+
 Build Environment
 -----------------
 
-* C++ compiler suite (clang or gcc (including mingw); msvc has not recently been tested)
-* cmake
-* make
+* C++ compiler suite (clang or gcc (including mingw); msvc on Windows)
+* cmake (not for msvc)
+* make (not for msvc)
 
 Documentation
 -------------
@@ -135,12 +141,32 @@ Linux Mint
 ----------
 See `Debian and Derivatives`_
 
-Windows
--------
+Windows (MinGW)
+---------------
 
 You're probably in for a lot of work, downloading software, and
 probably compiling at least some of the direct and indirect dependencies.
 At the moment, regrettably, detailed instructions are not available.
+
+Windows (MSVC)
+--------------
+
+The following must be installed to successfully compile minetestmapper using MSVC:
+
+* Visual Studio 2015 or 2013 (lower may not work). VS Community can be obtained here:
+  https://www.visualstudio.com/
+* A precompiled version of the gd library. A suitable version can be downloaded from
+  https://github.com/Rogier-5/minetest-mapper-cpp/wiki/Downloads#the-gd-library-for-compiling-minetestmapper-with-msvc
+
+  Alternatively, the gd sources can be downloaded from https://github.com/libgd/libgd.
+  They must be compiled using the same version of zlib that will be used when compiling
+  minetestmapper.
+
+  Version 2.2.1 of gd is verified to work, but any version 2.2.x should also work.
+  And presumably any version 2.x later than 2.2 should work as well.
+
+All other required dependencies will be downloaded automatically by MSVC.
+
 
 Other
 -----
@@ -177,10 +203,49 @@ Create native installation package(s):
 
 See `CMake Variables`_ for more CMake options.
 
-Windows
--------
+Windows (MinGW)
+---------------
 
-Unfortunately, at the moment no instructions for Windows building are available.
+Unfortunately, at the moment no instructions are available for Windows building using MinGW.
+
+Windows (MSVC)
+--------------
+
+Setting up the IDE
+..................
+
+1. Open ``minetestmapper.sln`` or ``MSVC\mintestmapper.vcxproj`` with Visual Studio.
+2. Configure the gd libary:
+    1. Open projectsettings `ALT+F7`.
+    2. Select `All Configurations` and `All Platforms`.
+    3. Click `C/C++` -> `additional include directories` and enter the path to the include directory of libGD.
+    4. Click `Apply`
+    5. Select a configuration (``Debug|Release``) and a platform (``x86|x64``)
+    6. Click `Linker` --> `additional libary directories` Enter the path to libgd that fits to your configuration and platform.
+
+       Do this step for all configurations and platforms you want to use.
+
+       WARNING: You will get a linker error if you select a version of libgd that does not fit to your configuration and platform.
+
+Building Minetestmapper
+.......................
+
+With everything set up, Minetestmapper can be built.
+
+Building for 64-bit may fail due to a `bug in snappy`__. If this happens,
+the following steps will solve this:
+
+1. Open ``packages\Snappy.1.1.1.7\lib\native\src\snappy.cc``
+2. Change line 955 from ``#ifndef WIN32`` to ``#ifndef _WIN32``
+
+__ https://bitbucket.org/robertvazan/snappy-visual-cpp/issues/1/snappycc-will-not-compile-on-windows-x64
+
+Debugging Minetestmapper
+........................
+
+1. In projectsettings (`ALT+F7`) click `Debugging`.
+2. Specify the Arguments in `Command arguments`.
+3. Every time you launch the debugger, minetstmapper will be executed with those arguments.
 
 OSX
 ---

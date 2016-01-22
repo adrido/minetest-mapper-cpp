@@ -23,6 +23,10 @@ Major Features
 Build Features
 ==============
 * Supports both the gcc and clang compiler suites
+* Supports MSVC building on Windows (with SQLite3 and LevelDB)
+
+  * With automatic downloading of all but one of the required libraries.
+
 * Build rpm, deb and/or tar.gz installation
   packages. Or simply type 'make install'.
 
@@ -71,6 +75,7 @@ Differences From Stock Minetestmapper
 * Block numbers are shown on the scale as well
 * Optionally, avoid reading the block list from the database
   (dramatically speeds up generating maps of small parts of large worlds)
+* Compiles using MSVC on windows.
 
 In addition a number bugs have been fixed. As bugs are also getting
 fixed in the stock version of minetestmapper, no accurate list
