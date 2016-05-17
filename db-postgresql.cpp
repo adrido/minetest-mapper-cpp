@@ -5,9 +5,12 @@
 #include "Settings.h"
 #include "types.h"
 
-#define BLOCKPOSLIST_QUERY		"SELECT x, y, z FROM blocks"
-#define BLOCKPOSLISTBOUNDED_QUERY	"SELECT x, y, z FROM blocks WHERE x BETWEEN $1 AND $2 AND y BETWEEN $3 AND $4 AND z BETWEEN $5 AND $6"
-#define BLOCK_QUERY			"SELECT data FROM blocks WHERE x = $1 AND y = $2 AND z = $3"
+#define BLOCKPOSLIST_QUERY_COMPAT	"SELECT x, y, z FROM blocks"
+#define BLOCKPOSLISTBOUNDED_QUERY_COMPAT "SELECT x, y, z FROM blocks WHERE x BETWEEN $1 AND $2 AND y BETWEEN $3 AND $4 AND z BETWEEN $5 AND $6"
+#define BLOCK_QUERY_COMPAT		"SELECT data FROM blocks WHERE x = $1 AND y = $2 AND z = $3"
+#define BLOCKPOSLIST_QUERY		"SELECT posX, posY, posZ FROM blocks"
+#define BLOCKPOSLISTBOUNDED_QUERY	"SELECT posX, posY, posZ FROM blocks WHERE posX BETWEEN $1 AND $2 AND posY BETWEEN $3 AND $4 AND posZ BETWEEN $5 AND $6"
+#define BLOCK_QUERY			"SELECT data FROM blocks WHERE posX = $1 AND posY = $2 AND posZ = $3"
 
 // From pg_type.h
 #define PG_INT4OID		23
@@ -20,16 +23,22 @@ DBPostgreSQL::DBPostgreSQL(const std::string &mapdir) :
 	std::string connection_info;
 
 	bool info_found = false;
-	// ShadowNinja's implementation
-	info_found = world_mt.check("postgresql_connection_info", connection_info);
-	// johnnyjoy's implementation
-	// The default value is not used here as it seems to me it has a serious issue:
-	// creating two worlds without specifying pg_connection_info will result in both
-	// worlds using the same database.
+	bool compat_mode = false;
+
+	// Official postgresql connection info string
+	info_found = world_mt.check("pgsql_connection", connection_info);
+	compat_mode = !info_found;
+
+	// ShadowNinja's implementation (historical)
+	if (!info_found)
+		info_found = world_mt.check("postgresql_connection_info", connection_info);
+
+	// johnnyjoy's implementation (historical)
 	if (!info_found)
 		info_found = world_mt.check("pg_connection_info", connection_info);
+
 	if (!info_found)
-		throw std::runtime_error("Set postgresql_connection_info or pg_connection_info in world.mt to use the postgresql backend");
+		throw std::runtime_error("Set pgsql_connection in world.mt to use the postgresql backend");
 
 	connection_info += "fallback_application_name=minetestmapper " + connection_info;
 
@@ -39,21 +48,30 @@ DBPostgreSQL::DBPostgreSQL(const std::string &mapdir) :
 			+ PQerrorMessage(m_connection));
 	}
 
+	const char *blockposlist_query = BLOCKPOSLIST_QUERY;
+	const char *blockposlistbounded_query = BLOCKPOSLISTBOUNDED_QUERY;
+	const char *block_query = BLOCK_QUERY;
+	if (compat_mode) {
+		blockposlist_query = BLOCKPOSLIST_QUERY_COMPAT;
+		blockposlistbounded_query = BLOCKPOSLISTBOUNDED_QUERY_COMPAT;
+		block_query = BLOCK_QUERY_COMPAT;
+	}
+
 	PGresult *result;
 
-	result = PQprepare(m_connection, "GetBlockPosList", BLOCKPOSLIST_QUERY, 0, NULL);
+	result = PQprepare(m_connection, "GetBlockPosList", blockposlist_query, 0, NULL);
 	if (!result || PQresultStatus(result) != PGRES_COMMAND_OK)
 		throw std::runtime_error(std::string("Failed to prepare PostgreSQL statement (GetBlockPosList): ")
 			+ (result ? PQresultErrorMessage(result) : "(result was NULL)"));
 	PQclear(result);
 
-	result = PQprepare(m_connection, "GetBlockPosListBounded", BLOCKPOSLISTBOUNDED_QUERY, 0, NULL);
+	result = PQprepare(m_connection, "GetBlockPosListBounded", blockposlistbounded_query, 0, NULL);
 	if (!result || PQresultStatus(result) != PGRES_COMMAND_OK)
 		throw std::runtime_error(std::string("Failed to prepare PostgreSQL statement (GetBlockPosListBounded): ")
 			+ (result ? PQresultErrorMessage(result) : "(result was NULL)"));
 	PQclear(result);
 
-	result = PQprepare(m_connection, "GetBlock", BLOCK_QUERY, 0, NULL);
+	result = PQprepare(m_connection, "GetBlock", block_query, 0, NULL);
 	if (!result || PQresultStatus(result) != PGRES_COMMAND_OK)
 		throw std::runtime_error(std::string("Failed to prepare PostgreSQL statement (GetBlock): ")
 			+ (result ? PQresultErrorMessage(result) : "(result was NULL)"));

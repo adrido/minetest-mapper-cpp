@@ -1,7 +1,9 @@
 []
     Features:
 	- Support for postgresql backend added
-		Compatible with both ShadowNinja's and johnnyjoy's implementation
+		Compatible with two previous unofficial implementations, by
+		ShadowNinja and johnnyjoy. Support for these will be removed
+		in a future version of Minetestmapper.
     Enhancements:
         - Updated the included colors file with colors for the new tiles that
 	 	were recently added to the default minetest game.
