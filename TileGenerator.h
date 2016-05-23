@@ -162,6 +162,7 @@ private:
 	std::string getWorldDatabaseBackend(const std::string &input);
 	int getMapChunkSize(const std::string &input);
 	void openDb(const std::string &input);
+	void closeDb();
 	void sanitizeParameters(void);
 	void loadBlocks();
 	void createImage();

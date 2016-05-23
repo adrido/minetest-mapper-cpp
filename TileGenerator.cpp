@@ -202,6 +202,7 @@ TileGenerator::TileGenerator():
 
 TileGenerator::~TileGenerator()
 {
+	closeDb();
 }
 
 void TileGenerator::setSilenceSuggestion(unsigned flags)
@@ -557,6 +558,7 @@ void TileGenerator::generate(const std::string &input, const std::string &output
 	if (!m_drawObjects.empty()) {
 		renderDrawObjects();
 	}
+	closeDb();
 	if (progressIndicator)
 	    cout << "Writing image...\r" << std::flush;
 	writeImage(output);
@@ -857,6 +859,14 @@ void TileGenerator::openDb(const std::string &input)
 
 	if (unsupported)
 		throw std::runtime_error(((std::string) "World uses backend '") + m_backend + ", which was not enabled at compile-time.");
+}
+
+void TileGenerator::closeDb()
+{
+	if (m_db) {
+		delete m_db;
+		m_db = NULL;
+	}
 }
 
 void TileGenerator::loadBlocks()

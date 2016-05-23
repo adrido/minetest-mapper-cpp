@@ -12,6 +12,7 @@
 
 class DB {
 public:
+	virtual ~DB() {}
 	typedef std::pair<BlockPos, ustring> Block;
 	typedef std::vector<BlockPos>  BlockPosList;
 	virtual const BlockPosList &getBlockPosList()=0;
