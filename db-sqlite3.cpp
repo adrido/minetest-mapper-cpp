@@ -76,7 +76,9 @@ DB::Block DBSQLite3::getBlockOnPos(const BlockPos &pos)
 
 	sqlite3_stmt *statement;
 
-	if (pos.databasePosIdIsValid()) {
+	// Disabled RowID querying, as it may cause blocks not to be found when mapping
+	// while minetest is running (i.e. modifying blocks).
+	if (0 && pos.databasePosIdIsValid()) {
 		statement = m_blockOnRowidStatement;
 		sqlite3_bind_int64(m_blockOnRowidStatement, 1, pos.databasePosId());
 	}

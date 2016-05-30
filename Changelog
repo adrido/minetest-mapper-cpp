@@ -36,6 +36,8 @@
 		specified manually.
 		(At least one backend-specific (LevelDB-related) option was not
 		 taking effect when LevelDB was auto-selected).
+	- Fixed problem causing existing but modified blocks not being found in
+		SQLite3 database when mapping while minetest is running.
 [10 mar 2015]
     Enhancements:
 	- Added an optimisation option: --disable-blocklist-prefetch.
