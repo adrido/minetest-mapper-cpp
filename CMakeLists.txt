@@ -13,13 +13,9 @@ endif(WIN32)
 
 # Obtain stored major version number
 # Make sure cmake is rerun when version has changed
-configure_file(version version.dup COPYONLY)
-file(REMOVE version.dup)
-if(EXISTS "${CMAKE_HOME_DIRECTORY}/version")
-	file(STRINGS "${CMAKE_HOME_DIRECTORY}/version" VERSION_FROM_FILE)
-else(EXISTS "${CMAKE_HOME_DIRECTORY}/version")
-	message(FATAL_ERROR "File '${CMAKE_HOME_DIRECTORY}/version' not found or not readable")
-endif(EXISTS "${CMAKE_HOME_DIRECTORY}/version")
+configure_file(base-version base-version.dup COPYONLY)
+file(REMOVE base-version.dup)
+file(STRINGS "${CMAKE_HOME_DIRECTORY}/base-version" VERSION_FROM_FILE)
 
 execute_process(COMMAND git describe --long "--match=[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]" --dirty=-WIP --abbrev=8
 		RESULT_VARIABLE VERSION_EXIT OUTPUT_VARIABLE GIT_VERSION ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -524,9 +520,15 @@ include(CPack)
 
 # DO this near the end - to make sure all variables have been computed
 # and are final.
+set(INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(BUILD_CONFIG_GENTOOL CMake)
+# CMake does not have a date format specifier for timezone...
+execute_process(COMMAND date -R RESULT_VARIABLE DATE_EXITVAL OUTPUT_VARIABLE BUILD_CONFIG_GENDATE ERROR_FILE /dev/null OUTPUT_STRIP_TRAILING_WHITESPACE)
+if(DATE_EXITVAL)
+	message(FATAL_ERROR "Failed to run command 'date -R'")
+endif(DATE_EXITVAL)
 configure_file(
-	"${PROJECT_SOURCE_DIR}/cmake_config.h.in"
-	"${PROJECT_BINARY_DIR}/cmake_config.h"
+	"${PROJECT_SOURCE_DIR}/build_config.h.in"
+	"${PROJECT_BINARY_DIR}/build_config.h"
 )
-add_definitions ( -DUSE_CMAKE_CONFIG_H )
 

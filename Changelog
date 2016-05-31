@@ -4,6 +4,7 @@
 		Compatible with two previous unofficial implementations, by
 		ShadowNinja and johnnyjoy. Support for these will be removed
 		in a future version of Minetestmapper.
+	- Support for MSVC/Windows compilation (Thanks to adrido!)
     Enhancements:
         - Updated the included colors file with colors for the new tiles that
 	 	were recently added to the default minetest game.
@@ -13,6 +14,7 @@
 		in the different packages.
 	- Documented concurrent minetest & minetestmapper use.
 	- Documented the different geometries reported with --verbose
+	- Mentioned adrido's MinetestmapperGUI in the manual
 	- The option --prescan-world was added to force or disable scanning the
 		entire world (i.e. reading a full blocklist)
 		(useful for postgresql, which doesn't do this by default).
