@@ -11,6 +11,7 @@
 		in the different packages.
 	- Documented concurrent minetest & minetestmapper use.
 	- Documented the different geometries reported with --verbose
+	- Mentioned adrido's MinetestmapperGUI in the manual
 	- The option --prescan-world was added to force or disable scanning the
 		entire world (i.e. reading a full blocklist)
 		(useful for postgresql, which doesn't do this by default).
