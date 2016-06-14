@@ -258,7 +258,7 @@ private:
 	int m_heightScaleMinor;
 
 	DB *m_db;
-	bool m_generateNoPrefetch;
+	int m_generateNoPrefetch;
 	bool m_databaseFormatSet;
 	BlockPos::StrFormat m_databaseFormat;
 	std::string m_recommendedDatabaseFormat;
