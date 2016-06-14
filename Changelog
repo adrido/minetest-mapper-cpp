@@ -1,3 +1,6 @@
+[]
+    Bugfixes:
+	- Fixed compilation failure when docutils is not installed
 [31 May 2016]
     Features:
 	- Support for postgresql backend added
