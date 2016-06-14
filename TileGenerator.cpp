@@ -1769,7 +1769,7 @@ public:
 		{ const MapBlockIteratorBlockPos &i2 = dynamic_cast<const MapBlockIteratorBlockPos &>(i); m_iter = i2.m_iter; return *this; }
 	bool operator==(const MapBlockIterator &i) const override
 		{ const MapBlockIteratorBlockPos &i2 = dynamic_cast<const MapBlockIteratorBlockPos &>(i); return m_iter == i2.m_iter; }
-	void breakDim(int i) { m_iter.breakDim(i); }
+	void breakDim(int i) override { m_iter.breakDim(i); }
 private:
 	BlockPosIterator m_iter;
 };
