@@ -139,9 +139,6 @@ struct NodeCoordHashed : NodeCoord
 private:
 	size_t m_hash;
 public:
-	struct Hash {
-		size_t operator()(const NodeCoordHashed &h) const { return h.hash(); }
-	};
 	NodeCoordHashed(const BlockPos &pos) : NodeCoord(pos) { rehash(); }
 	NodeCoordHashed(const NodeCoord &coord) : NodeCoord(coord) { rehash(); }
 	void rehash(void) { m_hash = NodeCoord::hash(); }
