@@ -2,7 +2,7 @@
 #define _DB_POSTGRESQL_H
 
 #include "db.h"
-#include <postgresql/libpq-fe.h>
+#include <libpq-fe.h>
 #if __cplusplus >= 201103L
 #include <unordered_map>
 #else
