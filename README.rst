@@ -11,8 +11,8 @@ Quick links (functional on github. Elsewhere possibly not):
 :Changelog:		`<Changelog>`_
 :Building:		`<doc/build-instructions.rst>`_
 :Github:		`<https://github.com/Rogier-5/minetest-mapper-cpp>`_
-:Bugs:			`<https://github.com/Rogier-5/minetest-mapper-cpp/issues>`_
-:Windows packages:	`<https://github.com/Rogier-5/minetest-mapper-cpp/wiki/Downloads>`_
+:Submitting bugs:	`<https://github.com/Rogier-5/minetest-mapper-cpp/issues>`_
+:Binary downloads:	`<https://github.com/Rogier-5/minetest-mapper-cpp/wiki/Downloads>`_
 :Generating colors.txt: `<dumpnodes/README.dumpnodes>`_
 
 Features (short list)
