@@ -289,6 +289,18 @@ CREATE_FLAT_PACKAGE:
 
     For ``.rpm`` package creation, rpmbuild is required.
 
+PACKAGING_VERSION:
+    The version number of the packaging itself. It is appended to the software version
+    number when packaging.
+
+    This number should normally be set to '1', but it should be increased when
+    a package has been installed or distributed, and a newer package is created from
+    from the same sources (i.e. from the same git commit).
+
+    This can happen for instance, if a problem was caused by the packaging itself,
+    or if a bug in a library was fixed, and minetestmapper needs to be recompiled
+    to incorporate that fix.
+
 CMAKE_INSTALL_PREFIX:
     The install location. Should probably be ``/usr`` or ``/usr/local`` on Linux and BSD variants.
 
