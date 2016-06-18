@@ -1,6 +1,13 @@
 []
+    Enhancements
+	- Improved rpm platform detection and version string
+	- Allow specifying a packaging version
     Bugfixes:
 	- Fixed compilation failure when docutils is not installed
+	- Removed all compiler warnings on Windows
+		When compiling a debug version, some warnings remain
+		(intentionally).
+	- Fixed a compilation failure on Fedora when using postgresql
 [31 May 2016]
     Features:
 	- Support for postgresql backend added
