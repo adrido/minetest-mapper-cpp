@@ -9,6 +9,8 @@
 		(intentionally).
 	- Fixed a compilation failure on Fedora when using postgresql
 	- Fixed failure to compile with gcc 6
+	- Fixed failure to compile when rpm is not installed
+		(e.g. on non-rpm systems...)
 [31 May 2016]
     Features:
 	- Support for postgresql backend added

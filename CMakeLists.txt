@@ -497,16 +497,18 @@ else(WIN32)
 		# .rpm settings
 		# RPM package building needs rpmbuild, but cpack doesn't check for it first...
 		find_program(RPM_AVAILABLE "rpmbuild")
-		execute_process(COMMAND rpm -q rpm
-				RESULT_VARIABLE RPM_VERSION_EXIT
-				OUTPUT_VARIABLE RPMCOMMAND_PACKAGE_VERSION
-				ERROR_QUIET
-				OUTPUT_STRIP_TRAILING_WHITESPACE)
-		if(RPM_VERSION_EXIT)
-			if(NOT RPMCOMMAND_PACKAGE_VERSION STREQUAL "package rpm is not installed")
-				message(FATAL_ERROR "Could not determine version of installed rpm package")
-			endif(NOT RPMCOMMAND_PACKAGE_VERSION STREQUAL "package rpm is not installed")
-		endif(RPM_VERSION_EXIT)
+		if(RPM_AVAILABLE)
+			execute_process(COMMAND rpm -q rpm
+					RESULT_VARIABLE RPM_VERSION_EXIT
+					OUTPUT_VARIABLE RPMCOMMAND_PACKAGE_VERSION
+					ERROR_QUIET
+					OUTPUT_STRIP_TRAILING_WHITESPACE)
+			if(RPM_VERSION_EXIT)
+				if(NOT RPMCOMMAND_PACKAGE_VERSION STREQUAL "package rpm is not installed")
+					message(FATAL_ERROR "Could not determine version of installed rpm package")
+				endif(NOT RPMCOMMAND_PACKAGE_VERSION STREQUAL "package rpm is not installed")
+			endif(RPM_VERSION_EXIT)
+		endif(RPM_AVAILABLE)
 		if(RPM_AVAILABLE AND NOT RPM_VERSION_EXIT)
 			message(STATUS "rpmbuild found - enabling .rpm package generation")
 			set(CPACK_GENERATOR ${CPACK_GENERATOR} RPM)
