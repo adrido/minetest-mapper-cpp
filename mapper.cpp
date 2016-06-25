@@ -25,6 +25,9 @@
 
 using namespace std;
 
+// Will be used in error messages if nothing better is available.
+#define DEFAULT_PROGRAM_NAME		"minetestmapper"
+
 #define OPT_SQLITE_CACHEWORLDROW	0x81
 #define OPT_PROGRESS_INDICATOR		0x82
 #define OPT_DRAW_OBJECT			0x83
@@ -51,7 +54,7 @@ using namespace std;
 
 
 // Will be replaced with the actual name and location of the executable (if found)
-string executableName = "minetestmapper";
+string executableName = DEFAULT_PROGRAM_NAME;
 string executablePath;			// ONLY for use on windows
 string installPrefix = INSTALL_PREFIX;
 string nodeColorsDefaultFile = "colors.txt";
@@ -673,7 +676,10 @@ int main(int argc, char *argv[])
 		if (pos == string::npos) {
 			if (!argv0.empty())
 				executableName = argv0;
-				executablePath = "";
+			else
+				executableName = DEFAULT_PROGRAM_NAME;
+			executablePath = "";
+
 		}
 		else {
 			executableName = argv0.substr(pos + 1);
