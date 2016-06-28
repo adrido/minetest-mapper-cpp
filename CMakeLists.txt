@@ -250,6 +250,24 @@ if(NOT USE_SQLITE3 AND NOT USE_POSTGRESQL AND NOT USE_LEVELDB AND NOT USE_REDIS)
 	message(SEND_ERROR "No database backends are configured, or none could be found")
 endif(NOT USE_SQLITE3 AND NOT USE_POSTGRESQL AND NOT USE_LEVELDB AND NOT USE_REDIS)
 
+# Determine whether there is a libstdc++ ABI incompatibility.
+# Currently only needed for leveldb.
+set(CPP_ABI_STDSTRING_OK 1)
+if(USE_LEVELDB)
+	# try_compile does not remove the temporary build directory, so put it in CMakeFiles...
+	# Also: use absolute paths; cmake chokes on relative paths :-(
+	# AARGH! try_compile does not understand the INCLUDE_DIRECTORIES directive.
+	try_compile(CPP_ABI_STDSTRING_RESULT
+			"${CMAKE_HOME_DIRECTORY}/CMakeFiles/CMakeTmp/abi-stdstring-test"
+			"${CMAKE_HOME_DIRECTORY}/cmake/abi-stdstring.cpp"
+			LINK_LIBRARIES ${LEVELDB_LIBRARY})
+			#INCLUDE_DIRECTORIES ${LEVELDB_INCLUDE_DIR}
+	if(NOT CPP_ABI_STDSTRING_RESULT)
+		set(CPP_ABI_STDSTRING_OK 0)
+		message(STATUS "C++ library ABI mismatch for std::string. Enabling workaround - this may affect functionality")
+	endif(NOT CPP_ABI_STDSTRING_RESULT)
+endif(USE_LEVELDB)
+
 include_directories(
 	"${PROJECT_BINARY_DIR}"
 	"${CMAKE_CURRENT_SOURCE_DIR}"

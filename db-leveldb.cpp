@@ -1,6 +1,7 @@
 #include "db-leveldb.h"
 #include <stdexcept>
 #include <sstream>
+#include "build_config.h"
 #include "types.h"
 
 inline int64_t stoi64(const std::string &s) {
@@ -26,7 +27,16 @@ DBLevelDB::DBLevelDB(const std::string &mapdir) :
 	options.create_if_missing = false;
 	leveldb::Status status = leveldb::DB::Open(options, mapdir + "map.db", &m_db);
 	if(!status.ok())
+		#if CPP_ABI_STDSTRING_OK
 		throw std::runtime_error(std::string("Failed to open Database: ") + status.ToString());
+		#else
+		throw std::runtime_error(std::string("Failed to open Database: ") +
+			( status.ok() ? "Ok (??? how is this possible ???"")"		// "" is needed to prevent interpretation as trigraph -shudder-
+			: status.IsNotFound() ? "NotFound"
+			: status.IsCorruption() ? "Corruption"
+			: status.IsIOError() ? "IOError"
+			: "Cannot determine error type - could be NotSupported or InvalidArgument or something else"));
+		#endif
 }
 
 DBLevelDB::~DBLevelDB() {

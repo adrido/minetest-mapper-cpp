@@ -11,6 +11,8 @@
 	- Fixed failure to compile with gcc 6
 	- Fixed failure to compile when rpm is not installed
 		(e.g. on non-rpm systems...)
+	- Workaround to allow compilation with clang when using leveldb.
+		This is broken due to libstdc++ ABI incompatibility
 [31 May 2016]
     Features:
 	- Support for postgresql backend added
