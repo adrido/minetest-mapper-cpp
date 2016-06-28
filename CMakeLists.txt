@@ -48,7 +48,7 @@ endif(VERSION_EXIT)
 
 # try_compile does not remove the temporary build directory, so put it in CMakeFiles...
 # Also: use absolute paths; cmake chokes on relative paths :-(
-try_compile(CXX_C0X_SUPPORTED "${CMAKE_HOME_DIRECTORY}/CMakeFiles/CMakeTmp/c0x-test" "${CMAKE_HOME_DIRECTORY}/empty.cpp" CMAKE_FLAGS "-std=c++0x")
+try_compile(CXX_C0X_SUPPORTED "${CMAKE_HOME_DIRECTORY}/CMakeFiles/CMakeTmp/c0x-test" "${CMAKE_HOME_DIRECTORY}/cmake/empty.cpp" CMAKE_FLAGS "-std=c++0x")
 if(CXX_C0X_SUPPORTED)
 	# Yes, I *know* c++0x is *not* an official C++ standard...
 	message(STATUS "Compiler: C++ standard version 'c++0x' is supported")
@@ -56,7 +56,7 @@ else(CXX_C0X_SUPPORTED)
 	message(STATUS "Compiler: C++ standard version c++0x is not supported")
 	message(FATAL_ERROR "Your compiler is not modern enough to compile this code\nPlease upgrade your compiler to one supporting at least c++0x.\n(or submit a bug report)")
 endif(CXX_C0X_SUPPORTED)
-try_compile(CXX_C11_SUPPORTED "${CMAKE_HOME_DIRECTORY}/CMakeFiles/CMakeTmp/c11-test" "${CMAKE_HOME_DIRECTORY}/empty.cpp" CMAKE_FLAGS "-std=c++11")
+try_compile(CXX_C11_SUPPORTED "${CMAKE_HOME_DIRECTORY}/CMakeFiles/CMakeTmp/c11-test" "${CMAKE_HOME_DIRECTORY}/cmake/empty.cpp" CMAKE_FLAGS "-std=c++11")
 if(CXX_C11_SUPPORTED)
 	message(STATUS "Compiler: C++ standard version 'c++11' is supported")
 else(CXX_C11_SUPPORTED)
