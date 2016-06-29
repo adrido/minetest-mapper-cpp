@@ -55,16 +55,6 @@ std::string BlockPos::databasePosStrFmt(StrFormat format) const
 	return os.str();
 }
 
-void BlockPosIterator::printState(const char *message, FILE *file)
-{
-	fprintf(file, "[%s]  Value: %d,%d,%d;  Range: %d,%d,%d .. %d,%d,%d;  State: %d\n",
-		message,
-		m_value.x(), m_value.y(), m_value.z(),
-		m_start.x(), m_start.y(), m_start.z(),
-		m_end.x(), m_end.y(), m_end.z(),
-		m_state);
-}
-
 void BlockPosIterator::breakDim(int i, int step)
 {
 	if (!step) return;

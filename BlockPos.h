@@ -104,7 +104,6 @@ private:
 	BlockPos m_start;
 	BlockPos m_end;
 	State m_state;
-	void printState(const char *message, FILE *file);
 	void stepForward(void);
 	void stepReverse(void);
 	bool stepDim(int i, int step);
