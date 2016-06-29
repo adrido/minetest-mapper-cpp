@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iostream>
 #include <langinfo.h>
+#include <cerrno>
 
 #define ICONV_BUFSIZE 16
 

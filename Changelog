@@ -13,6 +13,7 @@
 		(e.g. on non-rpm systems...)
 	- Workaround to allow compilation with clang when using leveldb.
 		This is broken due to libstdc++ ABI incompatibility
+	- Fixed compilation failure on FreeBSD (10.3) using gcc
 [31 May 2016]
     Features:
 	- Support for postgresql backend added
