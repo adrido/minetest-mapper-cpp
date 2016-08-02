@@ -2,6 +2,16 @@
     Enhancements
 	- Improved rpm platform detection and version string
 	- Allow specifying a packaging version
+	- Added option --sqlite3-limit-prescan-query-size to limit the number
+		of records queried simultaneously during a database prescan.
+		Use this if mapping while minetest is running causes minetest
+		to report warnings like:
+			SQLite3 database has been locked for <duration>
+		This may happen when mapping relatively large worlds.
+
+		If minetestmapper keeps the database locked for too long,
+		*and* if the database was modified in that time, minetestmapper
+		will also issue a warning.
     Bugfixes:
 	- Fixed compilation failure when docutils is not installed
 	- Removed all compiler warnings on Windows

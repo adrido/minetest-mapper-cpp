@@ -155,12 +155,17 @@ is also running (and most probably accessing and modifying the database).
 |Backend	|Support for online mapping					|
 +===============+===============================================================+
 |SQLite3	|Works perfectly since 30 dec 2015, or minetest version		|
-|		|0.4.14 (0.5 ?) and later.					|
+|		|0.4.14 and later.						|
 |		|								|
 |		|Minetest versions before 30 dec 2015 (or: version 0.4.13 and	|
 |		|earlier) probably can't handle concurrent mapping, and		|
 |		|may almost certainly crash with error 'database is locked'.	|
 |		|(but different systems may still behave differently...)	|
+|		|								|
+|		|Minetest versions since 30 dec 2015 (or version 0.4.14 and	|
+|		|later), may still be affected by locking delays, and even	|
+|		|rare crashes. Use `--sqlite3-limit-prescan-query-size`_ if	|
+|		|necessary.							|
 +---------------+---------------------------------------------------------------+
 |PostgreSQL	|Works perfectly.						|
 +---------------+---------------------------------------------------------------+
@@ -176,6 +181,9 @@ and there are no forceloaded blocks (i.e. provided minetest is not accessing the
 database while minetestmapper is running). The older versions of minetest will
 only crash if they find the database temporarily locked when writing (due to
 minetestmapper accessing it). Try at your own risk.
+
+Newer versions of may be affected by delays (i.e. lag). If the database is very large,
+and the prescan query keeps it locked for too long a time, minetest may still bail out.
 
 Command-line Options Summary
 ----------------------------
@@ -311,7 +319,7 @@ Feedback / information options:
     * ``--version`` :					Print version ID of minetestmapper
     * ``--verbose[=<n>]`` :				Report world and map statistics (size, dimensions, number of blocks)
     * ``--verbose-search-colors[=n]`` :			Report which colors files are used and/or which locations are searched
-    * ``--silence-suggestions all,prefetch`` :		Do not bother doing suggestions
+    * ``--silence-suggestions <types>`` :		Do not bother doing suggestions
     * ``--progress`` :					Show a progress indicator while generating the map
 
 Miscellaneous options
@@ -321,6 +329,7 @@ Miscellaneous options
     * ``--disable-blocklist-prefetch`` :		Do not prefetch a block list - faster when mapping small parts of large worlds.
     * ``--database-format minetest-i64|freeminer-axyz|mixed|query`` :	Specify the format of the database (needed with --disable-blocklist-prefetch and a LevelDB backend).
     * ``--prescan-world=full|auto|disabled`` :		Specify whether to prescan the world (compute a list of all blocks in the world).
+    * ``--sqlite3-limit-prescan-query-size[=<blocks>]`` :	Limit the size of individual block list queries during a world prescan.
 
 
 Detailed Description of Options
@@ -1213,16 +1222,21 @@ Detailed Description of Options
 	.. image:: images/drawscale-both.png
 	.. image:: images/sidescale-interval.png
 
-``--silence-suggestions all,prefetch``
+``--silence-suggestions <types>``
 ......................................
 	Do not print usage suggestions of the specified types.
 
 	If applicable, minetestmapper may suggest using or adjusting certain options
 	if that may be advantageous. This option disables such messages.
 
-	    :all:	Silence all existing (and future) suggestions there may be.
-	    :prefetch:	Do not make suggestions a about the use of --disable-blocklist-prefetch,
-			and adjustment of --min-y and --max-y when using --disable-blocklist-prefetch.
+	    :all:		Silence all existing (and future) suggestions there may be.
+	    :prefetch:		Do not make suggestions a about the use of `--disable-blocklist-prefetch`_,
+				and adjustment of --min-y and --max-y when using --disable-blocklist-prefetch.
+	    :sqlite3-lock:	Do not suggest using `--sqlite3-limit-prescan-query-size`_.
+
+				This warning will be given if the database was kept locked for 1 second or
+				more while fetching the block list `and` if the database was modified during
+				that time.
 
 ``--sqlite-cacheworldrow``
 ..........................
@@ -1232,6 +1246,59 @@ Detailed Description of Options
 
 	It is still recognised for compatibility with existing scripts,
 	but it has no effect.
+
+``--sqlite3-limit-prescan-query-size[=<blocks>]``
+.................................................
+	Limit the size of block list queries during a world prescan
+	(see `--prescan-world`_).
+
+	Use this if mapping while minetest is running causes minetest to
+	report warnings like:
+
+	    SQLite3 database has been locked for <duration>
+
+	If minetestmapper locks the database for too long, minetest may even
+	bail out eventually (i.e. crash).
+
+	If `--sqlite3-limit-prescan-query-size` is used, instead of doing a single
+	prescan query, minetestmapper will perform multiple queries, each for a
+	limited number of blocks, thus limiting the duration of the database lock.
+
+	To avoid blocks being skipped, which could happen if minetest has inserted new
+	blocks into the database, every query will overlap with the previous query.
+
+	Sample overlap sizes:
+
+	    ============	==========	==========
+	    Blocks		Overlap		Fraction
+	    ============	==========	==========
+	     2000		 1000		 50%
+	     10000		 1000		 10%
+	     100000		 10000		 10%
+	     250000		 11750		 4.7%
+	     1000000		 20000		 2%
+	    ============	==========	==========
+
+	The default value of `blocks` is 250000, the minimum value is 2000. The
+	minimum overlap is 1000.
+
+	E.g. with `blocks` = 100000 the overlap will be 10000, and minetestmapper will
+	perform the following block list prescan queries:
+
+	    =========		==========	==========
+	    Query nr.		From		To
+	    =========		==========	==========
+	     1			 0		 110000
+	     2			 100000		 210000
+	     3			 200000		 310000
+	     4			 300000		 410000
+	    etc. etc.
+	    =========		==========	==========
+
+	When using small values of `blocks` on fast machines, while minetest is
+	busy generating new parts of the world, the overlap may not be sufficient.
+	It is recommended (and much more efficient) to use a value of at least
+	100000.
 
 ``--tilebordercolor <color>``
 .............................
@@ -2051,7 +2118,8 @@ More information is available:
 .. _--playercolor: `--playercolor <color>`_
 .. _--prescan-world: `--prescan-world=full\|auto\|disabled`_
 .. _--prescan-world=disabled: `--prescan-world=full\|auto\|disabled`_
-.. _--silence-suggestions: `--silence-suggestions all,prefetch`_
+.. _--silence-suggestions: `--silence-suggestions <types>`_
+.. _--sqlite3-limit-prescan-query-size: `--sqlite3-limit-prescan-query-size[=<blocks>]`_
 .. _--scalecolor: `--scalecolor <color>`_
 .. _--scalefactor: `--scalefactor 1:<n>`_
 .. _--height-level-0: `--height-level-0 <level>`_

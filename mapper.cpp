@@ -22,6 +22,7 @@
 #include "TileGenerator.h"
 #include "PixelAttributes.h"
 #include "util.h"
+#include "db-sqlite3.h"
 
 using namespace std;
 
@@ -48,6 +49,7 @@ using namespace std;
 #define OPT_SILENCE_SUGGESTIONS		0x92
 #define OPT_PRESCAN_WORLD		0x93
 #define OPT_DRAWNODES			0x94
+#define OPT_SQLITE_LIMIT_PRESCAN_QUERY	0x95
 
 #define DRAW_ARROW_LENGTH		10
 #define DRAW_ARROW_ANGLE		30
@@ -147,6 +149,9 @@ void usage()
 			"  --disable-blocklist-prefetch[=force]\n"
 			"  --database-format minetest-i64|freeminer-axyz|mixed|query\n"
 			"  --prescan-world=full|auto|disabled\n"
+			#if USE_SQLITE3
+			"  --sqlite3-limit-prescan-query-size[=n]\n"
+			#endif
 			"  --geometry <geometry>\n"
 			"\t(Warning: has a compatibility mode - see README.rst)\n"
 			"  --cornergeometry <geometry>\n"
@@ -161,7 +166,7 @@ void usage()
 			"  --tilecenter <x>,<y>|world|map\n"
 			"  --scalefactor 1:<n>\n"
 			"  --chunksize <size>\n"
-			"  --silence-suggestions all,prefetch\n"
+			"  --silence-suggestions all,prefetch,sqlite3-lock\n"
 			"  --verbose[=n]\n"
 			"  --verbose-search-colors[=n]\n"
 			"  --progress\n"
@@ -741,6 +746,7 @@ int main(int argc, char *argv[])
 		{"database-format", required_argument, 0, OPT_DATABASE_FORMAT},
 		{"prescan-world", required_argument, 0, OPT_PRESCAN_WORLD},
 		{"sqlite-cacheworldrow", no_argument, 0, OPT_SQLITE_CACHEWORLDROW},
+		{"sqlite3-limit-prescan-query-size", optional_argument, 0, OPT_SQLITE_LIMIT_PRESCAN_QUERY},
 		{"tiles", required_argument, 0, 't'},
 		{"tileorigin", required_argument, 0, 'T'},
 		{"tilecenter", required_argument, 0, 'T'},
@@ -854,6 +860,24 @@ int main(int argc, char *argv[])
 							usage();
 							exit(1);
 						}
+					}
+					break;
+				case OPT_SQLITE_LIMIT_PRESCAN_QUERY:
+					if (!optarg || !*optarg) {
+						#if USE_SQLITE3
+						DBSQLite3::setLimitBlockListQuerySize();
+						#endif
+					}
+					else {
+						if (!isdigit(optarg[0])) {
+							std::cerr << "Invalid parameter to '" << long_options[option_index].name << "': must be a positive number" << std::endl;
+							usage();
+							exit(1);
+						}
+						#if USE_SQLITE3
+						int size = atoi(optarg);
+						DBSQLite3::setLimitBlockListQuerySize(size);
+						#endif
 					}
 					break;
 				case OPT_HEIGHTMAP:
@@ -1008,10 +1032,18 @@ int main(int argc, char *argv[])
 						std::string flag;
 						iss >> std::skipws >> flag;
 						while (!iss.fail()) {
-							if (flag == "all")
+							if (flag == "all") {
 								generator.setSilenceSuggestion(SUGGESTION_ALL);
-							else if (flag == "prefetch")
+								DBSQLite3::warnDatabaseLockDelay = false;
+							}
+							else if (flag == "prefetch") {
 								generator.setSilenceSuggestion(SUGGESTION_PREFETCH);
+							}
+							else if (flag == "sqlite3-lock") {
+								#if USE_SQLITE3
+								DBSQLite3::warnDatabaseLockDelay = false;
+								#endif
+							}
 							else {
 								std::cerr << "Invalid flag to '" << long_options[option_index].name << "': '" << flag << "'" << std::endl;
 								usage();
