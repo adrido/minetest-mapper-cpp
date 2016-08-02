@@ -49,21 +49,20 @@ int DBSQLite3::getBlocksQueriedCount(void)
 }
 
 const DB::BlockPosList &DBSQLite3::getBlockPosList() {
-	m_BlockPosList.clear();
-	int result = 0;
+	m_blockPosList.clear();
 	while (true) {
-		result = sqlite3_step(m_blockPosListStatement);
+		int result = sqlite3_step(m_blockPosListStatement);
 		if(result == SQLITE_ROW) {
 			sqlite3_int64 blocknum = sqlite3_column_int64(m_blockPosListStatement, 0);
 			sqlite3_int64 rowid = sqlite3_column_int64(m_blockPosListStatement, 1);
-			m_BlockPosList.push_back(BlockPos(blocknum, rowid));
+			m_blockPosList.push_back(BlockPos(blocknum, rowid));
 		} else if (result == SQLITE_BUSY) // Wait some time and try again
 			sleepMs(10);
 		else
 			break;
 	}
 	sqlite3_reset(m_blockPosListStatement);
-	return m_BlockPosList;
+	return m_blockPosList;
 }
 
 

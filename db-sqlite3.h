@@ -35,7 +35,7 @@ private:
 	sqlite3_stmt *m_blockOnRowidStatement;
 	std::ostringstream  m_getBlockSetStatementBlocks;
 	BlockCache  m_blockCache;
-	BlockPosList m_BlockPosList;
+	BlockPosList m_blockPosList;
 
 	void prepareBlockOnPosStatement(void);
 	Block getBlockOnPosRaw(const BlockPos &pos);
