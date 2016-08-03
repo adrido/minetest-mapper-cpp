@@ -178,6 +178,7 @@
     <ClInclude Include="..\PixelAttributes.h" />
     <ClInclude Include="..\PlayerAttributes.h" />
     <ClInclude Include="..\porting.h" />
+    <ClInclude Include="..\porting_win32.h" />
     <ClInclude Include="..\Settings.h" />
     <ClInclude Include="..\TileGenerator.h" />
     <ClInclude Include="..\types.h" />

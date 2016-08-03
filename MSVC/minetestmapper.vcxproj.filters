@@ -54,6 +54,9 @@
     <ClInclude Include="..\porting.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="..\porting_win32.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header files</Filter>
     </ClInclude>

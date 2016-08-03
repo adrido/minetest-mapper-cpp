@@ -2,15 +2,9 @@
 #define _PORTING_H
 
 #ifdef _WIN32
-
-#include <windows.h>
-#define sleepMs(x) Sleep(x)
-
+#include "porting_win32.h"
 #else
-
-#include <unistd.h>
-#define sleepMs(x) usleep(x*1000)
-
+#include "porting_posix.h"
 #endif
 
 #ifdef _MSC_VER
@@ -20,3 +14,4 @@
 #endif
 
 #endif // _PORTING_H
+
