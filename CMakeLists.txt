@@ -359,6 +359,7 @@ set(DUMPNODES_SCRIPTS
 
 set(PACKAGING_VERSION "1" CACHE STRING "Version of the packaging - '1' by default; increment when building a new package from the same sources (i.e. from the same commit)")
 #set(CPACK_SET_DESTDIR ON)
+set(CPACK_GIT_VERSION ${GIT_VERSION})
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Map generator for Minetest")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_HOME_DIRECTORY}/package-description.txt")
 set(CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})

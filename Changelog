@@ -14,6 +14,8 @@
 	- Workaround to allow compilation with clang when using leveldb.
 		This is broken due to libstdc++ ABI incompatibility
 	- Fixed compilation failure on FreeBSD (10.3) using gcc
+	- Detect when package version will not match current git commit id,
+		and refuse to build package with wrong version.
 [31 May 2016]
     Features:
 	- Support for postgresql backend added
