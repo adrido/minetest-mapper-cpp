@@ -175,6 +175,8 @@
     <ClInclude Include="..\db-sqlite3.h" />
     <ClInclude Include="..\db.h" />
     <ClInclude Include="..\minetest-database.h" />
+    <ClInclude Include="..\PaintEngine.h" />
+    <ClInclude Include="..\PaintEngine_libgd.h" />
     <ClInclude Include="..\PixelAttributes.h" />
     <ClInclude Include="..\PlayerAttributes.h" />
     <ClInclude Include="..\porting.h" />
@@ -195,6 +197,7 @@
     <ClCompile Include="..\db-leveldb.cpp" />
     <ClCompile Include="..\db-sqlite3.cpp" />
     <ClCompile Include="..\mapper.cpp" />
+    <ClCompile Include="..\PaintEngine_libgd.cpp" />
     <ClCompile Include="..\PixelAttributes.cpp" />
     <ClCompile Include="..\PlayerAttributes.cpp" />
     <ClCompile Include="..\Settings.cpp" />

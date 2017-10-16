@@ -10,9 +10,6 @@
 #include <cstdlib>
 #include <climits>
 #include <fstream>
-#include <gdfontmb.h>
-#include <gdfonts.h>
-#include <gdfontt.h>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -24,6 +21,7 @@
 #include "PlayerAttributes.h"
 #include "TileGenerator.h"
 #include "ZlibDecompressor.h"
+#include "PaintEngine_libgd.h"
 #if USE_SQLITE3
 #include "db-sqlite3.h"
 #endif
@@ -156,7 +154,6 @@ TileGenerator::TileGenerator():
 	m_databaseFormatSet(false),
 	m_databaseFormat(BlockPos::Unknown),
 	m_reportDatabaseFormat(false),
-	m_image(0),
 	m_xMin(INT_MAX/16-1),
 	m_xMax(INT_MIN/16+1),
 	m_zMin(INT_MAX/16-1),
@@ -186,13 +183,8 @@ TileGenerator::TileGenerator():
 	m_tileMapXOffset(0),
 	m_tileMapYOffset(0),
 	m_surfaceHeight(INT_MIN),
-	m_surfaceDepth(INT_MAX),
-	m_gdStringConv(NULL)
+	m_surfaceDepth(INT_MAX)
 {
-	// Libgd requires ISO8859-2 :-(
-	// Internally, we use UTF-8. Assume minetest does the same... (if not, it's probably broken)
-	m_gdStringConv = CharEncodingConverter::createStandardConverter("ISO8859-2", "UTF-8");
-
 	memset(&m_databaseFormatFound, 0, sizeof(m_databaseFormatFound));
 	// Load default grey colors.
 	m_heightMapColors.push_back(HeightMapColor(INT_MIN, Color(0,0,0), -129, Color(0,0,0)));
@@ -1373,7 +1365,7 @@ void TileGenerator::pushPixelRows(PixelAttributes &pixelAttributes, int zPosLimi
 			{ int iy = mapY2ImageY(mapY); assert(iy - borderTop() >= 0 && iy - borderTop() - borderBottom() < m_pictHeight); }
 #endif
 			if (pixel.is_valid() || pixel.color().to_uint())
-				m_image->tpixels[mapY2ImageY(mapY)][mapX2ImageX(mapX)] = pixel.color().to_libgd();
+				paintEngine->drawPixel(mapX2ImageX(mapX), mapY2ImageY(mapY), pixel.color());
 			#undef pixel
 		}
 	}
@@ -1579,36 +1571,35 @@ void TileGenerator::createImage()
 {
 	int totalPictHeight = m_pictHeight + borderTop() + borderBottom();
 	int totalPictWidth = m_pictWidth + borderLeft() + borderRight();
-	m_image = gdImageCreateTrueColor(totalPictWidth, totalPictHeight);
-	if (!m_image) {
+
+	paintEngine = new PaintEngine_libgd();
+	if (!paintEngine->create(totalPictWidth, totalPictHeight)) {
 		ostringstream oss;
 		oss << "Failed to allocate " << totalPictWidth << "x" << totalPictHeight << " image";
 		throw std::runtime_error(oss.str());
 	}
 	// Background
-	gdImageFilledRectangle(m_image, 0, 0, totalPictWidth - 1, totalPictHeight -1, m_bgColor.to_libgd());
+	paintEngine->fill(m_bgColor);
 
 	// Draw tile borders
 	if (m_tileWidth && m_tileBorderSize) {
-		int borderColor = m_tileBorderColor.to_libgd();
 		for (int i = 0; i < m_tileBorderXCount; i++) {
 			int xPos = m_tileMapXOffset / m_scaleFactor + i * (m_tileWidth / m_scaleFactor + m_tileBorderSize);
 #ifdef DEBUG
 			int xPos2 = mapX2ImageX(m_tileMapXOffset / m_scaleFactor + i * m_tileWidth / m_scaleFactor) - borderLeft() - m_tileBorderSize;
 			assert(xPos == xPos2);
 #endif
-			gdImageFilledRectangle(m_image, xPos + borderLeft(), borderTop(), xPos + (m_tileBorderSize-1) + borderLeft(), m_pictHeight + borderTop() - 1, borderColor);
+			paintEngine->drawFilledRect(xPos + borderLeft(), borderTop(), xPos + (m_tileBorderSize - 1) + borderLeft(), m_pictHeight + borderTop() - 1, m_tileBorderColor);
 		}
 	}
 	if (m_tileHeight && m_tileBorderSize) {
-		int borderColor = m_tileBorderColor.to_libgd();
 		for (int i = 0; i < m_tileBorderYCount; i++) {
 			int yPos = m_tileMapYOffset / m_scaleFactor + i * (m_tileHeight / m_scaleFactor + m_tileBorderSize);
 #ifdef DEBUG
 			int yPos2 = mapY2ImageY(m_tileMapYOffset / m_scaleFactor + i * m_tileHeight / m_scaleFactor) - borderTop() - m_tileBorderSize;
 			assert(yPos == yPos2);
 #endif
-			gdImageFilledRectangle(m_image, borderLeft(), yPos + borderTop(), m_pictWidth + borderLeft() - 1, yPos + (m_tileBorderSize-1) + borderTop(), borderColor);
+			paintEngine->drawFilledRect(borderLeft(), yPos + borderTop(), m_pictWidth + borderLeft() - 1, yPos + (m_tileBorderSize - 1) + borderTop(), m_tileBorderColor);
 		}
 	}
 }
@@ -2101,10 +2092,9 @@ inline void TileGenerator::renderMapBlock(const ustring &mapBlock, const BlockPo
 
 void TileGenerator::renderScale()
 {
-	int color = m_scaleColor.to_libgd();
 	if ((m_drawScale & DRAWSCALE_LEFT) && (m_drawScale & DRAWSCALE_TOP)) {
-		gdImageString(m_image, gdFontGetMediumBold(), borderLeft() - 26, 0, reinterpret_cast<unsigned char *>(const_cast<char *>("X")), color);
-		gdImageString(m_image, gdFontGetMediumBold(), 2, borderTop() - 26, reinterpret_cast<unsigned char *>(const_cast<char *>("Z")), color);
+		paintEngine->drawChar(borderLeft() - 26, 0, PaintEngine::Font::MediumBold, 'X', m_scaleColor);
+		paintEngine->drawChar(2, borderTop() - 26, PaintEngine::Font::MediumBold, 'Z', m_scaleColor);
 	}
 	int major = m_sideScaleMajor ? m_sideScaleMajor : 4 * 16 * m_scaleFactor;
 	int minor = m_sideScaleMinor;
@@ -2125,14 +2115,14 @@ void TileGenerator::renderScale()
 			int xPos = worldX2ImageX(i);
 
 			scaleText = buf.str();
-			gdImageString(m_image, gdFontGetMediumBold(), xPos + 2, 0, reinterpret_cast<unsigned char *>(const_cast<char *>(scaleText.c_str())), color);
+			paintEngine->drawText(xPos + 2, 0, PaintEngine::Font::MediumBold, scaleText, m_scaleColor);
 			if ((major % 16) == 0) {
 				buf.str("");
 				buf << "(" << i / 16 << ")";
 				scaleText = buf.str();
-				gdImageString(m_image, gdFontGetTiny(), xPos + 2, 16, reinterpret_cast<unsigned char *>(const_cast<char *>(scaleText.c_str())), color);
+				paintEngine->drawText(xPos + 2, 16, PaintEngine::Font::Tiny, scaleText, m_scaleColor);
 			}
-			gdImageLine(m_image, xPos, 0, xPos, borderTop() - 1, color);
+			paintEngine->drawLine(xPos, 0, xPos, borderTop() - 1, m_scaleColor);
 		}
 		if (minor) {
 			if (m_xMin >= 0)
@@ -2141,7 +2131,7 @@ void TileGenerator::renderScale()
 				start = (m_xMin * 16 + m_mapXStartNodeOffset - 1) / minor * minor;
 			for (int i = start; i <= (m_xMax + 1) * 16 + m_mapXEndNodeOffset; i += minor) {
 				int xPos = worldX2ImageX(i);
-				gdImageLine(m_image, xPos, borderTop() - 5, xPos, borderTop() - 1, color);
+				paintEngine->drawLine(xPos, borderTop() - 5, xPos, borderTop() - 1, m_scaleColor);
 			}
 		}
 	}
@@ -2160,14 +2150,14 @@ void TileGenerator::renderScale()
 			int yPos = worldZ2ImageY(i);
 
 			scaleText = buf.str();
-			gdImageString(m_image, gdFontGetMediumBold(), 2, yPos, reinterpret_cast<unsigned char *>(const_cast<char *>(scaleText.c_str())), color);
+			paintEngine->drawText(2, yPos, PaintEngine::Font::MediumBold, scaleText, m_scaleColor);
 			if ((major % 16) == 0) {
 				buf.str("");
 				buf << "(" << i / 16 << ")";
 				scaleText = buf.str();
-				gdImageString(m_image, gdFontGetTiny(), 2, yPos-10, reinterpret_cast<unsigned char *>(const_cast<char *>(scaleText.c_str())), color);
-			}
-			gdImageLine(m_image, 0, yPos, borderLeft() - 1, yPos, color);
+				paintEngine->drawText(2, yPos - 10, PaintEngine::Font::Tiny, scaleText, m_scaleColor);
+				}
+			paintEngine->drawLine(0, yPos, borderLeft() - 1, yPos, m_scaleColor);
 		}
 		if (minor) {
 			if (m_zMax >= 0)
@@ -2176,7 +2166,7 @@ void TileGenerator::renderScale()
 				start = ((m_zMax + 1) * 16 - m_mapYStartNodeOffset - minor + 1) / minor * minor;
 			for (int i = start; i >= m_zMin * 16 - m_mapYEndNodeOffset - 1; i -= minor) {
 				int yPos = worldZ2ImageY(i);
-				gdImageLine(m_image, borderLeft() - 5, yPos, borderLeft() - 1, yPos, color);
+				paintEngine->drawLine(borderLeft() - 5, yPos, borderLeft() - 1, yPos, m_scaleColor);
 			}
 		}
 	}
@@ -2186,8 +2176,6 @@ void TileGenerator::renderScale()
 
 void TileGenerator::renderHeightScale()
 {
-
-	int scaleColor = m_scaleColor.to_libgd();
 	int height_min = m_surfaceDepth - 16;
 	int height_limit = m_surfaceHeight + 16;
 	int xBorderOffset = borderLeft();
@@ -2212,28 +2200,28 @@ void TileGenerator::renderHeightScale()
 	double height = height_min;
 	for (int x = 0; height < height_limit; x++, height += height_step) {
 		Color color = computeMapHeightColor(int(height + 0.5));
-		gdImageLine(m_image, xBorderOffset + x, yBorderOffset + 8, xBorderOffset + x, yBorderOffset + borderBottom() - 20, color.to_libgd());
-
+		paintEngine->drawLine(xBorderOffset + x, yBorderOffset + 8, xBorderOffset + x, yBorderOffset + borderBottom() - 20, color);
+	
 		int iheight = static_cast<int>(height + (height > 0 ? 0.5 : -0.5));
 		int iheightMaj = static_cast<int>(trunc(iheight / major + (height > 0 ? 0.5 : -0.5)) * major);
 		if (fabs(height - iheightMaj) <= height_step / 2 && (height - iheightMaj) > -height_step / 2) {
 			if (iheightMaj / int(major) % 2 == 1 && fabs(height) > 9999 && major / height_step < 56) {
 				// Maybe not enough room for the number. Draw a tick mark instead
-				gdImageLine(m_image, xBorderOffset + x, yBorderOffset + borderBottom() - 19, xBorderOffset + x, yBorderOffset + borderBottom() - 16, scaleColor);
+				paintEngine->drawLine(xBorderOffset + x, yBorderOffset + borderBottom() - 19, xBorderOffset + x, yBorderOffset + borderBottom() - 16, m_scaleColor);
 			}
 			else {
 				stringstream buf;
 				buf << iheightMaj;
 				string scaleText = buf.str();
-				gdImageString(m_image, gdFontGetMediumBold(), xBorderOffset + x + 2, yBorderOffset + borderBottom() - 16,
-					reinterpret_cast<unsigned char *>(const_cast<char *>(scaleText.c_str())), scaleColor);
-				gdImageLine(m_image, xBorderOffset + x, yBorderOffset + borderBottom() - 19, xBorderOffset + x, yBorderOffset + borderBottom() - 1, scaleColor);
+				paintEngine->drawText(xBorderOffset + x + 2, yBorderOffset + borderBottom() - 16, PaintEngine::Font::MediumBold,
+					scaleText, m_scaleColor);
+				paintEngine->drawLine(xBorderOffset + x, yBorderOffset + borderBottom() - 19, xBorderOffset + x, yBorderOffset + borderBottom() - 1, m_scaleColor);
 			}
 		}
 		if (minor) {
 			int iheightMin = int(iheight / minor + (height > 0 ? 0.5 : -0.5)) * minor;
 			if (fabs(height - iheightMin) <= height_step / 2 && (height - iheightMin) > -height_step / 2) {
-				gdImageLine(m_image, xBorderOffset + x, yBorderOffset + borderBottom() - 19, xBorderOffset + x, yBorderOffset + borderBottom() - 16, scaleColor);
+				paintEngine->drawLine(xBorderOffset + x, yBorderOffset + borderBottom() - 19, xBorderOffset + x, yBorderOffset + borderBottom() - 16, m_scaleColor);
 			}
 		}
 	}
@@ -2243,21 +2231,18 @@ void TileGenerator::renderOrigin()
 {
 	int imageX = worldX2ImageX(0);
 	int imageY = worldZ2ImageY(0);
-	gdImageArc(m_image, imageX, imageY, 12, 12, 0, 360, m_originColor.to_libgd());
+	paintEngine->drawCircle(imageX, imageY, 12, m_originColor);
 }
 
 void TileGenerator::renderPlayers(const std::string &inputPath)
 {
-	int color = m_playerColor.to_libgd();
-
 	PlayerAttributes players(inputPath);
 	for (PlayerAttributes::Players::iterator player = players.begin(); player != players.end(); ++player) {
 		int imageX = worldX2ImageX(static_cast<int>(player->x / 10));
 		int imageY = worldZ2ImageY(static_cast<int>(player->z / 10));
-		std::string displayName = m_gdStringConv->convert(player->name);
 
-		gdImageArc(m_image, imageX, imageY, 5, 5, 0, 360, color);
-		gdImageString(m_image, gdFontGetMediumBold(), imageX + 2, imageY + 2, reinterpret_cast<unsigned char *>(const_cast<char *>(displayName.c_str())), color);
+		paintEngine->drawCircle(imageX, imageY, 5, m_playerColor);
+		paintEngine->drawText(imageX + 2, imageY + 2, PaintEngine::Font::MediumBold, player->name, m_playerColor);
 	}
 }
 
@@ -2381,22 +2366,19 @@ void TileGenerator::renderDrawObjects(void)
 		}
 		switch(o->type) {
 		case DrawObject::Point:
-			gdImageSetPixel(m_image, o->center.x(), o->center.y(), o->color.to_libgd());
+			paintEngine->drawPixel(o->center.x(), o->center.y(), o->color);
 			break;
 		case DrawObject::Line:
-			gdImageLine(m_image, o->corner1.x(), o->corner1.y(), o->corner2.x(), o->corner2.y(), o->color.to_libgd());
+			paintEngine->drawLine(o->corner1.x(), o->corner1.y(), o->corner2.x(), o->corner2.y(), o->color);
 			break;
 		case DrawObject::Ellipse:
-			gdImageArc(m_image, o->center.x(), o->center.y(), o->dimensions.x(), o->dimensions.y(), 0, 360, o->color.to_libgd());
+			paintEngine->drawArc(o->center.x(), o->center.y(), o->dimensions.x(), o->dimensions.y(), 0, 360, o->color);
 			break;
 		case DrawObject::Rectangle:
-			gdImageRectangle(m_image, o->corner1.x(), o->corner1.y(), o->corner2.x(), o->corner2.y(), o->color.to_libgd());
+			paintEngine->drawRect(o->corner1.x(), o->corner1.y(), o->corner2.x(), o->corner2.y(), o->color);
 			break;
-		case DrawObject::Text: {
-				std::string displayText = m_gdStringConv->convert(o->text.c_str());
-				gdImageString(m_image, gdFontGetMediumBold(), o->center.x(), o->center.y(),
-					reinterpret_cast<unsigned char *>(const_cast<char *>(displayText.c_str())), o->color.to_libgd());
-			}
+		case DrawObject::Text:
+			paintEngine->drawText(o->center.x(), o->center.y(), PaintEngine::Font::MediumBold, o->text, o->color);
 			break;
 		default:
 #ifdef DEBUG
@@ -2421,16 +2403,7 @@ inline std::list<int> TileGenerator::getZValueList() const
 
 void TileGenerator::writeImage(const std::string &output)
 {
-	FILE *out;
-	out = fopen(output.c_str(), "wb");
-	if (!out) {
-		std::ostringstream oss;
-		oss << "Error opening '" << output.c_str() << "': " << std::strerror(errno);
-		throw std::runtime_error(oss.str());
-	}
-	gdImagePng(m_image, out);
-	fclose(out);
-	gdImageDestroy(m_image);
+	paintEngine->save(output, std::string(), -1);
 }
 
 void TileGenerator::printUnknown()

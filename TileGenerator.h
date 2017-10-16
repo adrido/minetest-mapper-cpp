@@ -25,12 +25,12 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-#include "CharEncodingConverter.h"
 #include "types.h"
 #include "PixelAttributes.h"
 #include "BlockPos.h"
 #include "Color.h"
 #include "db.h"
+#include "PaintEngine.h"
 
 #define TILESIZE_CHUNK			(INT_MIN)
 #define TILECENTER_AT_WORLDCENTER	(INT_MAX)
@@ -264,7 +264,7 @@ private:
 	std::string m_recommendedDatabaseFormat;
 	long long m_databaseFormatFound[BlockPos::STRFORMAT_MAX];
 	bool m_reportDatabaseFormat;
-	gdImagePtr m_image;
+	PaintEngine *paintEngine = nullptr;
 	PixelAttributes m_blockPixelAttributes;
 	PixelAttributes m_blockPixelAttributesScaled;
 	int m_xMin;
@@ -319,8 +319,6 @@ private:
 	uint16_t m_readedPixels[16];
 	std::set<std::string> m_unknownNodes;
 	std::vector<DrawObject> m_drawObjects;
-
-	CharEncodingConverter *m_gdStringConv;
 }; /* -----  end of class TileGenerator  ----- */
 
 #endif /* end of include guard: TILEGENERATOR_H_JJNUCARH */
