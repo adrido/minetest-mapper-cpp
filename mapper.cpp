@@ -23,6 +23,7 @@
 #include "PixelAttributes.h"
 #include "util.h"
 #include "db-sqlite3.h"
+#include "CharEncodingConverter.h"
 
 using namespace std;
 

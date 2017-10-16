@@ -287,6 +287,7 @@ set(mapper_SRCS
 	BlockPos.cpp
 	mapper.cpp
 	CharEncodingConverter.cpp
+	PaintEngine_libgd.cpp
 	${MAPPER_SRCS_ICONV}
 )
 
