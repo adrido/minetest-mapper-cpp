@@ -1,27 +1,9 @@
-// The file 'build_config.h' is auto-generated. Any changes to it
-// will be overwritten.
-//
-// Modify the file build_config.h.in instead.
-//
-// This file was generated on @BUILD_CONFIG_GENDATE@ by @BUILD_CONFIG_GENTOOL@
+#pragma once
 
-#ifndef BUILD_CONFIG_H
-#define BUILD_CONFIG_H
+#cmakedefine USE_SQLITE3
 
-#define USE_SQLITE3 @USE_SQLITE3@
-#define USE_POSTGRESQL @USE_POSTGRESQL@
-#define USE_LEVELDB @USE_LEVELDB@
-#define USE_REDIS @USE_REDIS@
+#cmakedefine USE_POSTGRESQL
 
-#define USE_ICONV @USE_ICONV@
+#cmakedefine USE_LEVELDB
 
-#define VERSION_MAJOR "@VERSION_MAJOR@"
-#define VERSION_MINOR "@VERSION_MINOR@"
-
-#define PACKAGING_FLAT @PACKAGING_FLAT@
-#define INSTALL_PREFIX "@INSTALL_PREFIX@"
-
-#define CPP_ABI_STDSTRING_OK @CPP_ABI_STDSTRING_OK@
-
-#endif
-
+#cmakedefine USE_REDIS
