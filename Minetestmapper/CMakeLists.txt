@@ -53,6 +53,7 @@ include_directories(../wingetopt/src/)
 find_path(SYSTEM_INCLUDE_DIR dirent.h)
 include_directories(${SYSTEM_INCLUDE_DIR})
 
+add_library (wingetopt STATIC ../wingetopt/src/getopt.c)
 #link_directories (../wingetopt)
 # Fügen Sie der ausführbaren Datei für dieses Projekt eine Quelle hinzu.
 add_executable (Minetestmapper ${sources})
@@ -65,5 +66,10 @@ include (InstallRequiredSystemLibraries)
 include (CPack)
 set(CPACK_GENERATOR "ZIP")
 install (TARGETS Minetestmapper RUNTIME DESTINATION ".")
-install(DIRECTORY "${PROJECT_BINARY_DIR}/Minetestmapper/" DESTINATION "." 
+
+# Config might not set, so there might missing dll's after installation
+install(DIRECTORY "${PROJECT_BINARY_DIR}/Minetestmapper/$<CONFIG>/" DESTINATION "." 
 	FILES_MATCHING PATTERN "*.dll" PATTERN "/" EXCLUDE)
+
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/colors/" DESTINATION "colors/" 
+	FILES_MATCHING PATTERN "*.txt")

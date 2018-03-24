@@ -13,7 +13,7 @@ project (
 	"Minetestmapper" 
 	VERSION 0.1.0
 	DESCRIPTION "Map generator for Minetest"
-	LANGUAGES CXX)
+	LANGUAGES C CXX)
 
 # Set output directories
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
@@ -31,7 +31,6 @@ if(ENABLE_SQLITE3)
 	find_path(SQLITE3_INCLUDE_DIR sqlite3.h)
 	message (STATUS "sqlite3 library: ${SQLITE3_LIBRARY}")
 	message (STATUS "sqlite3 headers: ${SQLITE3_INCLUDE_DIR}")
-	message (STATUS "sqlite3 dll: ${SQLITE3_DLL}")
 	if(SQLITE3_LIBRARY AND SQLITE3_INCLUDE_DIR)
 		set(USE_SQLITE3 1)
 		message(STATUS "sqlite3 backend enabled")
@@ -107,7 +106,7 @@ if(ENABLE_REDIS OR ENABLE_ANY_DATABASE OR ENABLE_ALL_DATABASES)
 endif(ENABLE_REDIS OR ENABLE_ANY_DATABASE OR ENABLE_ALL_DATABASES)
 
 # Schließen Sie Unterprojekte ein.
-add_subdirectory ("wingetopt")
+#add_subdirectory ("wingetopt")
 add_subdirectory ("Minetestmapper")
 
 message(STATUS "VCPKG_APPLOCAL_DEPS: ${VCPKG_APPLOCAL_DEPS}")
@@ -122,4 +121,3 @@ configure_file(
 )
 
 
-# build a CPack driven installer package
