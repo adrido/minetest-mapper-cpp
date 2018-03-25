@@ -1,5 +1,5 @@
 #pragma once
-#include "paintEngine.h"
+#include "PaintEngine.h"
 #include "CharEncodingConverter.h"
 #include <gd.h>
 

@@ -1,6 +1,8 @@
 #include "PaintEngine_libgd.h"
 
 #include <sstream>
+#include <cstring>
+#include <stdexcept>
 
 #include <gdfontmb.h>
 #include <gdfontl.h>

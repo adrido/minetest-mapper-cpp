@@ -48,11 +48,11 @@
 // default database to use
 #if defined(USE_SQLITE3) && !defined(USE_POSTGRESQL) && !defined(USE_LEVELDB) && !defined(USE_REDIS)
 #define DEFAULT_BACKEND "sqlite3"
-#elif !USE_SQLITE3 && USE_POSTGRESQL && !USE_LEVELDB && !USE_REDIS
+#elif !defined(USE_SQLITE3) && defined(USE_POSTGRESQL) && !defined(USE_LEVELDB) && !defined(USE_REDIS)
 #define DEFAULT_BACKEND "postgresql"
-#elif !USE_SQLITE3 && !USE_POSTGRESQL && USE_LEVELDB && !USE_REDIS
+#elif !defined(USE_SQLITE3) && !defined(USE_POSTGRESQL) && defined(USE_LEVELDB) && !defined(USE_REDIS)
 #define DEFAULT_BACKEND "leveldb"
-#elif !USE_SQLITE3 && !USE_POSTGRESQL && !USE_LEVELDB && USE_REDIS
+#elif !defined(USE_SQLITE3) && !defined(USE_POSTGRESQL) && !defined(USE_LEVELDB) && defined(USE_REDIS)
 #define DEFAULT_BACKEND "redis"
 #else
 #define DEFAULT_BACKEND "auto"

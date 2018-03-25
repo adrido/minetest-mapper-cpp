@@ -42,22 +42,27 @@ add_definitions(-DVER_COMPANYNAME_STR="MyCompany")
 add_definitions(-DVER_FILEVERSION_STR="1,1,0.0")
 endif(WIN32)
 
-find_package (sqlite3 REQUIRED)
-find_package (zlib REQUIRED)
+find_library(ZLIB_LIBRARY NAMES zlib z)
+find_path(ZLIB_INCLUDE_DIR NAMES zlib.h)
 
-find_library(LIBGD_LIBRARY NAMES libgd libgd_static)
+find_library(LIBGD_LIBRARY NAMES gd libgd libgd_static)
 find_path(LIBGD_INCLUDE_DIR NAMES gd.h)
 
+if(WIN32)
+	include_directories(../wingetopt/src/)
+	find_path(SYSTEM_INCLUDE_DIR dirent.h)
+	include_directories(${SYSTEM_INCLUDE_DIR})
 
-include_directories(../wingetopt/src/)
-find_path(SYSTEM_INCLUDE_DIR dirent.h)
-include_directories(${SYSTEM_INCLUDE_DIR})
-
-add_library (wingetopt STATIC ../wingetopt/src/getopt.c)
+	add_library (wingetopt STATIC ../wingetopt/src/getopt.c)
+endif()
+set(wingetopt_lib "")
+if(WIN32)
+set(wingetopt_lib wingetopt)
+endif()
 #link_directories (../wingetopt)
 # Fügen Sie der ausführbaren Datei für dieses Projekt eine Quelle hinzu.
 add_executable (Minetestmapper ${sources})
-target_link_libraries(Minetestmapper wingetopt ${LIBGD_LIBRARY} ${ZLIB_LIBRARY} sqlite3)
+target_link_libraries(Minetestmapper ${wingetopt_lib} ${LIBGD_LIBRARY} ${ZLIB_LIBRARY} ${SQLITE3_LIBRARY})
 # TODO: Fügen Sie bei Bedarf Tests und Installationsziele hinzu.
 
 
