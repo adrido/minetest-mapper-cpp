@@ -25,13 +25,13 @@
 #ifdef USE_SQLITE3
 #include "db-sqlite3.h"
 #endif
-#if USE_POSTGRESQL
+#ifdef USE_POSTGRESQL
 #include "db-postgresql.h"
 #endif
-#if USE_LEVELDB
+#ifdef USE_LEVELDB
 #include "db-leveldb.h"
 #endif
-#if USE_REDIS
+#ifdef USE_REDIS
 #include "db-redis.h"
 #endif
 
@@ -829,7 +829,7 @@ void TileGenerator::openDb(const std::string &input)
 #endif
 	}
 	else if (m_backend == "leveldb") {
-#if USE_LEVELDB
+#ifdef USE_LEVELDB
 		m_db = new DBLevelDB(input);
 		m_scanEntireWorld = true;
 #else

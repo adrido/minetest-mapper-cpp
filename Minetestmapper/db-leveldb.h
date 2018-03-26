@@ -1,6 +1,6 @@
 #pragma once
 
-#if USE_LEVELDB
+#ifdef USE_LEVELDB
 
 #include "db.h"
 #include <leveldb/db.h>

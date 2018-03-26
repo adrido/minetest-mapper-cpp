@@ -67,7 +67,7 @@ endif(ENABLE_POSTGRESQL)
 
 # Find leveldb
 if(ENABLE_LEVELDB)
-	find_library(LEVELDB_LIBRARY leveldb)
+	find_library(LEVELDB_LIBRARY NAMES leveldb libleveldb)
 	find_path(LEVELDB_INCLUDE_DIR db.h PATH_SUFFIXES leveldb)
 	message (STATUS "LevelDB library: ${LEVELDB_LIBRARY}")
 	message (STATUS "LevelDB headers: ${LEVELDB_INCLUDE_DIR}")
