@@ -1,12 +1,10 @@
+#include "build_config.h"
 
-#if USE_LEVELDB
-
-
+#ifdef USE_LEVELDB
 
 #include "db-leveldb.h"
 #include <stdexcept>
 #include <sstream>
-#include "build_config.h"
 #include "types.h"
 
 inline int64_t stoi64(const std::string &s) {

@@ -1,0 +1,65 @@
+version: 1.0.{build}
+image:
+- Visual Studio 2017
+- Visual Studio 2015
+configuration: Release
+platform:
+- x86
+- x64
+init:
+- cmd: >-
+    SET
+
+    set arch=
+
+    if "%Platform%"=="x64" ( set arch= Win64)
+
+    echo %arch%
+
+    echo %APPVEYOR_BUILD_WORKER_IMAGE%
+
+    if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" ( set generator="Visual Studio 15 2017%arch%" )
+
+    if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" ( set generator="Visual Studio 14 2015%arch%" )
+
+    if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2013" ( set generator="Visual Studio 12 2013%arch%" )
+
+    echo %generator%
+install:
+- ps: >-
+    echo "Build Platform: $($env:Platform)"
+
+    vcpkg install zlib:$($env:Platform)-windows
+
+    vcpkg install sqlite3:$($env:Platform)-windows
+
+    vcpkg install dirent:$($env:Platform)-windows
+
+    vcpkg install libgd:$($env:Platform)-windows
+
+    vcpkg install leveldb:$($env:Platform)-windows
+cache:
+- c:\tools\vcpkg\installed\
+- c:\tools\vcpkg\downloads\
+build_script:
+- cmd: >-
+    mkdir build
+
+    cd build
+
+    cmake .. -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -G %generator% 
+
+    cmake --build . --target ALL_BUILD --config Release
+
+    cpack -G "ZIP"
+artifacts:
+- path: '\build\Minetestmapper*.zip'
+  name: build
+deploy:
+- provider: GitHub
+  auth_token:
+    secure: nvCGwNkN3YUjH8vsFB/Xkseo2VSLqje0wMOXmOPyo1Lovh++Cwg7/dJRyLsEZo+U
+  artifact: build
+  prerelease: true
+  on:
+    appveyor_repo_tag: true
