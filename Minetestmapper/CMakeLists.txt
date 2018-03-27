@@ -61,10 +61,15 @@ set(wingetopt_lib "")
 if(WIN32)
 set(wingetopt_lib wingetopt)
 endif()
+set(leveldb_lib "")
+if(USE_LEVELDB)
+set(leveldb_lib ${LEVELDB_LIBRARY})
+endif()
 #link_directories (../wingetopt)
 # Fügen Sie der ausführbaren Datei für dieses Projekt eine Quelle hinzu.
 add_executable (Minetestmapper ${sources})
-target_link_libraries(Minetestmapper ${wingetopt_lib} ${LIBGD_LIBRARY} ${ZLIB_LIBRARY} ${SQLITE3_LIBRARY})
+set_target_properties(Minetestmapper PROPERTIES COMPILE_FLAGS -DBUILDER_STATIC_DEFINE)
+target_link_libraries(Minetestmapper ${wingetopt_lib} ${LIBGD_LIBRARY} ${ZLIB_LIBRARY} ${SQLITE3_LIBRARY} ${leveldb_lib})
 # TODO: Fügen Sie bei Bedarf Tests und Installationsziele hinzu.
 
 

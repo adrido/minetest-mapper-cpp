@@ -952,39 +952,6 @@ void Mapper::usage()
 	std::cout << executableName << ' ' << options_text;
 }
 
-
-// Parse the following geometry formats:
-// <w>x<h>[+<x>+<y>]
-//	(dimensions, and position)
-//	(if x and y are omitted, they default to -w/2 and -h/2)
-// <x1>,<y1>:<x2>,<y2>
-//	(2 corners of the area)
-// <x>,<y>:<w>x<h>
-//	(center of the area, and dimensions)
-// <x>[,:]<y>+<w>+<h>
-//	(corner of the area, and dimensions)
-// <x>,<y>@<angle>+<length>
-
-
-// is: stream to read from
-// coord: set to coordinate value that was read
-// isBlockCoord: set to true if the coordinate read was a block coordinate
-// wildcard: if non-zero, accept '*' as a coordinate, and return this value instead.
-//	(suggested values for 'wildcard': INT_MIN or INT_MAX)
-//
-// Accepted coordinate syntax:
-// 	[+-]<n>:	node coordinate:  node +/- n
-// 	[+-]<b>#:	block coordinate: block +/- b	(isBlockCoord will be set to true)
-// 	[+-]<b>#<n>:	node coordinate:  node <n> in block +/- <b>
-// 	[+-]<b>.<n>:	node coordinate:  node +/- (b * 16 + n)
-// As a special feature, double signs are also supported. E.g.:
-//	+-3
-// Which allows shell command-lines like the following
-//	${width}x${height}+$xoffs+$yoffs
-// (which otherwise require special measures to cope with xoffs or yoffs being negative...)
-// Other uses of this feature are left as an excercise to the reader.
-// Hint: --3.5 is *not* the same as 3.5
-
 void Mapper::parseDataFile(TileGenerator & generator, const string & input, string dataFile, string defaultFile, void(TileGenerator::* parseFile)(const std::string &fileName))
 {
 	if (!dataFile.empty()) {
