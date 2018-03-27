@@ -21,6 +21,8 @@ set(sources
 	BlockPos.cpp
 	BlockPos.h
 	mapper.cpp
+	mapper.h
+	main.cpp
 	CharEncodingConverter.cpp
 	CharEncodingConverter.h
 	PaintEngine_libgd.cpp
