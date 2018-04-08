@@ -11,6 +11,7 @@
 
 
 #include <cstdlib>
+#include <chrono>
 #include <getopt.h>
 #include <iostream>
 #include <map>
@@ -48,6 +49,7 @@ Mapper::Mapper(const string &executableName, const string &executablePath) :
 
 int Mapper::start(int argc, char *argv[]) {
 
+	auto begin = std::chrono::high_resolution_clock::now();
 	static struct option long_options[] =
 	{
 		{ "help", no_argument, 0, 'h' },
@@ -858,6 +860,8 @@ int Mapper::start(int argc, char *argv[]) {
 		std::cout << "Exception: " << e.what() << std::endl;
 		return 1;
 	}
+	auto end = std::chrono::high_resolution_clock::now();
+	std::cout << "Mapping took:  " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
 	return 0;
 }
 
