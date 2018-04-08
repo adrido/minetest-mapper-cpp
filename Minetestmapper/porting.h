@@ -8,9 +8,9 @@
 #endif
 
 #ifdef _MSC_VER
-
+#ifndef strcasecmp 
 #define strcasecmp(a, b) _stricmp(a, b)
-
+#endif
 #endif
 
 #endif // _PORTING_H
