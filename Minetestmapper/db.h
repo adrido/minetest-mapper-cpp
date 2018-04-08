@@ -6,14 +6,13 @@
 #include <string>
 #include <utility>
 
-#include "types.h"
 #include "BlockPos.h"
 
 
 class DB {
 public:
 	virtual ~DB() {}
-	typedef std::pair<BlockPos, ustring> Block;
+	typedef std::pair<BlockPos, std::vector<unsigned char>> Block;
 	typedef std::vector<BlockPos>  BlockPosList;
 	virtual const BlockPosList &getBlockPosList()=0;
 	virtual const BlockPosList &getBlockPosList(BlockPos, BlockPos) { return getBlockPosList(); }

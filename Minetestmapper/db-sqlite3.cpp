@@ -8,7 +8,6 @@
 #include <iomanip>
 #include <ctime>
 #include "porting.h"
-#include "types.h"
 
 #define DATAVERSION_STATEMENT		"PRAGMA data_version"
 #define BLOCKPOSLIST_STATEMENT		"SELECT pos, rowid FROM blocks"
@@ -211,7 +210,7 @@ int DBSQLite3::getBlockPosListRows()
 
 DB::Block DBSQLite3::getBlockOnPos(const BlockPos &pos)
 {
-	Block block(pos,reinterpret_cast<const unsigned char *>(""));
+	Block block(pos, {});
 	int result = 0;
 	
 	m_blocksQueriedCount++;
@@ -234,7 +233,7 @@ DB::Block DBSQLite3::getBlockOnPos(const BlockPos &pos)
 		if(result == SQLITE_ROW) {
 			const unsigned char *data = reinterpret_cast<const unsigned char *>(sqlite3_column_blob(statement, 1));
 			int size = sqlite3_column_bytes(statement, 1);
-			block = Block(pos, ustring(data, size));
+			block.second.assign(&data[0], &data[size]);
 			m_blocksReadCount++;
 			break;
 		} else if (result == SQLITE_BUSY) { // Wait some time and try again

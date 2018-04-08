@@ -25,7 +25,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-#include "types.h"
+
 #include "PixelAttributes.h"
 #include "BlockPos.h"
 #include "Color.h"
@@ -186,7 +186,7 @@ private:
 	void pushPixelRows(PixelAttributes &pixelAttributes, int zPosLimit);
 	void scalePixelRows(PixelAttributes &pixelAttributes, PixelAttributes &pixelAttributesScaled, int zPosLimit);
 	void processMapBlock(const DB::Block &block);
-	void renderMapBlock(const ustring &mapBlock, const BlockPos &pos, int version);
+	void renderMapBlock(const std::vector<unsigned char> &mapBlock, const BlockPos &pos, int version);
 	void renderScale();
 	void renderHeightScale();
 	void renderOrigin();

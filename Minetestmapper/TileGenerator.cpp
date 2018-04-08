@@ -1607,8 +1607,8 @@ void TileGenerator::createImage()
 void TileGenerator::processMapBlock(const DB::Block &block)
 {
 	const BlockPos &pos = block.first;
-	const unsigned char *data = block.second.c_str();
-	size_t length = block.second.length();
+	const unsigned char *data = block.second.data();
+	size_t length = block.second.size();
 
 	uint8_t version = readU8(data, 0, length);
 	//uint8_t flags = readU8(data, 1, length);
@@ -1628,8 +1628,8 @@ void TileGenerator::processMapBlock(const DB::Block &block)
 	checkDataLimit("zlib", dataOffset, 3, length);
 	ZlibDecompressor decompressor(data, length);
 	decompressor.setSeekPos(dataOffset);
-	ustring mapData = decompressor.decompress();
-	ustring mapMetadata = decompressor.decompress();
+	auto mapData = decompressor.decompress();
+	auto mapMetadata = decompressor.decompress();
 	dataOffset = decompressor.seekPos();
 
 	// Skip unused data
@@ -2021,12 +2021,12 @@ Color TileGenerator::computeMapHeightColor(int height)
 	return Color(int(r / n + 0.5), int(g / n + 0.5), int(b / n + 0.5));
 }
 
-inline void TileGenerator::renderMapBlock(const ustring &mapBlock, const BlockPos &pos, int version)
+inline void TileGenerator::renderMapBlock(const std::vector<unsigned char> &mapBlock, const BlockPos &pos, int version)
 {
-	checkBlockNodeDataLimit(version, mapBlock.length());
+	checkBlockNodeDataLimit(version, mapBlock.size());
 	int xBegin = worldBlockX2StoredX(pos.x());
 	int zBegin = worldBlockZ2StoredY(pos.z());
-	const unsigned char *mapData = mapBlock.c_str();
+	const unsigned char *mapData = mapBlock.data();
 	int minY = (pos.y() < m_reqYMin) ? 16 : (pos.y() > m_reqYMin) ?  0 : m_reqYMinNode;
 	int maxY = (pos.y() > m_reqYMax) ? -1 : (pos.y() < m_reqYMax) ? 15 : m_reqYMaxNode;
 	bool renderedAnything = false;

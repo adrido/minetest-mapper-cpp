@@ -12,7 +12,7 @@
 
 #include <cstdlib>
 #include <string>
-#include "types.h"
+#include <vector>
 
 
 class ZlibDecompressor
@@ -27,7 +27,7 @@ public:
 	~ZlibDecompressor();
 	void setSeekPos(std::size_t seekPos);
 	std::size_t seekPos() const;
-	ustring decompress();
+	std::vector<unsigned char> decompress();
 
 private:
 	const unsigned char *m_data;

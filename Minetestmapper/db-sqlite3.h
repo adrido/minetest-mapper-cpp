@@ -15,14 +15,13 @@
 #include <string>
 #include <sstream>
 
-#include "types.h"
 
 class DBSQLite3 : public DB {
 #if __cplusplus >= 201103L
-	typedef std::unordered_map<int64_t, ustring>  BlockCache;
+	typedef std::unordered_map<int64_t, std::vector<unsigned char>>  BlockCache;
 	typedef std::unordered_set<int64_t>  BlockIdSet;
 #else
-	typedef std::map<int64_t, ustring>  BlockCache;
+	typedef std::map<int64_t, std::vector<unsigned char>>  BlockCache;
 	typedef std::set<int64_t>  BlockIdSet;
 #endif
 public:
