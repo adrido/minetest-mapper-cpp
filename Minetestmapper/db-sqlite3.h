@@ -5,25 +5,16 @@
 
 #include "db.h"
 #include <sqlite3.h>
-#if __cplusplus >= 201103L
 #include <unordered_map>
 #include <unordered_set>
-#else
-#include <map>
-#include <set>
-#endif
 #include <string>
 #include <sstream>
 
 
 class DBSQLite3 : public DB {
-#if __cplusplus >= 201103L
 	typedef std::unordered_map<int64_t, std::vector<unsigned char>>  BlockCache;
 	typedef std::unordered_set<int64_t>  BlockIdSet;
-#else
-	typedef std::map<int64_t, std::vector<unsigned char>>  BlockCache;
-	typedef std::set<int64_t>  BlockIdSet;
-#endif
+
 public:
 	DBSQLite3(const std::string &mapdir);
 	virtual int getBlocksQueriedCount(void);

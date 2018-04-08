@@ -6,22 +6,15 @@
 
 #include "db.h"
 #include <libpq-fe.h>
-#if __cplusplus >= 201103L
 #include <unordered_map>
-#else
-#include <map>
-#endif
 #include <string>
 #include <sstream>
 
 #include "types.h"
 
 class DBPostgreSQL : public DB {
-#if __cplusplus >= 201103L
 	typedef std::unordered_map<int64_t, ustring>  BlockCache;
-#else
-	typedef std::map<int64_t, ustring>  BlockCache;
-#endif
+
 public:
 	DBPostgreSQL(const std::string &mapdir);
 	virtual int getBlocksQueriedCount(void);
