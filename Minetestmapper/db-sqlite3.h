@@ -5,10 +5,9 @@
 
 #include "db.h"
 #include <sqlite3.h>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <string>
-#include <sstream>
 
 
 class DBSQLite3 : public DB {
@@ -31,11 +30,11 @@ private:
 
 	int m_blocksQueriedCount;
 	int m_blocksReadCount;
-	sqlite3 *m_db;
-	sqlite3_stmt *m_dataVersionStatement;
-	sqlite3_stmt *m_blockPosListStatement;
-	sqlite3_stmt *m_blockOnPosStatement;
-	sqlite3_stmt *m_blockOnRowidStatement;
+	sqlite3 *m_db = nullptr;
+	sqlite3_stmt *m_dataVersionStatement = nullptr;
+	sqlite3_stmt *m_blockPosListStatement = nullptr;
+	sqlite3_stmt *m_blockOnPosStatement = nullptr;
+	sqlite3_stmt *m_blockOnRowidStatement = nullptr;
 	std::ostringstream  m_getBlockSetStatementBlocks;
 	BlockCache  m_blockCache;
 	BlockPosList m_blockPosList;
@@ -44,7 +43,7 @@ private:
 	uint64_t m_blockPosListQueryTime;
 
 	int64_t getDataVersion();
-	void prepareBlockOnPosStatement(void);
+	void prepareBlockOnPosStatement();
 	int getBlockPosListRows();
 	Block getBlockOnPosRaw(const BlockPos &pos);
 	void cacheBlocks(sqlite3_stmt *SQLstatement);
