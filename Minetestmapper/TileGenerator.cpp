@@ -16,7 +16,10 @@
 #include <stdexcept>
 #include <cerrno>
 #include <cstring>
+
+
 #include "config.h"
+#include "DataFileParser.h"
 #include "Settings.h"
 #include "PlayerAttributes.h"
 #include "TileGenerator.h"
@@ -111,11 +114,6 @@ const ColorEntry *TileGenerator::NodeColorNotDrawn = &nodeColorNotDrawnObject;
 const BlockPos TileGenerator::BlockPosLimitMin(MAPBLOCK_MIN, MAPBLOCK_MIN, MAPBLOCK_MIN);
 const BlockPos TileGenerator::BlockPosLimitMax(MAPBLOCK_MAX, MAPBLOCK_MAX, MAPBLOCK_MAX);
 
-struct HeightMapColor
-{
-	int height[2];
-	Color color[2];
-};
 
 TileGenerator::TileGenerator():
 	verboseCoordinates(0),
@@ -431,40 +429,23 @@ void TileGenerator::setMaxY(int y)
 
 void TileGenerator::parseNodeColorsFile(const std::string &fileName)
 {
-	m_nodeColors.clear();
-	parseDataFile(fileName, 0, "map colors", &TileGenerator::parseNodeColorsLine);
+	ColorsFileParser d(verboseReadColors, m_drawAlpha);
+	d.parseDataFile(fileName, "map colors");
+	m_nodeColors = d.getNodeColors();
 }
 
 void TileGenerator::parseHeightMapNodesFile(const std::string &fileName)
 {
-	m_nodeColors.clear();
-	parseDataFile(fileName, 0, "heightmap nodes", &TileGenerator::parseHeightMapNodesLine);
+	HeightMapNodesFileParser p(verboseReadColors, m_drawAlpha);
+	p.parseDataFile(fileName, "heightmap nodes");
+	m_nodeColors = p.getNodeColors();
 }
 
 void TileGenerator::parseHeightMapColorsFile(const std::string &fileName)
 {
-	m_heightMapColors.clear();
-	parseDataFile(fileName, 0, "heightmap colors", &TileGenerator::parseHeightMapColorsLine);
-}
-
-void TileGenerator::parseDataFile(const std::string &fileName, int depth, const char *type,
-	void (TileGenerator::*parseLine)(const std::string &line, std::string name,
-		istringstream &iline, int linenr, const std::string &filename))
-{
-	if (depth > 100)
-		throw std::runtime_error(std::string("Excessive inclusion depth of ") + type + " files - suspected recursion (i.e. cycle); current file: '" + fileName + "'");
-	if (depth == 0 && verboseReadColors >= 2)
-		cout << "Checking for " << type << " file: " << fileName << std::endl;
-	ifstream in;
-	in.open(fileName.c_str(), ifstream::in);
-	if (!in.is_open()) {
-		throw std::runtime_error(std::string("Failed to open ") + type + " file '" + fileName + "'");
-		return;
-	}
-	if (verboseReadColors >= 1)
-		cout << "Reading " << type << " file:  " << fileName << std::endl;
-	parseDataStream(in, fileName, depth, type, parseLine);
-	in.close();
+	HeightMapColorsFileParser p(verboseReadColors, m_drawAlpha);
+	p.parseDataFile(fileName, "heightmap colors");
+	m_heightMapColors = p.getHeightMapColors();
 }
 
 void TileGenerator::setBackend(std::string backend)
@@ -557,202 +538,6 @@ void TileGenerator::generate(const std::string &input, const std::string &output
 	if (progressIndicator)
 	    cout << std::setw(20) << " " <<  "\r" << std::flush;
 	printUnknown();
-}
-
-void TileGenerator::parseDataStream(std::istream &in, const std::string &filename, int depth, const char *type,
-	void (TileGenerator::*parseLine)(const std::string &line, std::string name,
-		istringstream &iline, int linenr, const std::string &filename))
-{
-	string line;
-	int linenr = 0;
-	for (std::getline(in,line); in.good(); std::getline(in,line)) {
-		linenr++;
-		size_t comment = line.find_first_of('#');
-		if (comment != string::npos)
-			line.erase(comment);
-		istringstream iline;
-		iline.str(line);
-		iline >> std::skipws;
-		string name;
-		iline >> name >> std::ws;
-		if (name.length() == 0)
-			continue;
-		if (name == "@include") {
-			string includeFile;
-			getline(iline,includeFile);
-			size_t lastChar = includeFile.find_last_not_of(" \t\r\n");
-			if (lastChar != string::npos)
-				includeFile.erase(lastChar + 1);
-			if (includeFile == "") {
-				std::cerr << filename << ":" << linenr << ": include filename missing in colors file (" << line << ")" << std::endl;
-				continue;
-			}
-#if ! (MSDOS || __OS2__ || __NT__ || _WIN32)
-			// This same feature seems needlessly complicated on windows - so it is not supported
-			if (includeFile[0] != '/') {
-				string includePath = filename;
-				size_t offset = includePath.find_last_of('/');
-				if (offset != string::npos) {
-					includePath.erase(offset);
-					includeFile = includePath + '/' + includeFile;
-				}
-			}
-#endif
-			parseDataFile(includeFile, depth + 1, type, parseLine);
-		}
-		else {
-			(this->*parseLine)(line, name, iline, linenr, filename);
-		}
-	}
-	if (!in.eof()) {
-		std::cerr << filename << ": error reading colors file after line " << linenr << std::endl;
-	}
-}
-
-void TileGenerator::parseNodeColorsLine(const std::string &line, std::string name, istringstream &iline, int linenr, const std::string &filename)
-{
-	iline >> std::ws >> std::skipws;
-	if (iline.good() && iline.peek() == '-') {
-		char c;
-		iline >> c >> std::ws;
-		if (iline.fail() || !iline.eof()) {
-			std::cerr << filename << ":" << linenr << ": bad line in colors file (" << line << ")" << std::endl;
-			return;
-		}
-		m_nodeColors.erase(name);
-	}
-	else {
-		int r, g, b, a, t, f;
-		std::string flags;
-		ColorEntry color;
-		iline >> r;
-		iline >> g;
-		iline >> b;
-		if (iline.fail()) {
-			std::cerr << filename << ":" << linenr << ": bad line in colors file (" << line << ")" << std::endl;
-			return;
-		}
-		a = 0xff;
-		iline >> std::ws;
-		if (iline.good() && isdigit(iline.peek()))
-			iline >> a >> std::ws;
-		t = 0;
-		if (iline.good() && isdigit(iline.peek()))
-			iline >> t >> std::ws;
-		if (iline.good() && !isdigit(iline.peek()))
-			iline >> flags >> std::ws;
-		f = 0;
-		if (!iline.fail() && flags != "") {
-			for(size_t i = 0; i < flags.length(); i++) {
-				if (flags[i] == ',')
-					flags[i]= ' ';
-			}
-			istringstream iflags(flags);
-			std::string flag;
-			iflags >> flag;
-			while (!iflags.fail()) {
-				if (flag == "ignore")
-					f |= ColorEntry::FlagIgnore;
-				else if (flag == "air")
-					f |= ColorEntry::FlagAir;
-				iflags >> flag;
-			}
-		}
-		color = ColorEntry(r,g,b,a,t,f);
-		if ((m_drawAlpha && a == 0xff) || (!m_drawAlpha && a != 0xff)) {
-			// If drawing alpha, and the colors file contains both
-			// an opaque entry and a non-opaque entry for a name, prefer
-			// the non-opaque entry
-			// If not drawing alpha, and the colors file contains both
-			// an opaque entry and a non-opaque entry for a name, prefer
-			// the opaque entry
-			// Otherwise, any later entry overrides any previous entry
-			NodeColorMap::iterator it = m_nodeColors.find(name);
-			if (it != m_nodeColors.end()) {
-				if (m_drawAlpha && (a == 0xff && it->second.a != 0xff)) {
-					// drawing alpha: don't use opaque color to override
-					// non-opaque color
-					return;
-				}
-				if (!m_drawAlpha && (a != 0xff && it->second.a == 0xff)) {
-					// not drawing alpha: don't use non-opaque color to
-					// override opaque color
-					return;
-				}
-			}
-		}
-		m_nodeColors[name] = color;
-	}
-}
-
-void TileGenerator::parseHeightMapColorsLine(const std::string &line, std::string name, istringstream &iline, int linenr, const std::string &filename)
-{
-	(void) name;
-	int height[2];
-	Color color[2];
-	iline.str(line);		// Reset
-	for (int i = 0; i < 2; i++) {
-		iline >> std::ws;
-		char c = iline.peek();
-		iline >> height[i];
-		if (iline.fail()) {
-			std::string value;
-			iline.clear();
-			iline >> std::ws;
-			iline >> value >> std::ws;
-			if (!iline.fail()) {
-				if (value == "-oo" || (c == '-' && value=="oo"))
-					height[i] = INT_MIN;
-				else if (value == "oo" || value == "+oo")
-					height[i] = INT_MAX;
-				else {
-					iline.clear(ios::failbit);	// Set to failed
-					break;
-				}
-			}
-		}
-	}
-	for (int i = 0; i < 2; i++) {
-		int r, g, b;
-		iline >> r;
-		iline >> g;
-		iline >> b;
-		color[i] = Color(r,g,b);
-	}
-	if (height[0] > height[1]) {
-		{
-			int tmp = height[0];
-			height[0] = height[1];
-			height[1] = tmp;
-		}
-		{
-			Color tmp = color[0];
-			color[0] = color[1];
-			color[1] = tmp;
-		}
-	}
-	iline >> std::ws;
-	if (iline.fail() || !iline.eof()) {
-		std::cerr << filename << ":" << linenr << ": bad line in heightmap colors file (" << line << ")" << std::endl;
-		return;
-	}
-	m_heightMapColors.push_back(HeightMapColor(height[0], color[0], height[1], color[1]));
-}
-
-void TileGenerator::parseHeightMapNodesLine(const std::string &line, std::string name, istringstream &iline, int linenr, const std::string &filename)
-{
-	if (name == "-") {
-		iline >> std::ws >> name >> std::ws;
-		m_nodeColors.erase(name);
-	}
-	else {
-		m_nodeColors[name] = ColorEntry(0,0,0,255,1,0);		// Dummy entry - but must not be transparent
-	}
-	// Don't care if not at eof (== really eol). We might be reading a colors.txt file...
-	if (iline.fail()) {
-		std::cerr << filename << ":" << linenr << ": bad line in heightmap nodes file (" << line << ")" << std::endl;
-		return;
-	}
 }
 
 std::string TileGenerator::getWorldDatabaseBackend(const std::string &input)

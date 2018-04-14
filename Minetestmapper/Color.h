@@ -46,4 +46,11 @@ inline Color &Color::operator=(const Color &c)
 	return *this;
 }
 
+struct HeightMapColor
+{
+	HeightMapColor(int h0, Color c0, int h1, Color c1) : height{ h0, h1 }, color{ c0, c1 } {}
+	int height[2];
+	Color color[2];
+};
+
 #endif // COLOR_H

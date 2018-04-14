@@ -16,6 +16,8 @@ set(sources
 	ZlibDecompressor.h
 	Color.cpp
 	Color.h
+	DataFileParser.cpp
+	DataFileParser.h
 	Settings.cpp
 	Settings.h
 	BlockPos.cpp

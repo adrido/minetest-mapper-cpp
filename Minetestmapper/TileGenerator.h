@@ -61,12 +61,6 @@ private:
 	typedef std::unordered_map<int, std::string> NodeID2NameMap;
 
 public:
-	struct HeightMapColor
-	{
-		HeightMapColor(int h0, Color c0, int h1, Color c1) : height{h0, h1}, color{c0, c1} {}
-		int height[2];
-		Color color[2];
-	};
 	typedef std::list<HeightMapColor> HeightMapColorList;
 	struct DrawObject {
 		void setCenter(const NodeCoord &c) { haveCenter = true; center = c; }
@@ -196,19 +190,6 @@ private:
 	int borderBottom() const { return ((m_drawScale & DRAWSCALE_BOTTOM) ? SCALESIZE_HOR : 0) + (m_heightMap && (m_drawScale & DRAWHEIGHTSCALE_BOTTOM) ? HEIGHTSCALESIZE : 0); }
 	int borderLeft() const { return ((m_drawScale & DRAWSCALE_LEFT) ? SCALESIZE_VERT : 0) + (m_heightMap && (m_drawScale & DRAWHEIGHTSCALE_LEFT) ? HEIGHTSCALESIZE : 0); }
 	int borderRight() const { return ((m_drawScale & DRAWSCALE_RIGHT) ? SCALESIZE_VERT : 0) + (m_heightMap && (m_drawScale & DRAWHEIGHTSCALE_RIGHT) ? HEIGHTSCALESIZE : 0); }
-
-	void parseDataFile(const std::string &fileName, int depth, const char *type,
-		void (TileGenerator::*parseLine)(const std::string &line, std::string name,
-			std::istringstream &iline, int linenr, const std::string &filename));
-	void parseDataStream(std::istream &in, const std::string &filename, int depth, const char *type,
-		void (TileGenerator::*parseLine)(const std::string &line, std::string name,
-			std::istringstream &iline, int linenr, const std::string &filename));
-	void parseNodeColorsLine(const std::string &line, std::string name, std::istringstream &iline,
-		int linenr, const std::string &filename);
-	void parseHeightMapNodesLine(const std::string &line, std::string name, std::istringstream &iline,
-		int linenr, const std::string &filename);
-	void parseHeightMapColorsLine(const std::string &line, std::string name, std::istringstream &iline,
-		int linenr, const std::string &filename);
 
 public:
 	static const BlockPos BlockPosLimitMin;
