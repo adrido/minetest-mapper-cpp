@@ -9,7 +9,7 @@
 
 #include "mapper.h"
 
-
+#include <cmath>
 #include <cstdlib>
 #include <chrono>
 #include <getopt.h>

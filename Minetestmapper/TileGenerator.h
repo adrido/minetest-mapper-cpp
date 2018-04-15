@@ -7,26 +7,23 @@
  * =====================================================================
  */
 
-#ifndef TILEGENERATOR_H_JJNUCARH
-#define TILEGENERATOR_H_JJNUCARH
+#pragma once
 
-#include <gd.h>
 #include <climits>
-#include <iosfwd>
-#include <list>
-#include <unordered_map>
-#include <set>
-#include <list>
 #include <cstdint>
-#include <string>
+#include <iosfwd>
 #include <iostream>
+#include <list>
+#include <set>
 #include <sstream>
+#include <string>
+#include <unordered_map>
 
-#include "PixelAttributes.h"
 #include "BlockPos.h"
 #include "Color.h"
-#include "db.h"
 #include "PaintEngine.h"
+#include "PixelAttributes.h"
+#include "db.h"
 
 #define TILESIZE_CHUNK			(INT_MIN)
 #define TILECENTER_AT_WORLDCENTER	(INT_MAX)
@@ -106,7 +103,7 @@ public:
 	void setHeightMapYScale(float scale);
 	void setSeaLevel(int level);
 	void setBgColor(const Color &bgColor);
-	void setBlockDefaultColor(const Color &olor);
+	void setBlockDefaultColor(const Color &color);
 	void setScaleColor(const Color &scaleColor);
 	void setOriginColor(const Color &originColor);
 	void setPlayerColor(const Color &playerColor);
@@ -195,94 +192,94 @@ public:
 	static const BlockPos BlockPosLimitMin;
 	static const BlockPos BlockPosLimitMax;
 
-	int verboseCoordinates;
-	int verboseReadColors;
-	int verboseStatistics;
-	bool progressIndicator;
+	int verboseCoordinates{ 0 };
+	int verboseReadColors{ 0 };
+	int verboseStatistics{ 0 };
+	bool progressIndicator{ false };
 
 private:
-	unsigned m_silenceSuggestions;
-	bool m_heightMap;
-	float m_heightMapYScale;
-	int m_seaLevel;
-	Color m_bgColor;
-	Color m_blockDefaultColor;
-	Color m_scaleColor;
-	Color m_originColor;
-	Color m_playerColor;
-	Color m_tileBorderColor;
-	bool m_drawOrigin;
-	bool m_drawPlayers;
-	int m_drawScale;
-	bool m_drawAlpha;
-	bool m_drawAir;
-	bool m_drawIgnore;
-	bool m_shading;
-	std::string m_backend;
-	std::string m_requestedBackend;
-	bool m_scanEntireWorld;
-	bool m_shrinkGeometry;
-	bool m_blockGeometry;
-	int m_scaleFactor;
-	int m_chunkSize;
-	int m_sideScaleMajor;
-	int m_sideScaleMinor;
-	int m_heightScaleMajor;
-	int m_heightScaleMinor;
+	unsigned m_silenceSuggestions{ 0 };
+	bool m_heightMap{ false };
+	float m_heightMapYScale{ 1 };
+	int m_seaLevel{ 0 };
+	Color m_bgColor{ 255, 255, 255 };
+	Color m_blockDefaultColor{ 0, 0, 0, 0 };
+	Color m_scaleColor{ 0, 0, 0 };
+	Color m_originColor{ 255, 0, 0 };
+	Color m_playerColor{ 255, 0, 0 };
+	Color m_tileBorderColor{ 0, 0, 0 };
+	bool m_drawOrigin{ false };
+	bool m_drawPlayers{ false };
+	int m_drawScale{ DRAWSCALE_NONE };
+	bool m_drawAlpha{ false };
+	bool m_drawAir{ false };
+	bool m_drawIgnore{ false };
+	bool m_shading{ true };
+	std::string m_backend{ DEFAULT_BACKEND };
+	std::string m_requestedBackend{ DEFAULT_BACKEND };
+	bool m_scanEntireWorld{ false };
+	bool m_shrinkGeometry{ true };
+	bool m_blockGeometry{ false };
+	int m_scaleFactor{ 1 };
+	int m_chunkSize{ 0 };
+	int m_sideScaleMajor{ 0 };
+	int m_sideScaleMinor{ 0 };
+	int m_heightScaleMajor{ 0 };
+	int m_heightScaleMinor{ 0 };
 
 	DB *m_db = nullptr;
-	int m_generateNoPrefetch;
-	bool m_databaseFormatSet;
-	BlockPos::StrFormat m_databaseFormat;
+	int m_generateNoPrefetch{ 0 };
+	bool m_databaseFormatSet{ false };
+	BlockPos::StrFormat m_databaseFormat{ BlockPos::Unknown };
 	std::string m_recommendedDatabaseFormat;
 	long long m_databaseFormatFound[BlockPos::STRFORMAT_MAX];
-	bool m_reportDatabaseFormat;
+	bool m_reportDatabaseFormat{ false };
 	PaintEngine *paintEngine = nullptr;
 	PixelAttributes m_blockPixelAttributes;
 	PixelAttributes m_blockPixelAttributesScaled;
-	int m_xMin;
-	int m_xMax;
-	int m_zMin;
-	int m_zMax;
-	int m_yMin;
-	int m_yMax;
-	int m_reqXMin;
-	int m_reqXMax;
-	int m_reqYMin;
-	int m_reqYMax;
-	int m_reqZMin;
-	int m_reqZMax;
-	int m_reqYMinNode;		// Node offset within a map block
-	int m_reqYMaxNode;		// Node offset within a map block
-	int m_YMinMapped;		// Lowest block number mapped (not empty or air)
-	int m_YMaxMapped;		// Higher block number mapped (not empty or air)
-	long long m_emptyMapArea;	// Number of blocks that are partly empty in the map
+	int m_xMin{ INT_MAX / 16 - 1 };
+	int m_xMax{ INT_MIN / 16 + 1 };
+	int m_zMin{ INT_MAX / 16 - 1 };
+	int m_zMax{ INT_MIN / 16 + 1 };
+	int m_yMin{ INT_MAX / 16 - 1 };
+	int m_yMax{ INT_MIN / 16 + 1 };
+	int m_reqXMin{ MAPBLOCK_MIN };
+	int m_reqXMax{ MAPBLOCK_MAX };
+	int m_reqYMin{ MAPBLOCK_MIN };
+	int m_reqYMax{ MAPBLOCK_MAX };
+	int m_reqZMin{ MAPBLOCK_MIN };
+	int m_reqZMax{ MAPBLOCK_MAX };
+	int m_reqYMinNode{ 0 };		// Node offset within a map block
+	int m_reqYMaxNode{ 15 };		// Node offset within a map block
+	int m_YMinMapped{ MAPBLOCK_MAX };		// Lowest block number mapped (not empty or air)
+	int m_YMaxMapped{ MAPBLOCK_MIN };		// Higher block number mapped (not empty or air)
+	long long m_emptyMapArea{ 0 };	// Number of blocks that are partly empty in the map
 	long long m_worldBlocks;	// Number of blocks in the world (if known)
 	int m_storedWidth;
 	int m_storedHeight;
-	int m_mapXStartNodeOffset;
-	int m_mapYStartNodeOffset;
-	int m_mapXEndNodeOffset;
-	int m_mapYEndNodeOffset;
+	int m_mapXStartNodeOffset{ 0 };
+	int m_mapYStartNodeOffset{ 0 };
+	int m_mapXEndNodeOffset{ 0 };
+	int m_mapYEndNodeOffset{ 0 };
 	int m_mapXStartNodeOffsetOrig;
 	int m_mapYStartNodeOffsetOrig;
 	int m_mapXEndNodeOffsetOrig;
 	int m_mapYEndNodeOffsetOrig;
-	int m_tileXOrigin;
-	int m_tileZOrigin;
+	int m_tileXOrigin{ TILECENTER_AT_WORLDCENTER };
+	int m_tileZOrigin{ TILECENTER_AT_WORLDCENTER };
 	int m_tileXCentered;
 	int m_tileYCentered;
-	int m_tileWidth;
-	int m_tileHeight;
-	int m_tileBorderSize;
-	int m_tileMapXOffset;
-	int m_tileMapYOffset;
-	int m_tileBorderXCount;
-	int m_tileBorderYCount;
+	int m_tileWidth{ 0 };
+	int m_tileHeight{ 0 };
+	int m_tileBorderSize{ 1 };
+	int m_tileMapXOffset{ 0 };
+	int m_tileMapYOffset{ 0 };
+	int m_tileBorderXCount{ 0 };
+	int m_tileBorderYCount{ 0 };
 	int m_pictWidth;
 	int m_pictHeight;
-	int m_surfaceHeight;
-	int m_surfaceDepth;
+	int m_surfaceHeight{ INT_MIN };
+	int m_surfaceDepth{ INT_MAX };
 	std::list<BlockPos> m_positions;
 	NodeID2NameMap m_nameMap;
 	static const ColorEntry *NodeColorNotDrawn;
@@ -293,6 +290,4 @@ private:
 	std::set<std::string> m_unknownNodes;
 	std::vector<DrawObject> m_drawObjects;
 }; /* -----  end of class TileGenerator  ----- */
-
-#endif /* end of include guard: TILEGENERATOR_H_JJNUCARH */
 

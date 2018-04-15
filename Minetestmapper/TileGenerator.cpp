@@ -6,25 +6,26 @@
  *        Company:  LinuxOS.sk
  * =====================================================================
  */
+#include <cerrno>
+#include <climits>
 #include <cstdio>
 #include <cstdlib>
-#include <climits>
+#include <cstring>
 #include <fstream>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include <cerrno>
-#include <cstring>
+#include <utility>
 
 
 #include "config.h"
 #include "DataFileParser.h"
-#include "Settings.h"
+#include "PaintEngine_libgd.h"
 #include "PlayerAttributes.h"
+#include "Settings.h"
 #include "TileGenerator.h"
 #include "ZlibDecompressor.h"
-#include "PaintEngine_libgd.h"
 #ifdef USE_SQLITE3
 #include "db-sqlite3.h"
 #endif
@@ -115,75 +116,7 @@ const BlockPos TileGenerator::BlockPosLimitMin(MAPBLOCK_MIN, MAPBLOCK_MIN, MAPBL
 const BlockPos TileGenerator::BlockPosLimitMax(MAPBLOCK_MAX, MAPBLOCK_MAX, MAPBLOCK_MAX);
 
 
-TileGenerator::TileGenerator():
-	verboseCoordinates(0),
-	verboseReadColors(0),
-	verboseStatistics(0),
-	progressIndicator(false),
-	m_silenceSuggestions(0),
-	m_heightMap(false),
-	m_heightMapYScale(1),
-	m_seaLevel(0),
-	m_bgColor(255, 255, 255),
-	m_blockDefaultColor(0, 0, 0, 0),
-	m_scaleColor(0, 0, 0),
-	m_originColor(255, 0, 0),
-	m_playerColor(255, 0, 0),
-	m_tileBorderColor(0, 0, 0),
-	m_drawOrigin(false),
-	m_drawPlayers(false),
-	m_drawScale(DRAWSCALE_NONE),
-	m_drawAlpha(false),
-	m_drawAir(false),
-	m_drawIgnore(false),
-	m_shading(true),
-	m_backend(DEFAULT_BACKEND),
-	m_requestedBackend(DEFAULT_BACKEND),
-	m_scanEntireWorld(false),
-	m_shrinkGeometry(true),
-	m_blockGeometry(false),
-	m_scaleFactor(1),
-	m_chunkSize(0),
-	m_sideScaleMajor(0),
-	m_sideScaleMinor(0),
-	m_heightScaleMajor(0),
-	m_heightScaleMinor(0),
-	m_generateNoPrefetch(0),
-	m_databaseFormatSet(false),
-	m_databaseFormat(BlockPos::Unknown),
-	m_reportDatabaseFormat(false),
-	m_xMin(INT_MAX/16-1),
-	m_xMax(INT_MIN/16+1),
-	m_zMin(INT_MAX/16-1),
-	m_zMax(INT_MIN/16+1),
-	m_yMin(INT_MAX/16-1),
-	m_yMax(INT_MIN/16+1),
-	m_reqXMin(MAPBLOCK_MIN),
-	m_reqXMax(MAPBLOCK_MAX),
-	m_reqYMin(MAPBLOCK_MIN),
-	m_reqYMax(MAPBLOCK_MAX),
-	m_reqZMin(MAPBLOCK_MIN),
-	m_reqZMax(MAPBLOCK_MAX),
-	m_reqYMinNode(0),
-	m_reqYMaxNode(15),
-	m_YMinMapped(MAPBLOCK_MAX),
-	m_YMaxMapped(MAPBLOCK_MIN),
-	m_emptyMapArea(0),
-	m_mapXStartNodeOffset(0),
-	m_mapYStartNodeOffset(0),
-	m_mapXEndNodeOffset(0),
-	m_mapYEndNodeOffset(0),
-	m_tileXOrigin(TILECENTER_AT_WORLDCENTER),
-	m_tileZOrigin(TILECENTER_AT_WORLDCENTER),
-	m_tileWidth(0),
-	m_tileHeight(0),
-	m_tileBorderSize(1),
-	m_tileMapXOffset(0),
-	m_tileMapYOffset(0),
-	m_surfaceHeight(INT_MIN),
-	m_surfaceDepth(INT_MAX),
-	m_tileBorderXCount(0),
-	m_tileBorderYCount(0)
+TileGenerator::TileGenerator()
 {
 	memset(&m_databaseFormatFound, 0, sizeof(m_databaseFormatFound));
 	// Load default grey colors.
