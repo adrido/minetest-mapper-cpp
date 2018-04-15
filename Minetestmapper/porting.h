@@ -1,11 +1,9 @@
-#ifndef _PORTING_H
-#define _PORTING_H
+#pragma once
 
-#ifdef _WIN32
-#include "porting_win32.h"
-#else
-#include "porting_posix.h"
-#endif
+#include <chrono>
+#include <cstdio>
+#include <string>
+#include <thread>
 
 #ifdef _MSC_VER
 #ifndef strcasecmp 
@@ -13,5 +11,24 @@
 #endif
 #endif
 
-#endif // _PORTING_H
+inline void sleepMs(int time);
+
+namespace porting {
+
+	/* 
+	Wrapper for fopen_s on Windows. This is not only to keep the deprecation notice quit,
+	it is also much faster the the deprecated fopen (~50 ms!)
+	On other systems it does still use the original fopen
+	*/
+	FILE* fopen(const char *filename, const char *mode);
+
+	/*
+	Wrapper for getenv_s on Windows.
+	Uses getenv on other OS.
+	*/
+	std::string getenv(const char *name);
+
+	std::string strerror(int errnum);
+
+}  // namespace porting
 

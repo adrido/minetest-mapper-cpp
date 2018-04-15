@@ -29,6 +29,8 @@ set(sources
 	CharEncodingConverter.h
 	PaintEngine_libgd.cpp
 	PaintEngine_libgd.h
+	porting.cpp
+	porting.h
 	db.h
 	db-leveldb.cpp
 	db-leveldb.h
