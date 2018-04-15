@@ -2,6 +2,7 @@
 
 #include <cstdio> // fopen
 #include <cstdlib> // getenv
+#include <cstring>
 
 
 
@@ -16,7 +17,7 @@ FILE *porting::fopen(const char *filename, const char *mode)
 #ifdef _WIN32	
 	fopen_s(&file, filename, mode);
 #else
-	file = fopen(minetestConf, mode)
+	file = fopen(filename, mode);
 #endif // _WIN32
 
 	return file;
@@ -43,7 +44,7 @@ std::string porting::strerror(int errnum)
 	char errmsg[len];
 	strerror_s(errmsg, len, errnum);
 #else
-	char *errmsg = strerror(errnum);
+	char *errmsg = std::strerror(errnum);
 #endif // _WIN32
 
 	return std::string(errmsg);
