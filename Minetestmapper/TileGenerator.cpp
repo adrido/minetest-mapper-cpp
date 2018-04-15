@@ -181,7 +181,9 @@ TileGenerator::TileGenerator():
 	m_tileMapXOffset(0),
 	m_tileMapYOffset(0),
 	m_surfaceHeight(INT_MIN),
-	m_surfaceDepth(INT_MAX)
+	m_surfaceDepth(INT_MAX),
+	m_tileBorderXCount(0),
+	m_tileBorderYCount(0)
 {
 	memset(&m_databaseFormatFound, 0, sizeof(m_databaseFormatFound));
 	// Load default grey colors.
