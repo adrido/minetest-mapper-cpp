@@ -73,9 +73,9 @@ static inline void readString(string &str, const unsigned char *data, size_t off
 
 static inline void checkBlockNodeDataLimit(int version, size_t dataLength)
 {
-	int datapos = 16 * 16 * 16;
+	constexpr const int datapos = 16 * 16 * 16;
 	if (version >= 24) {
-		size_t index = datapos << 1;
+		constexpr const size_t index = static_cast<size_t>(datapos) << 1;
 		checkDataLimit("node:24", index, 2, dataLength);
 	}
 	else if (version >= 20) {
@@ -91,7 +91,7 @@ static inline void checkBlockNodeDataLimit(int version, size_t dataLength)
 static inline int readBlockContent(const unsigned char *mapData, int version, int datapos)
 {
 	if (version >= 24) {
-		size_t index = datapos << 1;
+		size_t index = static_cast<size_t>(datapos) << 1;
 		return (mapData[index] << 8) | mapData[index + 1];
 	}
 	else if (version >= 20) {
@@ -118,7 +118,6 @@ const BlockPos TileGenerator::BlockPosLimitMax(MAPBLOCK_MAX, MAPBLOCK_MAX, MAPBL
 
 TileGenerator::TileGenerator()
 {
-	memset(&m_databaseFormatFound, 0, sizeof(m_databaseFormatFound));
 	// Load default grey colors.
 	m_heightMapColors.push_back(HeightMapColor(INT_MIN, Color(0,0,0), -129, Color(0,0,0)));
 	m_heightMapColors.push_back(HeightMapColor(-128, Color(0,0,0), 127, Color(255,255,255)));
@@ -1540,9 +1539,8 @@ void TileGenerator::renderMap()
 					<< "  (" << std::fixed << std::setprecision(0) << 100.0 * (m_zMax - pos.z()) / (m_zMax - m_zMin)
 					<< "%)          \r" << std::flush;
 			}
-			for (int i = 0; i < 16; ++i) {
-				m_readedPixels[i] = 0;
-			}
+			
+			m_readedPixels.fill(0);
 			allReaded = false;
 			currentPos = pos;
 		}

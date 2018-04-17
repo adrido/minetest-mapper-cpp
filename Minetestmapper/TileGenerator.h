@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <array>
 #include <climits>
 #include <cstdint>
 #include <iosfwd>
@@ -232,7 +233,7 @@ private:
 	bool m_databaseFormatSet{ false };
 	BlockPos::StrFormat m_databaseFormat{ BlockPos::Unknown };
 	std::string m_recommendedDatabaseFormat;
-	long long m_databaseFormatFound[BlockPos::STRFORMAT_MAX];
+	std::array<long long, BlockPos::STRFORMAT_MAX>  m_databaseFormatFound{ { 0 } };
 	bool m_reportDatabaseFormat{ false };
 	PaintEngine *paintEngine = nullptr;
 	PixelAttributes m_blockPixelAttributes;
@@ -286,7 +287,7 @@ private:
 	const ColorEntry *m_nodeIDColor[MAPBLOCK_MAXCOLORS];
 	NodeColorMap m_nodeColors;
 	HeightMapColorList m_heightMapColors;
-	uint16_t m_readedPixels[16];
+	std::array<uint16_t, 16> m_readedPixels;
 	std::set<std::string> m_unknownNodes;
 	std::vector<DrawObject> m_drawObjects;
 }; /* -----  end of class TileGenerator  ----- */
