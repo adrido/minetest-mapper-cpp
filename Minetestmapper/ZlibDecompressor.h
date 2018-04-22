@@ -7,10 +7,11 @@
  * =====================================================================
  */
 
-#ifndef ZLIBDECOMPRESSOR_H_ZQL1PN8Q
-#define ZLIBDECOMPRESSOR_H_ZQL1PN8Q
+#pragma once
 
+#include <array>
 #include <cstdlib>
+#include <utility>
 #include <string>
 #include <vector>
 
@@ -19,7 +20,7 @@ class ZlibDecompressor
 {
 public:
 	struct DecompressError {
-		DecompressError(std::string m = "(unknown error)") : message(m) {}
+		DecompressError(const std::string &m = "(unknown error)") : message(m) {}
 		const std::string message;
 	};
 
@@ -29,11 +30,15 @@ public:
 	std::size_t seekPos() const;
 	std::vector<unsigned char> decompress();
 
+	void decompressVoid();
+
+	static constexpr const size_t nodesBlockSize = 16 * 16 * 16 * 4;
+	std::array<unsigned char, nodesBlockSize> decompressNodes();
+
 private:
 	const unsigned char *m_data;
 	std::size_t m_seekPos;
 	std::size_t m_size;
 }; /* -----  end of class ZlibDecompressor  ----- */
 
-#endif /* end of include guard: ZLIBDECOMPRESSOR_H_ZQL1PN8Q */
 

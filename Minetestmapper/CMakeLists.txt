@@ -22,6 +22,8 @@ set(sources
 	Settings.h
 	BlockPos.cpp
 	BlockPos.h
+	MapBlock.cpp
+	MapBlock.h
 	mapper.cpp
 	mapper.h
 	main.cpp

@@ -22,6 +22,7 @@
 
 #include "BlockPos.h"
 #include "Color.h"
+#include "MapBlock.h"
 #include "PaintEngine.h"
 #include "PixelAttributes.h"
 #include "db.h"
@@ -59,7 +60,7 @@ private:
 	typedef std::unordered_map<int, std::string> NodeID2NameMap;
 
 public:
-	typedef std::list<HeightMapColor> HeightMapColorList;
+	using HeightMapColorList = std::list<HeightMapColor>;
 	struct DrawObject {
 		void setCenter(const NodeCoord &c) { haveCenter = true; center = c; }
 		void setCorner1(const NodeCoord &c) { haveCenter = false; corner1 = c; }
@@ -132,7 +133,7 @@ public:
 	void setTileOrigin(int x, int y);
 	void setTileCenter(int x, int y);
 	void setScaleFactor(int f);
-	void enableProgressIndicator(void);
+	void enableProgressIndicator();
 	void parseNodeColorsFile(const std::string &fileName);
 	void parseHeightMapNodesFile(const std::string &fileName);
 	void parseHeightMapColorsFile(const std::string &fileName);
@@ -147,7 +148,7 @@ private:
 	int getMapChunkSize(const std::string &input);
 	void openDb(const std::string &input);
 	void closeDb();
-	void sanitizeParameters(void);
+	void sanitizeParameters();
 	void loadBlocks();
 	void createImage();
 	void computeMapParameters(const std::string &input);
@@ -170,7 +171,7 @@ private:
 	void pushPixelRows(PixelAttributes &pixelAttributes, int zPosLimit);
 	void scalePixelRows(PixelAttributes &pixelAttributes, PixelAttributes &pixelAttributesScaled, int zPosLimit);
 	void processMapBlock(const DB::Block &block);
-	void renderMapBlock(const std::vector<unsigned char> &mapBlock, const BlockPos &pos, int version);
+	void renderMapBlock(const MapBlock &mapBlock);
 	void renderScale();
 	void renderHeightScale();
 	void renderOrigin();

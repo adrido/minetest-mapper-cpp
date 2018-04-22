@@ -19,7 +19,7 @@ public:
 	virtual int getBlocksQueriedCount(void);
 	virtual int getBlocksReadCount(void);
 	virtual const BlockPosList &getBlockPosList();
-	virtual Block getBlockOnPos(const BlockPos &pos);
+	virtual const Block getBlockOnPos(const BlockPos &pos);
 	~DBSQLite3();
 
 	static void setLimitBlockListQuerySize(int count = -1);

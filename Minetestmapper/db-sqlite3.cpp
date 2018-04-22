@@ -230,9 +230,11 @@ int DBSQLite3::getBlockPosListRows()
 }
 
 
-DB::Block DBSQLite3::getBlockOnPos(const BlockPos &pos)
+const DB::Block DBSQLite3::getBlockOnPos(const BlockPos &pos)
 {
-	Block block(pos, {});
+	static thread_local MapBlock block;
+	block.reset();
+	block.setPos(pos);
 	int result = 0;
 
 	m_blocksQueriedCount++;
@@ -253,9 +255,11 @@ DB::Block DBSQLite3::getBlockOnPos(const BlockPos &pos)
 	while (true) {
 		result = sqlite3_step(statement);
 		if (result == SQLITE_ROW) {
-			const auto *data = static_cast<const unsigned char *>(sqlite3_column_blob(statement, 1));
+			//const auto *data = static_cast<const unsigned char *>(sqlite3_column_blob(statement, 1));
 			int size = sqlite3_column_bytes(statement, 1);
-			block.second.assign(&data[0], &data[size]);
+			//block = MapBlock(pos, sqlite3_column_blob(statement, 1), size);
+			block.setData(sqlite3_column_blob(statement, 1), size);
+			//block.second.assign(&data[0], &data[size]);
 			m_blocksReadCount++;
 			break;
 		}

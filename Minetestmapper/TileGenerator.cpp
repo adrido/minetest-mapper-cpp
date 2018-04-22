@@ -47,68 +47,6 @@
 
 using namespace std;
 
-static inline void checkDataLimit(const char *type, size_t offset, size_t length, size_t dataLength)
-{
-	if (offset + length > dataLength)
-		throw TileGenerator::UnpackError(type, offset, length, dataLength);
-}
-
-static inline uint8_t readU8(const unsigned char *data, size_t offset, size_t dataLength)
-{
-	checkDataLimit("uint8", offset, 1, dataLength);
-	return data[offset];
-}
-
-static inline uint16_t readU16(const unsigned char *data, size_t offset, size_t dataLength)
-{
-	checkDataLimit("uint16", offset, 2, dataLength);
-	return data[offset] << 8 | data[offset + 1];
-}
-
-static inline void readString(string &str, const unsigned char *data, size_t offset, size_t length, size_t dataLength)
-{
-	checkDataLimit("string", offset, length, dataLength);
-	str = string(reinterpret_cast<const char *>(data) + offset, length);
-}
-
-static inline void checkBlockNodeDataLimit(int version, size_t dataLength)
-{
-	constexpr const int datapos = 16 * 16 * 16;
-	if (version >= 24) {
-		constexpr const size_t index = static_cast<size_t>(datapos) << 1;
-		checkDataLimit("node:24", index, 2, dataLength);
-	}
-	else if (version >= 20) {
-		checkDataLimit("node:20", datapos + 0x2000, 1, dataLength);
-	}
-	else {
-		std::ostringstream oss;
-		oss << "Unsupported map version " << version;
-		throw std::runtime_error(oss.str());
-	}
-}
-
-static inline int readBlockContent(const unsigned char *mapData, int version, int datapos)
-{
-	if (version >= 24) {
-		size_t index = static_cast<size_t>(datapos) << 1;
-		return (mapData[index] << 8) | mapData[index + 1];
-	}
-	else if (version >= 20) {
-		if (mapData[datapos] <= 0x80) {
-			return mapData[datapos];
-		}
-		else {
-			return (int(mapData[datapos]) << 4) | (int(mapData[datapos + 0x2000]) >> 4);
-		}
-	}
-	else {
-		std::ostringstream oss;
-		oss << "Unsupported map version " << version;
-		throw std::runtime_error(oss.str());
-	}
-}
-
 static const ColorEntry nodeColorNotDrawnObject;
 const ColorEntry *TileGenerator::NodeColorNotDrawn = &nodeColorNotDrawnObject;
 
@@ -1323,124 +1261,55 @@ void TileGenerator::createImage()
 	}
 }
 
-void TileGenerator::processMapBlock(const DB::Block &block)
+void TileGenerator::processMapBlock(const DB::Block &mapBlock)
 {
-	const BlockPos &pos = block.first;
-	const unsigned char *data = block.second.data();
-	size_t length = block.second.size();
-
-	uint8_t version = readU8(data, 0, length);
-	//uint8_t flags = readU8(data, 1, length);
-
-	size_t dataOffset = 0;
-	if (version >= 27) {
-		dataOffset = 6;
-	}
-	else if (version >= 22) {
-		dataOffset = 4;
-	}
-	else {
-		dataOffset = 2;
+	if ((!m_drawAir && mapBlock.onlyAir())
+		|| (!m_drawIgnore && mapBlock.onlyIgnore())) {
+		// Nothing to draw :-)
+		return;
 	}
 
-	// Zlib header: 2; Deflate header: >=1
-	checkDataLimit("zlib", dataOffset, 3, length);
-	ZlibDecompressor decompressor(data, length);
-	decompressor.setSeekPos(dataOffset);
-	auto mapData = decompressor.decompress();
-	auto mapMetadata = decompressor.decompress();
-	dataOffset = decompressor.seekPos();
-
-	// Skip unused data
-	if (version <= 21) {
-		dataOffset += 2;
-	}
-	if (version == 23) {
-		dataOffset += 1;
-	}
-	if (version == 24) {
-		uint8_t ver = readU8(data, dataOffset++, length);
-		if (ver == 1) {
-			uint16_t num = readU16(data, dataOffset, length);
-			dataOffset += 2;
-			dataOffset += 10 * num;
+	for (const auto &entry : mapBlock.getMappings()) {
+		const string &name = entry.second;
+		const int nodeId = entry.first;
+		// In case of a height map, it stores just dummy colors... 
+		NodeColorMap::const_iterator color = m_nodeColors.find(name);
+		if (name == "air" && !(m_drawAir && color != m_nodeColors.end())) {
+			m_nodeIDColor[nodeId] = NodeColorNotDrawn;
 		}
-	}
-
-	// Skip unused static objects
-	dataOffset++; // Skip static object version
-	int staticObjectCount = readU16(data, dataOffset, length);
-	dataOffset += 2;
-	for (int i = 0; i < staticObjectCount; ++i) {
-		dataOffset += 13;
-		uint16_t dataSize = readU16(data, dataOffset, length);
-		dataOffset += dataSize + 2;
-	}
-	dataOffset += 4; // Skip timestamp
-
-	// Read mapping
-	if (version >= 22) {
-		dataOffset++; // mapping version
-		uint16_t numMappings = readU16(data, dataOffset, length);
-		dataOffset += 2;
-		for (int i = 0; i < numMappings; ++i) {
-			uint16_t nodeId = readU16(data, dataOffset, length);
-			dataOffset += 2;
-			uint16_t nameLen = readU16(data, dataOffset, length);
-			dataOffset += 2;
-			string name;
-			readString(name, data, dataOffset, nameLen, length);
-			size_t end = name.find_first_of('\0');
-			if (end != std::string::npos)
-				name.erase(end);
-			// In case of a height map, it stores just dummy colors...
-			NodeColorMap::const_iterator color = m_nodeColors.find(name);
-			if (name == "air" && !(m_drawAir && color != m_nodeColors.end())) {
-				m_nodeIDColor[nodeId] = NodeColorNotDrawn;
-			}
-			else if (name == "ignore" && !(m_drawIgnore && color != m_nodeColors.end())) {
-				m_nodeIDColor[nodeId] = NodeColorNotDrawn;
+		else if (name == "ignore" && !(m_drawIgnore && color != m_nodeColors.end())) {
+			m_nodeIDColor[nodeId] = NodeColorNotDrawn;
+		}
+		else {
+			if (color != m_nodeColors.end()) {
+				// If the color is marked 'ignore', then treat it accordingly. 
+				// Colors marked 'ignore' take precedence over 'air' 
+				if ((color->second.f & ColorEntry::FlagIgnore)) {
+					if (m_drawIgnore)
+						m_nodeIDColor[nodeId] = &color->second;
+					else
+						m_nodeIDColor[nodeId] = NodeColorNotDrawn;
+				}
+				// If the color is marked 'air', then treat it accordingly. 
+				else if ((color->second.f & ColorEntry::FlagAir)) {
+					if (m_drawAir)
+						m_nodeIDColor[nodeId] = &color->second;
+					else
+						m_nodeIDColor[nodeId] = NodeColorNotDrawn;
+				}
+				// Regular node. 
+				else {
+					m_nodeIDColor[nodeId] = &color->second;
+				}
 			}
 			else {
-				if (color != m_nodeColors.end()) {
-					// If the color is marked 'ignore', then treat it accordingly.
-					// Colors marked 'ignore' take precedence over 'air'
-					if ((color->second.f & ColorEntry::FlagIgnore)) {
-						if (m_drawIgnore)
-							m_nodeIDColor[nodeId] = &color->second;
-						else
-							m_nodeIDColor[nodeId] = NodeColorNotDrawn;
-					}
-					// If the color is marked 'air', then treat it accordingly.
-					else if ((color->second.f & ColorEntry::FlagAir)) {
-						if (m_drawAir)
-							m_nodeIDColor[nodeId] = &color->second;
-						else
-							m_nodeIDColor[nodeId] = NodeColorNotDrawn;
-					}
-					// Regular node.
-					else {
-						m_nodeIDColor[nodeId] = &color->second;
-					}
-				}
-				else {
-					m_nameMap[nodeId] = name;
-					m_nodeIDColor[nodeId] = NULL;
-				}
+				m_nameMap[nodeId] = name;
+				m_nodeIDColor[nodeId] = nullptr;
 			}
-			dataOffset += nameLen;
 		}
 	}
 
-	// Node timers
-	if (version >= 25) {
-		dataOffset++;
-		uint16_t numTimers = readU16(data, dataOffset, length);
-		dataOffset += 2;
-		dataOffset += numTimers * 10;
-	}
-
-	renderMapBlock(mapData, pos, version);
+	renderMapBlock(mapBlock);
 }
 
 class MapBlockIterator
@@ -1549,8 +1418,8 @@ void TileGenerator::renderMap()
 			continue;
 		}
 		currentPos.y() = pos.y();
-		DB::Block block = m_db->getBlockOnPos(pos);
-		if (!block.second.empty()) {
+		const DB::Block block = m_db->getBlockOnPos(pos);
+		if (!block.isEmpty()) {
 			try {
 				processMapBlock(block);
 
@@ -1739,12 +1608,12 @@ Color TileGenerator::computeMapHeightColor(int height)
 	return Color(int(r / n + 0.5), int(g / n + 0.5), int(b / n + 0.5));
 }
 
-inline void TileGenerator::renderMapBlock(const std::vector<unsigned char> &mapBlock, const BlockPos &pos, int version)
+inline void TileGenerator::renderMapBlock(const MapBlock &mapBlock)
 {
-	checkBlockNodeDataLimit(version, mapBlock.size());
+	const BlockPos &pos = mapBlock.getPos();
 	int xBegin = worldBlockX2StoredX(pos.x());
 	int zBegin = worldBlockZ2StoredY(pos.z());
-	const unsigned char *mapData = mapBlock.data();
+	//const unsigned char *mapData = mapBlock.data();
 	int minY = (pos.y() < m_reqYMin) ? 16 : (pos.y() > m_reqYMin) ?  0 : m_reqYMinNode;
 	int maxY = (pos.y() > m_reqYMax) ? -1 : (pos.y() < m_reqYMax) ? 15 : m_reqYMaxNode;
 	bool renderedAnything = false;
@@ -1763,7 +1632,7 @@ inline void TileGenerator::renderMapBlock(const std::vector<unsigned char> &mapB
 			}
 			for (int y = maxY; y >= minY; --y) {
 				int position = x + (y << 4) + (z << 8);
-				int content = readBlockContent(mapData, version, position);
+				int content = mapBlock.readBlockContent(position);//readBlockContent(mapData, version, position);
 				#define nodeColor (*m_nodeIDColor[content])
 				//const ColorEntry &nodeColor = *m_nodeIDColor[content];
 				if (m_nodeIDColor[content] == NodeColorNotDrawn) {
