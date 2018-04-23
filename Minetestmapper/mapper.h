@@ -1,10 +1,10 @@
 #pragma once
 
-#include <string>
-#include <getopt.h>
-#include "TileGenerator.h"
 #include "CharEncodingConverter.h"
+#include "TileGenerator.h"
+#include <getopt.h>
 #include <istream>
+#include <string>
 
 #define OPT_SQLITE_CACHEWORLDROW	0x81
 #define OPT_PROGRESS_INDICATOR		0x82
@@ -36,10 +36,10 @@
 
 class FuzzyBool {
 private:
-	int m_value;
+	int m_value{0};
 	FuzzyBool(int i) : m_value(i) {}
 public:
-	FuzzyBool() : m_value(0) {}
+	FuzzyBool()  = default;
 	FuzzyBool(bool b) : m_value(b ? Yes.m_value : No.m_value) {}
 	static const FuzzyBool Yes;
 	static const FuzzyBool Maybe;
@@ -56,7 +56,7 @@ public:
 class Mapper 
 {
 public:
-	Mapper(const std::string &executableName, const std::string &executablePath);
+	Mapper(const std::string &executablePath, const std::string &executableName);
 	int start(int argc, char *argv[]);
 
 private:
@@ -101,7 +101,7 @@ private:
 		return is.eof() ? EOF : is.peek();
 	}
 
-	void parseDataFile(TileGenerator &generator, const std::string &input, std::string dataFile, std::string defaultFile,
+	void parseDataFile(TileGenerator &generator, const std::string &input, std::string dataFile, const std::string& defaultFile,
 		void (TileGenerator::*parseFile)(const std::string &fileName));
 
 	// is: stream to read from

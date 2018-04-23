@@ -9,28 +9,27 @@
 
 #include "mapper.h"
 
+#include <cctype>
+#include <chrono>
 #include <cmath>
 #include <cstdlib>
-#include <chrono>
+#include <cstring>
 #include <getopt.h>
 #include <iostream>
 #include <map>
-#include <string>
-#include <cctype>
 #include <sstream>
-#include <cstring>
 #include <stdexcept>
-#include <fcntl.h>
-#include <sys/types.h>
+#include <string>
+#include <utility>
 
-#include "config.h"
-#include "version.h"
-#include "porting.h"
-#include "TileGenerator.h"
-#include "PixelAttributes.h"
-#include "util.h"
-#include "db-sqlite3.h"
 #include "CharEncodingConverter.h"
+#include "PixelAttributes.h"
+#include "TileGenerator.h"
+#include "config.h"
+#include "db-sqlite3.h"
+#include "porting.h"
+#include "util.h"
+#include "version.h"
 
 
 using namespace std;
@@ -40,7 +39,7 @@ const FuzzyBool FuzzyBool::Yes = 1;
 const FuzzyBool FuzzyBool::Maybe = 0;
 const FuzzyBool FuzzyBool::No = -1;
 
-Mapper::Mapper(const string &executableName, const string &executablePath) : 
+Mapper::Mapper(const string &executablePath, const string &executableName ) :
 	executablePath(executablePath),
 	executableName(executableName)
 {
@@ -50,78 +49,80 @@ Mapper::Mapper(const string &executableName, const string &executablePath) :
 int Mapper::start(int argc, char *argv[]) {
 
 	auto begin = std::chrono::high_resolution_clock::now();
+
+	// TODO: Get rid of getopt and use a proper cmdarg parsing lib or write something own.
 	static struct option long_options[] =
 	{
-		{ "help", no_argument, 0, 'h' },
-		{ "version", no_argument, 0, 'V' },
-		{ "input", required_argument, 0, 'i' },
-		{ "output", required_argument, 0, 'o' },
-		{ "colors", required_argument, 0, 'C' },
-		{ "heightmap-nodes", required_argument, 0, OPT_HEIGHTMAPNODESFILE },
-		{ "heightmap-colors", required_argument, 0, OPT_HEIGHTMAPCOLORSFILE },
-		{ "heightmap", optional_argument, 0, OPT_HEIGHTMAP },
-		{ "heightmap-yscale", required_argument, 0, OPT_HEIGHTMAPYSCALE },
-		{ "height-level-0", required_argument, 0, OPT_HEIGHT_LEVEL0 },
-		{ "bgcolor", required_argument, 0, 'b' },
-		{ "blockcolor", required_argument, 0, OPT_BLOCKCOLOR },
-		{ "scalecolor", required_argument, 0, 's' },
-		{ "origincolor", required_argument, 0, 'r' },
-		{ "playercolor", required_argument, 0, 'p' },
-		{ "draworigin", no_argument, 0, 'R' },
-		{ "drawplayers", no_argument, 0, 'P' },
-		{ "drawscale", optional_argument, 0, 'S' },
-		{ "sidescale-interval", required_argument, 0, OPT_SCALEINTERVAL },
-		{ "drawheightscale", no_argument, 0, OPT_DRAWHEIGHTSCALE },
-		{ "heightscale-interval", required_argument, 0, OPT_SCALEINTERVAL },
-		{ "drawalpha", optional_argument, 0, 'e' },
-		{ "drawair", no_argument, 0, OPT_DRAWAIR },
-		{ "drawnodes", required_argument, 0, OPT_DRAWNODES },
-		{ "ignorenodes", required_argument, 0, OPT_DRAWNODES },
-		{ "drawpoint", required_argument, 0, OPT_DRAW_OBJECT },
-		{ "drawline", required_argument, 0, OPT_DRAW_OBJECT },
-		{ "drawcircle", required_argument, 0, OPT_DRAW_OBJECT },
-		{ "drawellipse", required_argument, 0, OPT_DRAW_OBJECT },
-		{ "drawrectangle", required_argument, 0, OPT_DRAW_OBJECT },
-		{ "drawarrow", required_argument, 0, OPT_DRAW_OBJECT },
-		{ "drawtext", required_argument, 0, OPT_DRAW_OBJECT },
-		{ "drawmappoint", required_argument, 0, OPT_DRAW_OBJECT },
-		{ "drawmapline", required_argument, 0, OPT_DRAW_OBJECT },
-		{ "drawmapcircle", required_argument, 0, OPT_DRAW_OBJECT },
-		{ "drawmapellipse", required_argument, 0, OPT_DRAW_OBJECT },
-		{ "drawmaprectangle", required_argument, 0, OPT_DRAW_OBJECT },
-		{ "drawmaparrow", required_argument, 0, OPT_DRAW_OBJECT },
-		{ "drawmaptext", required_argument, 0, OPT_DRAW_OBJECT },
-		{ "noshading", no_argument, 0, 'H' },
-		{ "geometry", required_argument, 0, 'g' },
-		{ "cornergeometry", required_argument, 0, 'g' },
-		{ "centergeometry", required_argument, 0, 'g' },
-		{ "geometrymode", required_argument, 0, 'G' },
-		{ "forcegeometry", no_argument, 0, 'G' },
-		{ "min-y", required_argument, 0, 'a' },
-		{ "max-y", required_argument, 0, 'c' },
-		{ "backend", required_argument, 0, 'd' },
-		{ "disable-blocklist-prefetch", optional_argument, 0, OPT_NO_BLOCKLIST_PREFETCH },
-		{ "database-format", required_argument, 0, OPT_DATABASE_FORMAT },
-		{ "prescan-world", required_argument, 0, OPT_PRESCAN_WORLD },
-		{ "sqlite-cacheworldrow", no_argument, 0, OPT_SQLITE_CACHEWORLDROW },
-		{ "sqlite3-limit-prescan-query-size", optional_argument, 0, OPT_SQLITE_LIMIT_PRESCAN_QUERY },
-		{ "tiles", required_argument, 0, 't' },
-		{ "tileorigin", required_argument, 0, 'T' },
-		{ "tilecenter", required_argument, 0, 'T' },
-		{ "tilebordercolor", required_argument, 0, 'B' },
-		{ "scalefactor", required_argument, 0, OPT_SCALEFACTOR },
-		{ "chunksize", required_argument, 0, OPT_CHUNKSIZE },
-		{ "silence-suggestions", required_argument, 0, OPT_SILENCE_SUGGESTIONS },
-		{ "verbose", optional_argument, 0, 'v' },
-		{ "verbose-search-colors", optional_argument, 0, OPT_VERBOSE_SEARCH_COLORS },
-		{ "progress", no_argument, 0, OPT_PROGRESS_INDICATOR },
-		{ NULL, 0, 0, 0 }
+		{ "help", no_argument, nullptr, 'h' },
+		{ "version", no_argument, nullptr, 'V' },
+		{ "input", required_argument, nullptr, 'i' },
+		{ "output", required_argument, nullptr, 'o' },
+		{ "colors", required_argument, nullptr, 'C' },
+		{ "heightmap-nodes", required_argument, nullptr, OPT_HEIGHTMAPNODESFILE },
+		{ "heightmap-colors", required_argument, nullptr, OPT_HEIGHTMAPCOLORSFILE },
+		{ "heightmap", optional_argument, nullptr, OPT_HEIGHTMAP },
+		{ "heightmap-yscale", required_argument, nullptr, OPT_HEIGHTMAPYSCALE },
+		{ "height-level-0", required_argument, nullptr, OPT_HEIGHT_LEVEL0 },
+		{ "bgcolor", required_argument, nullptr, 'b' },
+		{ "blockcolor", required_argument, nullptr, OPT_BLOCKCOLOR },
+		{ "scalecolor", required_argument, nullptr, 's' },
+		{ "origincolor", required_argument, nullptr, 'r' },
+		{ "playercolor", required_argument, nullptr, 'p' },
+		{ "draworigin", no_argument, nullptr, 'R' },
+		{ "drawplayers", no_argument, nullptr, 'P' },
+		{ "drawscale", optional_argument, nullptr, 'S' },
+		{ "sidescale-interval", required_argument, nullptr, OPT_SCALEINTERVAL },
+		{ "drawheightscale", no_argument, nullptr, OPT_DRAWHEIGHTSCALE },
+		{ "heightscale-interval", required_argument, nullptr, OPT_SCALEINTERVAL },
+		{ "drawalpha", optional_argument, nullptr, 'e' },
+		{ "drawair", no_argument, nullptr, OPT_DRAWAIR },
+		{ "drawnodes", required_argument, nullptr, OPT_DRAWNODES },
+		{ "ignorenodes", required_argument, nullptr, OPT_DRAWNODES },
+		{ "drawpoint", required_argument, nullptr, OPT_DRAW_OBJECT },
+		{ "drawline", required_argument, nullptr, OPT_DRAW_OBJECT },
+		{ "drawcircle", required_argument, nullptr, OPT_DRAW_OBJECT },
+		{ "drawellipse", required_argument, nullptr, OPT_DRAW_OBJECT },
+		{ "drawrectangle", required_argument, nullptr, OPT_DRAW_OBJECT },
+		{ "drawarrow", required_argument, nullptr, OPT_DRAW_OBJECT },
+		{ "drawtext", required_argument, nullptr, OPT_DRAW_OBJECT },
+		{ "drawmappoint", required_argument, nullptr, OPT_DRAW_OBJECT },
+		{ "drawmapline", required_argument, nullptr, OPT_DRAW_OBJECT },
+		{ "drawmapcircle", required_argument, nullptr, OPT_DRAW_OBJECT },
+		{ "drawmapellipse", required_argument, nullptr, OPT_DRAW_OBJECT },
+		{ "drawmaprectangle", required_argument, nullptr, OPT_DRAW_OBJECT },
+		{ "drawmaparrow", required_argument, nullptr, OPT_DRAW_OBJECT },
+		{ "drawmaptext", required_argument, nullptr, OPT_DRAW_OBJECT },
+		{ "noshading", no_argument, nullptr, 'H' },
+		{ "geometry", required_argument, nullptr, 'g' },
+		{ "cornergeometry", required_argument, nullptr, 'g' },
+		{ "centergeometry", required_argument, nullptr, 'g' },
+		{ "geometrymode", required_argument, nullptr, 'G' },
+		{ "forcegeometry", no_argument, nullptr, 'G' },
+		{ "min-y", required_argument, nullptr, 'a' },
+		{ "max-y", required_argument, nullptr, 'c' },
+		{ "backend", required_argument, nullptr, 'd' },
+		{ "disable-blocklist-prefetch", optional_argument, nullptr, OPT_NO_BLOCKLIST_PREFETCH },
+		{ "database-format", required_argument, nullptr, OPT_DATABASE_FORMAT },
+		{ "prescan-world", required_argument, nullptr, OPT_PRESCAN_WORLD },
+		{ "sqlite-cacheworldrow", no_argument, nullptr, OPT_SQLITE_CACHEWORLDROW },
+		{ "sqlite3-limit-prescan-query-size", optional_argument, nullptr, OPT_SQLITE_LIMIT_PRESCAN_QUERY },
+		{ "tiles", required_argument, nullptr, 't' },
+		{ "tileorigin", required_argument, nullptr, 'T' },
+		{ "tilecenter", required_argument, nullptr, 'T' },
+		{ "tilebordercolor", required_argument, nullptr, 'B' },
+		{ "scalefactor", required_argument, nullptr, OPT_SCALEFACTOR },
+		{ "chunksize", required_argument, nullptr, OPT_CHUNKSIZE },
+		{ "silence-suggestions", required_argument, nullptr, OPT_SILENCE_SUGGESTIONS },
+		{ "verbose", optional_argument, nullptr, 'v' },
+		{ "verbose-search-colors", optional_argument, nullptr, OPT_VERBOSE_SEARCH_COLORS },
+		{ "progress", no_argument, nullptr, OPT_PROGRESS_INDICATOR },
+		{ nullptr, 0, nullptr, 0 }
 	};
 
 	try {
 		int option_index = 0;
 		int c = 0;
-		while (1) {
+		while (true) {
 			c = getopt_long(argc, argv, "hi:o:", long_options, &option_index);
 			if (c == -1) {
 				if (input.empty() || output.empty()) {
@@ -956,7 +957,7 @@ void Mapper::usage()
 	std::cout << executableName << ' ' << options_text;
 }
 
-void Mapper::parseDataFile(TileGenerator & generator, const string & input, string dataFile, string defaultFile, void(TileGenerator::* parseFile)(const std::string &fileName))
+void Mapper::parseDataFile(TileGenerator & generator, const string & input, string dataFile, const string& defaultFile, void(TileGenerator::* parseFile)(const std::string &fileName))
 {
 	if (!dataFile.empty()) {
 		(generator.*parseFile)(dataFile);
@@ -973,16 +974,16 @@ void Mapper::parseDataFile(TileGenerator & generator, const string & input, stri
 		fclose(file);
 		colorPaths.push_back(minetestPath);
 	}
-	char *homedir;
-	if ((homedir = getenv("HOME"))) {
-		colorPaths.push_back(string(homedir) + PATH_SEPARATOR + ".minetest");
+	string homedir;
+#if _WIN32
+	homedir = porting::getenv("appdata");
+	colorPaths.push_back(homedir + PATH_SEPARATOR + "Minetest");
+#else
+	homedir = porting::getenv("HOME");
+	if (!homedir.empty()) {
+		colorPaths.push_back(homedir + PATH_SEPARATOR + ".minetest");
 	}
-	// TODO: test/verify this (probably another subdirectory ('application data' or so) should be preferred)
-	//#if MSDOS || __OS2__ || __NT__ || _WIN32
-	//	if ((homedir = getenv("USERPROFILE"))) {
-	//		colorPaths.push_back(string(homedir) + PATH_SEPARATOR + ".minetest");
-	//	}
-	//#endif
+#endif // _WIN32
 
 #if MSDOS || __OS2__ || __NT__ || _WIN32 || DEBUG
 	// On windows, assume that argv[0] contains the full path location of minetestmapper.exe
@@ -991,7 +992,7 @@ void Mapper::parseDataFile(TileGenerator & generator, const string & input, stri
 	// depend on how it was invoked anyway.
 	// In DEBUG mode, do check the command-line path; so this code can at least be tested on
 	// Linux...
-	if (executablePath != "") {
+	if (!executablePath.empty()) {
 		size_t binpos = executablePath.find_last_of(PATH_SEPARATOR);
 		if (binpos != string::npos) {
 			string lastDir = executablePath.substr(binpos + 1);
@@ -1018,25 +1019,30 @@ void Mapper::parseDataFile(TileGenerator & generator, const string & input, stri
 	//		colorPaths.push_back(installPrefix + "/share/games/minetestmapper");
 	//#endif
 	//	}
-	colorPaths.push_back("");
+	colorPaths.emplace_back("");
 
 	std::vector<std::string> fileNames;
 	fileNames.push_back(defaultFile);
 
-	for (std::vector<std::string>::iterator path = colorPaths.begin(); path != colorPaths.end(); path++) {
-		for (std::vector<std::string>::iterator name = fileNames.begin(); name != fileNames.end(); name++) {
-			if (path->empty())
-				dataFile = *name;
-			else
-				dataFile = *path + PATH_SEPARATOR + *name;
+	for (auto & colorPath : colorPaths) {
+		for (auto & fileName : fileNames) {
+			if (colorPath.empty()) {
+				dataFile = fileName;
+			} else {
+				dataFile = colorPath + PATH_SEPARATOR + fileName;
+}
 			try {
 				(generator.*parseFile)(dataFile);
-				if (path->empty()) {
-					// I hope this is not obnoxious to windows users ?
-					cerr << "Warning: Using " << *name << " in current directory as a last resort." << std::endl
+				if (colorPath.empty()) {
+					cerr << "Warning: Using " << fileName << " in current directory as a last resort." << std::endl
 						<< "         Preferably, store the colors file in the world directory" << std::endl;
-					if (homedir)
+#if _WIN32
+					cerr << "         or in the private minetest directory (%Appdata%\\Minetest)." << std::endl;
+#else
+					if (!homedir.empty()) {
 						cerr << "         or in the private minetest directory ($HOME/.minetest)." << std::endl;
+					}
+#endif // _WIN32
 					cerr << "         It can also be specified on the command-line" << std::endl;
 				}
 				return;
@@ -1044,7 +1050,7 @@ void Mapper::parseDataFile(TileGenerator & generator, const string & input, stri
 			catch (std::runtime_error e) {
 				// Ignore failure to locate colors file in standard location
 				// (we have more places to search)
-				if (path->empty()) {
+				if (colorPath.empty()) {
 				}
 			}
 

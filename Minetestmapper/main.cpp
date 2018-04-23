@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	Mapper m(executableName, executablePath);
+	Mapper m(executablePath, executableName);
 	return m.start(argc, argv);
 
 }
