@@ -118,7 +118,7 @@ std::array<unsigned char, ZlibDecompressor::nodesBlockSize> ZlibDecompressor::de
 	switch (status)
 	{
 	case Z_MEM_ERROR:
-		throw DecompressError("not enought Memory");
+		throw DecompressError("not enough Memory");
 		break;
 	case Z_BUF_ERROR:
 		throw DecompressError("Mapblock too big, buffer too small");
