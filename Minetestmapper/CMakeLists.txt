@@ -64,19 +64,32 @@ if(WIN32)
 
 	add_library (wingetopt STATIC ../wingetopt/src/getopt.c)
 endif()
+
 set(wingetopt_lib "")
 if(WIN32)
 set(wingetopt_lib wingetopt)
 endif()
+
 set(leveldb_lib "")
 if(USE_LEVELDB)
 set(leveldb_lib ${LEVELDB_LIBRARY})
 endif()
+
+set(postgresql_lib "")
+if(USE_POSTGRESQL)
+	set(postgresql_lib ${POSTGRESQL_LIBRARY})
+	if(WIN32)
+		# the libpq database driver requires htonl which is in the Ws2_32 library
+		set(postgresql_lib ${POSTGRESQL_LIBRARY} "Ws2_32.lib")
+	endif(WIN32)
+endif()
+
+
 #link_directories (../wingetopt)
 # Fügen Sie der ausführbaren Datei für dieses Projekt eine Quelle hinzu.
 add_executable (Minetestmapper ${sources})
 set_target_properties(Minetestmapper PROPERTIES COMPILE_FLAGS -DBUILDER_STATIC_DEFINE)
-target_link_libraries(Minetestmapper ${wingetopt_lib} ${LIBGD_LIBRARY} ${ZLIB_LIBRARY} ${SQLITE3_LIBRARY} ${leveldb_lib})
+target_link_libraries(Minetestmapper ${wingetopt_lib} ${LIBGD_LIBRARY} ${ZLIB_LIBRARY} ${SQLITE3_LIBRARY} ${leveldb_lib} ${postgresql_lib})
 # TODO: Fügen Sie bei Bedarf Tests und Installationsziele hinzu.
 
 

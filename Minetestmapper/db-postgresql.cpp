@@ -1,14 +1,16 @@
 
-#if USE_POSTGRESQL
-
-
-
 #include "db-postgresql.h"
+
+#ifdef USE_POSTGRESQL
+
 #include <stdexcept>
-#include <unistd.h> // for usleep
-#include <arpa/inet.h>
+#if _WIN32
+#include <Winsock2.h> // htonl
+#else
+#include <arpa/inet.h> // htonl
+#endif
+
 #include "Settings.h"
-#include "types.h"
 
 #define BLOCKPOSLIST_QUERY_COMPAT	"SELECT x, y, z FROM blocks"
 #define BLOCKPOSLISTBOUNDED_QUERY_COMPAT "SELECT x, y, z FROM blocks WHERE x BETWEEN $1 AND $2 AND y BETWEEN $3 AND $4 AND z BETWEEN $5 AND $6"
@@ -149,9 +151,9 @@ const DB::BlockPosList &DBPostgreSQL::processBlockPosListQueryResult(PGresult *r
 }
 
 
-DB::Block DBPostgreSQL::getBlockOnPos(const BlockPos &pos)
+const DB::Block DBPostgreSQL::getBlockOnPos(const BlockPos &pos)
 {
-	Block block(pos,reinterpret_cast<const unsigned char *>(""));
+	Block block(pos, {});
 	
 	m_blocksQueriedCount++;
 
@@ -165,7 +167,7 @@ DB::Block DBPostgreSQL::getBlockOnPos(const BlockPos &pos)
 			+ (result ? PQresultErrorMessage(result) : "(result was NULL)"));
 
 	if (PQntuples(result) != 0) {
-		block = Block(pos, ustring(reinterpret_cast<unsigned char *>(PQgetvalue(result, 0, 0)), PQgetlength(result, 0, 0)));
+		block = Block(pos, reinterpret_cast<unsigned char *>(PQgetvalue(result, 0, 0)), PQgetlength(result, 0, 0));
 		m_blocksReadCount++;
 	}
 

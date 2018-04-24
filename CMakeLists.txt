@@ -47,7 +47,7 @@ endif(ENABLE_SQLITE3)
 
 # Find postgresql
 if(ENABLE_POSTGRESQL)
-	find_library(POSTGRESQL_LIBRARY pq)
+	find_library(POSTGRESQL_LIBRARY NAMES pq libpq)
 	find_path(POSTGRESQL_INCLUDE_DIR libpq-fe.h PATH_SUFFIXES postgresql)
 	message (STATUS "postgresql library: ${POSTGRESQL_LIBRARY}")
 	message (STATUS "postgresql headers: ${POSTGRESQL_INCLUDE_DIR}")

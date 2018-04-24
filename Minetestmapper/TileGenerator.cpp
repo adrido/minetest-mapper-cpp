@@ -478,7 +478,7 @@ void TileGenerator::openDb(const std::string &input)
 #endif
 	}
 	else if (m_backend == "postgresql") {
-#if USE_POSTGRESQL
+#ifdef USE_POSTGRESQL
 		DBPostgreSQL *db;
 		m_db = db = new DBPostgreSQL(input);
 #else
@@ -494,7 +494,7 @@ void TileGenerator::openDb(const std::string &input)
 #endif
 	}
 	else if (m_backend == "redis") {
-#if USE_REDIS
+#ifdef USE_REDIS
 		m_db = new DBRedis(input);
 		m_scanEntireWorld = true;
 #else

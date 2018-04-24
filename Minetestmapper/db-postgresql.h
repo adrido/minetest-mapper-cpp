@@ -2,7 +2,7 @@
 
 #include "config.h"
 
-#if USE_POSTGRESQL
+#ifdef USE_POSTGRESQL
 
 #include "db.h"
 #include <libpq-fe.h>
@@ -10,18 +10,15 @@
 #include <string>
 #include <sstream>
 
-#include "types.h"
 
 class DBPostgreSQL : public DB {
-	typedef std::unordered_map<int64_t, ustring>  BlockCache;
-
 public:
 	DBPostgreSQL(const std::string &mapdir);
 	virtual int getBlocksQueriedCount(void);
 	virtual int getBlocksReadCount(void);
 	virtual const BlockPosList &getBlockPosList();
 	virtual const BlockPosList &getBlockPosList(BlockPos minPos, BlockPos maxPos);
-	virtual Block getBlockOnPos(const BlockPos &pos);
+	virtual const Block getBlockOnPos(const BlockPos &pos);
 	~DBPostgreSQL();
 private:
 	int m_blocksQueriedCount;
