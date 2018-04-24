@@ -7,11 +7,12 @@ addons:
   apt:
     packages:
       - libgd2-noxpm-dev
+      - libleveldb-dev
 
 before_script:
   - mkdir build
   - cd build
-  - cmake ..
+  - cmake .. -DENABLE_LEVELDB=true
 
 script: 
   - cmake --build . --config Release

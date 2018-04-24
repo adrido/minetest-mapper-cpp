@@ -5,7 +5,6 @@
 #include "db-leveldb.h"
 #include <stdexcept>
 #include <sstream>
-#include "types.h"
 
 inline int64_t stoi64(const std::string &s) {
 	std::stringstream tmp(s);
@@ -66,7 +65,7 @@ const DB::BlockPosList &DBLevelDB::getBlockPosList() {
 	return m_blockPosList;
 }
 
-DB::Block DBLevelDB::getBlockOnPos(const BlockPos &pos)
+const DB::Block DBLevelDB::getBlockOnPos(const BlockPos &pos)
 {
 	std::string datastr;
 	leveldb::Status status;
@@ -109,10 +108,10 @@ DB::Block DBLevelDB::getBlockOnPos(const BlockPos &pos)
 
 	if(status.ok()) {
 		m_blocksReadCount++;
-		return Block(pos, ustring(reinterpret_cast<const unsigned char *>(datastr.c_str()), datastr.size()));
+		return Block(pos, reinterpret_cast<const unsigned char *>(datastr.c_str()), datastr.size());
 	}
 	else {
-		return Block(pos, ustring(reinterpret_cast<const unsigned char *>("")));
+		return Block(pos, {});
 	}
 
 }
