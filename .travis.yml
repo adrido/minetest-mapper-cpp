@@ -12,7 +12,7 @@ addons:
 before_script:
   - mkdir build
   - cd build
-  - cmake .. -DENABLE_LEVELDB=true
+  - cmake .. -DENABLE_LEVELDB=true -DENABLE_POSTGRESQL=true
 
 script: 
   - cmake --build . --config Release

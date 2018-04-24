@@ -38,6 +38,8 @@ install:
     vcpkg install libgd:$($env:Platform)-windows
 
     vcpkg install leveldb:$($env:Platform)-windows
+
+    vcpkg install libpq:$($env:Platform)-windows
 cache:
 - c:\tools\vcpkg\installed\
 - c:\tools\vcpkg\downloads\
@@ -47,7 +49,7 @@ build_script:
 
     cd build
 
-    cmake .. -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -G %generator% 
+    cmake .. -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -G %generator% -DENABLE_POSTGRESQL=true
 
     cmake --build . --target ALL_BUILD --config Release
 
