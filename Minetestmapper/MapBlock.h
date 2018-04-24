@@ -28,13 +28,13 @@ public:
 
 	void reset() {
 		nodeId2NodeName.clear();
-		mapData.clear();
+		//mapData.clear();
 		empty = true;
 		version = 0;
 	}
 	const std::unordered_map<int, std::string> &getMappings() const { return nodeId2NodeName; }
 	const BlockPos &getPos() const { return pos; }
-	const std::vector<unsigned char> &getMapData() const { return mapData; }
+	//const std::vector<unsigned char> &getMapData() const { return mapData; }
 	int getVersion() const { return version; }
 	bool isEmpty() const { return empty; }
 
@@ -55,7 +55,8 @@ public:
 
 private:
 	std::unordered_map<int, std::string> nodeId2NodeName;
-	std::vector<unsigned char> mapData;
+	//std::vector<unsigned char> mapData;
+	std::array<unsigned char, ZlibDecompressor::nodesBlockSize> mapData;
 	BlockPos pos;
 	int version = 0;
 	bool empty = true;

@@ -109,29 +109,31 @@ void ZlibDecompressor::decompressVoid()
 std::array<unsigned char, ZlibDecompressor::nodesBlockSize> ZlibDecompressor::decompressNodes()
 {
 	const unsigned char *data = m_data + m_seekPos;
-	const uLong size = static_cast<uLong>(m_size - m_seekPos);
+	const std::size_t size = m_size - m_seekPos;
 
-	std::array<unsigned char, nodesBlockSize> nodes;
-	uLong nodeSize = static_cast<uLong>(nodes.size());
+	std::array<unsigned char, ZlibDecompressor::nodesBlockSize> nodes;
 
-	int status = uncompress(nodes.data(), &nodeSize, data, size);
-	switch (status)
-	{
-	case Z_MEM_ERROR:
-		throw DecompressError("not enough Memory");
-		break;
-	case Z_BUF_ERROR:
-		throw DecompressError("Mapblock too big, buffer too small");
-		break;
-	case Z_DATA_ERROR:
-		throw DecompressError("Data Error: Mapblock corrupted");
-		break;
-	case Z_OK:
-	default:
-		break;
+	z_stream strm;
+	strm.zalloc = Z_NULL;
+	strm.zfree = Z_NULL;
+	strm.opaque = Z_NULL;
+	strm.next_in = Z_NULL;
+	strm.avail_in = static_cast<uInt>(size);
+
+	if (inflateInit(&strm) != Z_OK) {
+		throw DecompressError(strm.msg);
 	}
 
+	strm.next_in = const_cast<unsigned char *>(data);
 
+	strm.avail_out = static_cast<uInt>(nodes.size());
+	strm.next_out = nodes.data();
+	//inflate(&strm, Z_NO_FLUSH); // TODO: Test use of Z_FINISH
+	if (inflate(&strm, Z_FINISH) != Z_STREAM_END) {
+		throw DecompressError(strm.msg);
+	}
+	m_seekPos += strm.next_in - data;
+	(void)inflateEnd(&strm);
 
 	return nodes;
 }

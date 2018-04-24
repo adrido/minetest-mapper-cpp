@@ -89,9 +89,10 @@ inline void MapBlock::deserialize(const unsigned char *data, size_t length)
 	checkDataLimit("zlib", dataOffset, 3, length);
 	ZlibDecompressor decompressor(data, length);
 	decompressor.setSeekPos(dataOffset);
-	mapData = decompressor.decompress();
+	mapData = decompressor.decompressNodes();
 	checkBlockNodeDataLimit();
-	auto mapMetadata = decompressor.decompress();
+	decompressor.decompressVoid();
+	//auto mapMetadata = decompressor.decompress();
 	dataOffset = decompressor.seekPos();
 
 	// Skip unused data
