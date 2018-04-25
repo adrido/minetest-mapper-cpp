@@ -239,7 +239,7 @@ void TileGenerator::setShading(bool shading)
 	m_shading = shading;
 }
 
-void TileGenerator::enableProgressIndicator(void)
+void TileGenerator::enableProgressIndicator()
 {
 	progressIndicator = true;
 }
@@ -320,7 +320,7 @@ void TileGenerator::parseHeightMapColorsFile(const std::string &fileName)
 	m_heightMapColors = p.getHeightMapColors();
 }
 
-void TileGenerator::setBackend(std::string backend)
+void TileGenerator::setBackend(const std::string &backend)
 {
 	m_requestedBackend = backend;
 }
@@ -335,7 +335,7 @@ void TileGenerator::setChunkSize(int size)
 	m_chunkSize = size;
 }
 
-void TileGenerator::sanitizeParameters(void)
+void TileGenerator::sanitizeParameters()
 {
 	if (m_scaleFactor > 1) {
 		int dx0 = m_mapXStartNodeOffset % m_scaleFactor;
@@ -512,10 +512,8 @@ void TileGenerator::openDb(const std::string &input)
 
 void TileGenerator::closeDb()
 {
-	if (m_db) {
-		delete m_db;
-		m_db = NULL;
-	}
+	delete m_db;
+	m_db = nullptr;
 }
 
 void TileGenerator::loadBlocks()
@@ -655,19 +653,17 @@ void TileGenerator::loadBlocks()
 	else {
 		if (progressIndicator)
 			cout << "Scanning world (reading block list)...\r" << std::flush;
-		const DB::BlockPosList *bp;
+		DB::BlockPosList blocks;
 		BlockPos posMin(m_reqXMin, m_reqYMin, m_reqZMin);
 		BlockPos posMax(m_reqXMax, m_reqYMax, m_reqZMax);
 		if (!m_scanEntireWorld && (posMin != BlockPosLimitMin || posMax != BlockPosLimitMax))
-			bp = &m_db->getBlockPosList(BlockPos(m_reqXMin, m_reqYMin, m_reqZMin), BlockPos(m_reqXMax, m_reqYMax, m_reqZMax));
+			blocks = m_db->getBlockPosList(BlockPos(m_reqXMin, m_reqYMin, m_reqZMin), BlockPos(m_reqXMax, m_reqYMax, m_reqZMax));
 		else {
 			m_scanEntireWorld = true;
-			bp = &m_db->getBlockPosList();
+			blocks = m_db->getBlockPosList();
 		}
-		const DB::BlockPosList &blocks = *bp;
-		for(DB::BlockPosList::const_iterator it = blocks.begin(); it != blocks.end(); ++it) {
+		for(const BlockPos &pos : blocks) {
 			m_worldBlocks++;
-			const BlockPos &pos = *it;
 			m_databaseFormatFound[pos.databaseFormat()]++;
 			if (pos.x() < mapXMin) {
 				mapXMin = pos.x();
@@ -1518,7 +1514,7 @@ void TileGenerator::renderMap()
 	if (!m_generateNoPrefetch && m_backend == "leveldb" && (m_reportDatabaseFormat || verboseStatistics >= 1)) {
 		cout
 			<< "Database format setting when using --disable-blocklist-prefetch: ";
-		if (m_recommendedDatabaseFormat != "")
+		if (!m_recommendedDatabaseFormat.empty())
 			cout << m_recommendedDatabaseFormat;
 		else
 			cout << "unknown - use 'mixed' to be safe";
@@ -1535,7 +1531,7 @@ void TileGenerator::renderMap()
 		     << "  (" << (long long)area_rendered*16*16 << " nodes)";
 		if (unpackErrors)
 			cout << "  (" << unpackErrors << " errors)";
-		 cout << std::endl;
+		cout << std::endl;
 	}
 	if (progressIndicator && eraseProgress)
 		cout << std::setw(50) << "" << "\r";
@@ -1577,7 +1573,7 @@ void TileGenerator::renderMap()
 			std::cout << "NOTE: Mapping speed may improve using the option --disable-blocklist-prefetch,"
 				<< " combined with vertical limits (" << m_YMinMapped * 16 << " .. " << m_YMaxMapped*16+15 << ")" << std::endl;
 			if (m_backend == "leveldb") {
-				std::cout << "      The option --database-format=" << (m_recommendedDatabaseFormat != "" ? m_recommendedDatabaseFormat : "mixed")
+				std::cout << "      The option --database-format=" << (!m_recommendedDatabaseFormat.empty() ? m_recommendedDatabaseFormat : "mixed")
 					<< " is also required for the (current) leveldb backend." << std::endl
 					<< "      Use --verbose=2 or --database-format=query for details" << std::endl;
 			}
@@ -1592,14 +1588,13 @@ Color TileGenerator::computeMapHeightColor(int height)
 	float g = 0;
 	float b = 0;
 	int n = 0;
-	for (HeightMapColorList::iterator i = m_heightMapColors.begin(); i != m_heightMapColors.end(); i++) {
-		HeightMapColor &colorSpec = *i;
+	for (const HeightMapColor &colorSpec : m_heightMapColors) {
 		if (adjustedHeight >= colorSpec.height[0] && adjustedHeight <= colorSpec.height[1]) {
-			float weight = (float) (colorSpec.height[1] - adjustedHeight + 1) / (colorSpec.height[1] - colorSpec.height[0] + 1);
-			for (int j = 0; j < 2; j++) {
-				r += colorSpec.color[j].r * weight;
-				g += colorSpec.color[j].g * weight;
-				b += colorSpec.color[j].b * weight;
+			float weight = (float)(colorSpec.height[1] - adjustedHeight + 1) / (colorSpec.height[1] - colorSpec.height[0] + 1);
+			for (const Color &j : colorSpec.color) {
+				r += j.r * weight;
+				g += j.g * weight;
+				b += j.b * weight;
 				weight = 1 - weight;
 			}
 			n++;
@@ -1827,20 +1822,20 @@ void TileGenerator::renderOrigin()
 void TileGenerator::renderPlayers(const std::string &inputPath)
 {
 	PlayerAttributes players(inputPath);
-	for (PlayerAttributes::Players::iterator player = players.begin(); player != players.end(); ++player) {
-		int imageX = worldX2ImageX(static_cast<int>(player->x / 10));
-		int imageY = worldZ2ImageY(static_cast<int>(player->z / 10));
+	for (const Player &player : players) {
+		int imageX = worldX2ImageX(static_cast<int>(player.x / 10));
+		int imageY = worldZ2ImageY(static_cast<int>(player.z / 10));
 
 		paintEngine->drawCircle(imageX, imageY, 5, m_playerColor);
-		paintEngine->drawText(imageX + 2, imageY + 2, PaintEngine::Font::MediumBold, player->name, m_playerColor);
+		paintEngine->drawText(imageX + 2, imageY + 2, PaintEngine::Font::MediumBold, player.name, m_playerColor);
 	}
 }
 
-void TileGenerator::renderDrawObjects(void)
+void TileGenerator::renderDrawObjects()
 {
-	for (std::vector<DrawObject>::iterator o = m_drawObjects.begin(); o != m_drawObjects.end(); o++) {
+	for (DrawObject &drawObject : m_drawObjects) {
 		// Hack to adjust the center of an ellipse with even dimensions to align it correctly
-		bool ellipseAdjustCenter[2] = { 0, 1 };
+		bool ellipseAdjustCenter[2] = { false, true };
 #ifdef DEBUG
 		assert(o->type != DrawObject::Unknown);
 		assert(o->haveDimensions || !o->haveCenter);
@@ -1855,98 +1850,98 @@ void TileGenerator::renderDrawObjects(void)
 			o->dimensions = NodeCoord(NodeCoord::Invalid, NodeCoord::Invalid, NodeCoord::Invalid);
 #else
 		// Avoid problems - the resulting image may still be incorrect though...
-		if (o->type == DrawObject::Unknown)
+		if (drawObject.type == DrawObject::Unknown)
 			continue;
-		if (o->haveCenter)
-			o->corner1 = o->center;
+		if (drawObject.haveCenter)
+			drawObject.corner1 = drawObject.center;
 		else
-			o->center = o->corner1;
-		if (o->haveDimensions)
-			o->corner2 = o->dimensions;
+			drawObject.center = drawObject.corner1;
+		if (drawObject.haveDimensions)
+			drawObject.corner2 = drawObject.dimensions;
 		else
-			o->dimensions = o->corner2;
-		if (!o->haveDimensions && o->haveCenter)
-			o->haveDimensions = true;
+			drawObject.dimensions = drawObject.corner2;
+		if (!drawObject.haveDimensions && drawObject.haveCenter)
+			drawObject.haveDimensions = true;
 #endif
 		for (int i = 0; i < 2; i++) {
-			if (o->world) {
+			if (drawObject.world) {
 				int (TileGenerator::*world2Image)(int val) const;
 				if (i==0)
 					world2Image = &TileGenerator::worldX2ImageX;
 				else
 					world2Image = &TileGenerator::worldZ2ImageY;
-				if (o->haveCenter)
-					o->center.dimension[i] = (this->*world2Image)(o->center.dimension[i]);
+				if (drawObject.haveCenter)
+					drawObject.center.dimension[i] = (this->*world2Image)(drawObject.center.dimension[i]);
 				else
-					o->corner1.dimension[i] = (this->*world2Image)(o->corner1.dimension[i]);
-				if (!o->haveDimensions) {
-					o->corner2.dimension[i] = (this->*world2Image)(o->corner2.dimension[i]);
+					drawObject.corner1.dimension[i] = (this->*world2Image)(drawObject.corner1.dimension[i]);
+				if (!drawObject.haveDimensions) {
+					drawObject.corner2.dimension[i] = (this->*world2Image)(drawObject.corner2.dimension[i]);
 					if (i == 1)
 						ellipseAdjustCenter[i] = !ellipseAdjustCenter[i];
 				}
 				else if (i==1) {
-					o->dimensions.dimension[i] = -o->dimensions.dimension[i];
+					drawObject.dimensions.dimension[i] = -drawObject.dimensions.dimension[i];
 					ellipseAdjustCenter[i] = !ellipseAdjustCenter[i];
 				}
 			}
 			else {
-				if (o->haveCenter)
-					o->center.dimension[i] += i ? borderTop() : borderLeft();
+				if (drawObject.haveCenter)
+					drawObject.center.dimension[i] += i ? borderTop() : borderLeft();
 				else
-					o->corner1.dimension[i] += i ? borderTop() : borderLeft();
-				if (!o->haveDimensions)
-					o->corner2.dimension[i] += i ? borderTop() : borderLeft();
+					drawObject.corner1.dimension[i] += i ? borderTop() : borderLeft();
+				if (!drawObject.haveDimensions)
+					drawObject.corner2.dimension[i] += i ? borderTop() : borderLeft();
 			}
 		}
 
 		for (int i = 0; i < 2; i++) {
 			// Make sure all individual coordinates are ordered and dimensions are positive
 			// EXCEPT for lines: lines do not have reflection symmetry.
-			if (o->type != DrawObject::Line) {
-				if (!o->haveDimensions) {
-					if (o->corner1.dimension[i] > o->corner2.dimension[i]) {
-						int temp = o->corner1.dimension[i];
-						o->corner1.dimension[i] = o->corner2.dimension[i];
-						o->corner2.dimension[i] = temp;
+			if (drawObject.type != DrawObject::Line) {
+				if (!drawObject.haveDimensions) {
+					if (drawObject.corner1.dimension[i] > drawObject.corner2.dimension[i]) {
+						int temp = drawObject.corner1.dimension[i];
+						drawObject.corner1.dimension[i] = drawObject.corner2.dimension[i];
+						drawObject.corner2.dimension[i] = temp;
 						ellipseAdjustCenter[i] = !ellipseAdjustCenter[i];
 					}
 				}
-				else if (o->dimensions.dimension[i] < 0) {
-					if (!o->haveCenter)
-						o->corner1.dimension[i] += o->dimensions.dimension[i] + 1;
+				else if (drawObject.dimensions.dimension[i] < 0) {
+					if (!drawObject.haveCenter)
+						drawObject.corner1.dimension[i] += drawObject.dimensions.dimension[i] + 1;
 					else
 						// Even dimensions cause asymetry
-						o->center.dimension[i] += ((1 - o->dimensions.dimension[i]) % 2);
-					o->dimensions.dimension[i] = -o->dimensions.dimension[i];
+						drawObject.center.dimension[i] += ((1 - drawObject.dimensions.dimension[i]) % 2);
+					drawObject.dimensions.dimension[i] = -drawObject.dimensions.dimension[i];
 					ellipseAdjustCenter[i] = !ellipseAdjustCenter[i];
 				}
 			}
 
 			// Convert to the apropriate type of coordinates.
-			if (o->type == DrawObject::Ellipse) {
-				if (!o->haveDimensions) {
-					o->dimensions.dimension[i] = o->corner2.dimension[i] - o->corner1.dimension[i] + 1;
-					o->center.dimension[i] = o->corner1.dimension[i] + o->dimensions.dimension[i] / 2;
+			if (drawObject.type == DrawObject::Ellipse) {
+				if (!drawObject.haveDimensions) {
+					drawObject.dimensions.dimension[i] = drawObject.corner2.dimension[i] - drawObject.corner1.dimension[i] + 1;
+					drawObject.center.dimension[i] = drawObject.corner1.dimension[i] + drawObject.dimensions.dimension[i] / 2;
 				}
-				else if (!o->haveCenter) {
-					o->center.dimension[i] = o->corner1.dimension[i] + o->dimensions.dimension[i] / 2;
+				else if (!drawObject.haveCenter) {
+					drawObject.center.dimension[i] = drawObject.corner1.dimension[i] + drawObject.dimensions.dimension[i] / 2;
 				}
-				if (o->world && ellipseAdjustCenter[i] && o->dimensions.dimension[i] % 2 == 0)
-					o->center.dimension[i] -= 1;
+				if (drawObject.world && ellipseAdjustCenter[i] && drawObject.dimensions.dimension[i] % 2 == 0)
+					drawObject.center.dimension[i] -= 1;
 			}
-			else if (o->type == DrawObject::Line || o->type == DrawObject::Rectangle) {
-				if (o->haveCenter) {
-					o->corner1.dimension[i] = o->center.dimension[i] - o->dimensions.dimension[i] / 2;
-					if (o->dimensions.dimension[i] < 0)
-						o->corner2.dimension[i] = o->corner1.dimension[i] + o->dimensions.dimension[i] + 1;
+			else if (drawObject.type == DrawObject::Line || drawObject.type == DrawObject::Rectangle) {
+				if (drawObject.haveCenter) {
+					drawObject.corner1.dimension[i] = drawObject.center.dimension[i] - drawObject.dimensions.dimension[i] / 2;
+					if (drawObject.dimensions.dimension[i] < 0)
+						drawObject.corner2.dimension[i] = drawObject.corner1.dimension[i] + drawObject.dimensions.dimension[i] + 1;
 					else
-						o->corner2.dimension[i] = o->corner1.dimension[i] + o->dimensions.dimension[i] - 1;
+						drawObject.corner2.dimension[i] = drawObject.corner1.dimension[i] + drawObject.dimensions.dimension[i] - 1;
 				}
-				else if (o->haveDimensions) {
-					if (o->dimensions.dimension[i] < 0)
-						o->corner2.dimension[i] = o->corner1.dimension[i] + o->dimensions.dimension[i] + 1;
+				else if (drawObject.haveDimensions) {
+					if (drawObject.dimensions.dimension[i] < 0)
+						drawObject.corner2.dimension[i] = drawObject.corner1.dimension[i] + drawObject.dimensions.dimension[i] + 1;
 					else
-						o->corner2.dimension[i] = o->corner1.dimension[i] + o->dimensions.dimension[i] - 1;
+						drawObject.corner2.dimension[i] = drawObject.corner1.dimension[i] + drawObject.dimensions.dimension[i] - 1;
 				}
 			}
 #ifdef DEBUG
@@ -1954,21 +1949,21 @@ void TileGenerator::renderDrawObjects(void)
 				assert(o->type == DrawObject::Point || o->type == DrawObject::Text);
 #endif
 		}
-		switch(o->type) {
+		switch(drawObject.type) {
 		case DrawObject::Point:
-			paintEngine->drawPixel(o->center.x(), o->center.y(), o->color);
+			paintEngine->drawPixel(drawObject.center.x(), drawObject.center.y(), drawObject.color);
 			break;
 		case DrawObject::Line:
-			paintEngine->drawLine(o->corner1.x(), o->corner1.y(), o->corner2.x(), o->corner2.y(), o->color);
+			paintEngine->drawLine(drawObject.corner1.x(), drawObject.corner1.y(), drawObject.corner2.x(), drawObject.corner2.y(), drawObject.color);
 			break;
 		case DrawObject::Ellipse:
-			paintEngine->drawArc(o->center.x(), o->center.y(), o->dimensions.x(), o->dimensions.y(), 0, 360, o->color);
+			paintEngine->drawArc(drawObject.center.x(), drawObject.center.y(), drawObject.dimensions.x(), drawObject.dimensions.y(), 0, 360, drawObject.color);
 			break;
 		case DrawObject::Rectangle:
-			paintEngine->drawRect(o->corner1.x(), o->corner1.y(), o->corner2.x(), o->corner2.y(), o->color);
+			paintEngine->drawRect(drawObject.corner1.x(), drawObject.corner1.y(), drawObject.corner2.x(), drawObject.corner2.y(), drawObject.color);
 			break;
 		case DrawObject::Text:
-			paintEngine->drawText(o->center.x(), o->center.y(), PaintEngine::Font::MediumBold, o->text, o->color);
+			paintEngine->drawText(drawObject.center.x(), drawObject.center.y(), PaintEngine::Font::MediumBold, drawObject.text, drawObject.color);
 			break;
 		default:
 #ifdef DEBUG
@@ -1982,8 +1977,8 @@ void TileGenerator::renderDrawObjects(void)
 inline std::list<int> TileGenerator::getZValueList() const
 {
 	std::list<int> zlist;
-	for (std::list<BlockPos>::const_iterator position = m_positions.begin(); position != m_positions.end(); ++position) {
-		zlist.push_back(position->z());
+	for (const BlockPos &position : m_positions) {
+		zlist.push_back(position.z());
 	}
 	zlist.sort();
 	zlist.unique();
@@ -1998,10 +1993,10 @@ void TileGenerator::writeImage(const std::string &output)
 
 void TileGenerator::printUnknown()
 {
-	if (m_unknownNodes.size() > 0) {
+	if (!m_unknownNodes.empty()) {
 		std::cerr << "Unknown nodes:" << std::endl;
-		for (std::set<std::string>::iterator node = m_unknownNodes.begin(); node != m_unknownNodes.end(); ++node) {
-			std::cerr << *node << std::endl;
+		for (const string &unknownNode : m_unknownNodes) {
+			std::cerr << unknownNode << std::endl;
 		}
 	}
 }

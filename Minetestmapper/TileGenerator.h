@@ -137,7 +137,7 @@ public:
 	void parseNodeColorsFile(const std::string &fileName);
 	void parseHeightMapNodesFile(const std::string &fileName);
 	void parseHeightMapColorsFile(const std::string &fileName);
-	void setBackend(std::string backend);
+	void setBackend(const std::string &backend);
 	void setScanEntireWorld(bool enable);
 	void setChunkSize(int size);
 	void generate(const std::string &input, const std::string &output);
@@ -162,15 +162,15 @@ private:
 		int tileSize,
 		// Output parameters
 		int &tileBorderCount,
-		int &tileMapOffset,
-		int &tileMapExcess,
+		int &tileMapStartOffset,
+		int &tileMapEndOffset,
 		// Behavior selection
 		bool ascending);
 	void renderMap();
 	std::list<int> getZValueList() const;
 	void pushPixelRows(PixelAttributes &pixelAttributes, int zPosLimit);
 	void scalePixelRows(PixelAttributes &pixelAttributes, PixelAttributes &pixelAttributesScaled, int zPosLimit);
-	void processMapBlock(const DB::Block &block);
+	void processMapBlock(const DB::Block &mapBlock);
 	void renderMapBlock(const MapBlock &mapBlock);
 	void renderScale();
 	void renderHeightScale();
