@@ -111,6 +111,10 @@ add_subdirectory ("Minetestmapper")
 
 message(STATUS "VCPKG_APPLOCAL_DEPS: ${VCPKG_APPLOCAL_DEPS}")
 
+if(NOT PROJECT_VERSION_TWEAK)
+	set(PROJECT_VERSION_TWEAK 0)
+endif()
+
 configure_file(
 	"${PROJECT_SOURCE_DIR}/version.h.in"
 	"${PROJECT_SOURCE_DIR}/Minetestmapper/version.h"

@@ -45,9 +45,7 @@ set(sources
 )
 
 if(WIN32)
-set(sources ${sources} ResTempl1.rct)
-add_definitions(-DVER_COMPANYNAME_STR="MyCompany")
-add_definitions(-DVER_FILEVERSION_STR="1,1,0.0")
+set(sources ${sources} Minetestmapper.rc)
 add_definitions(-D_USE_MATH_DEFINES)
 endif(WIN32)
 
