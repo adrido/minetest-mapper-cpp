@@ -1,6 +1,5 @@
 #pragma once
 
-#include "CharEncodingConverter.h"
 #include "TileGenerator.h"
 #include <getopt.h>
 #include <istream>
@@ -75,7 +74,6 @@ private:
 	std::string heightMapNodesFile;
 	bool foundGeometrySpec = false;
 	bool setFixedOrShrinkGeometry = false;
-	CharEncodingConverter *charConvUTF8;
 
 	const std::string nodeColorsDefaultFile = "colors.txt";
 	const std::string heightMapNodesDefaultFile = "heightmap-nodes.txt";

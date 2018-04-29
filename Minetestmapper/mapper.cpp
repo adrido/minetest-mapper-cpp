@@ -43,7 +43,6 @@ Mapper::Mapper(const string &executablePath, const string &executableName ) :
 	executablePath(executablePath),
 	executableName(executableName)
 {
-	charConvUTF8 = CharEncodingConverter::createStandardConverter("UTF-8");
 }
 
 int Mapper::start(int argc, char *argv[]) {
@@ -802,7 +801,7 @@ int Mapper::start(int argc, char *argv[]) {
 						usage();
 						exit(1);
 					}
-					drawObject.text = charConvUTF8->convert(localizedText);
+					drawObject.text = localizedText;
 				}
 
 				generator.drawObject(drawObject);
