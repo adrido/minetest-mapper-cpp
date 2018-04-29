@@ -29,6 +29,7 @@ set(sources
 	main.cpp
 	CharEncodingConverter.cpp
 	CharEncodingConverter.h
+	PaintEngine.h
 	PaintEngine_libgd.cpp
 	PaintEngine_libgd.h
 	porting.cpp
