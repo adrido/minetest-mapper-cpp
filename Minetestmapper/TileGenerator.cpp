@@ -72,9 +72,9 @@ void TileGenerator::setSilenceSuggestion(unsigned flags)
 	m_silenceSuggestions |= flags;
 }
 
-void TileGenerator::setGenerateNoPrefetch(int enable)
+void TileGenerator::setGenerateNoPrefetch(BlockListPrefetch enable)
 {
-	m_generateNoPrefetch = enable;
+	m_generatePrefetch = enable;
 }
 
 void TileGenerator::setDBFormat(BlockPos::StrFormat format, bool query)
@@ -614,15 +614,15 @@ void TileGenerator::loadBlocks()
 		std::cerr << "WARNING: querying database format is only sensible when using the leveldb backend - querying disabled" << std::endl;
 		m_reportDatabaseFormat = false;
 	}
-	if (m_reportDatabaseFormat && m_generateNoPrefetch) {
+	if (m_reportDatabaseFormat && m_generatePrefetch != BlockListPrefetch::Prefetch) {
 		std::cerr << "WARNING: querying database format: ignoring '--disable-blocklist-prefetch' and/or '--prescan-world=disabled'." << std::endl;
-		m_generateNoPrefetch = 0;
+		m_generatePrefetch = BlockListPrefetch::Prefetch;
 	}
-	if (m_generateNoPrefetch && !m_databaseFormatSet && m_backend == "leveldb") {
+	if (m_generatePrefetch != BlockListPrefetch::Prefetch && !m_databaseFormatSet && m_backend == "leveldb") {
 		throw(std::runtime_error("When using --disable-blocklist-prefetch with a leveldb backend, database format must be set (--database-format)"));
 	}
-	if (m_generateNoPrefetch) {
-		if (m_generateNoPrefetch == 1) {
+	if (m_generatePrefetch != BlockListPrefetch::Prefetch) {
+		if (m_generatePrefetch == BlockListPrefetch::NoPrefetch) {
 			long long volume = (long long)(m_reqXMax - m_reqXMin + 1) * (m_reqYMax - m_reqYMin + 1) * (m_reqZMax - m_reqZMin + 1);
 			if (volume > MAX_NOPREFETCH_VOLUME) {
 				std::ostringstream oss;
@@ -914,7 +914,7 @@ void TileGenerator::loadBlocks()
 				<< std::setw(10) << map_blocks << "\n";
 		}
 	}
-	if (m_backend == "leveldb" && !m_generateNoPrefetch) {
+	if (m_backend == "leveldb" && m_generatePrefetch == BlockListPrefetch::Prefetch) {
 		if (m_databaseFormatFound[BlockPos::AXYZ] && m_databaseFormatFound[BlockPos::I64])
 			m_recommendedDatabaseFormat = "mixed";
 		else if (m_databaseFormatFound[BlockPos::AXYZ])
@@ -1366,7 +1366,7 @@ void TileGenerator::renderMap()
 	MapBlockIterator *position;
 	MapBlockIterator *begin;
 	MapBlockIterator *end;
-	if (m_generateNoPrefetch) {
+	if (m_generatePrefetch != BlockListPrefetch::Prefetch) {
 		position = new MapBlockIteratorBlockPos();
 		begin = new MapBlockIteratorBlockPos(BlockPosIterator(
 				BlockPos(m_xMin, m_yMax, m_zMax, m_databaseFormat),
@@ -1511,7 +1511,7 @@ void TileGenerator::renderMap()
 				<< ")\n";
 		}
 	}
-	if (!m_generateNoPrefetch && m_backend == "leveldb" && (m_reportDatabaseFormat || verboseStatistics >= 1)) {
+	if (m_generatePrefetch == BlockListPrefetch::Prefetch && m_backend == "leveldb" && (m_reportDatabaseFormat || verboseStatistics >= 1)) {
 		cout
 			<< "Database format setting when using --disable-blocklist-prefetch: ";
 		if (!m_recommendedDatabaseFormat.empty())
@@ -1536,7 +1536,7 @@ void TileGenerator::renderMap()
 	if (progressIndicator && eraseProgress)
 		cout << std::setw(50) << "" << "\r";
 
-	if (m_generateNoPrefetch) {
+	if (m_generatePrefetch != BlockListPrefetch::Prefetch) {
 		double queryFactor = 1.0 * m_db->getBlocksQueriedCount() / m_db->getBlocksReadCount();
 		if (verboseStatistics >= 4) {
 			std::cout << std::fixed << std::setprecision(2);

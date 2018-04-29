@@ -162,7 +162,7 @@ int Mapper::start(int argc, char *argv[]) {
 			case OPT_NO_BLOCKLIST_PREFETCH:
 				if (optarg && *optarg) {
 					if (strlower(optarg) == "force")
-						generator.setGenerateNoPrefetch(2);
+						generator.setGenerateNoPrefetch(TileGenerator::BlockListPrefetch::NoPrefetchForced);
 					else {
 						std::cerr << "Invalid parameter to '" << long_options[option_index].name << "'; expected 'force' or nothing." << std::endl;
 						usage();
@@ -170,7 +170,7 @@ int Mapper::start(int argc, char *argv[]) {
 					}
 				}
 				else {
-					generator.setGenerateNoPrefetch(1);
+					generator.setGenerateNoPrefetch(TileGenerator::BlockListPrefetch::NoPrefetch);
 				}
 				break;
 			case OPT_DATABASE_FORMAT: {
@@ -192,11 +192,11 @@ int Mapper::start(int argc, char *argv[]) {
 									  break;
 			case OPT_PRESCAN_WORLD: {
 				std::string opt = strlower(optarg);
-				generator.setGenerateNoPrefetch(0);
+				generator.setGenerateNoPrefetch(TileGenerator::BlockListPrefetch::Prefetch);
 				if (opt == "disabled-force")
-					generator.setGenerateNoPrefetch(2);
+					generator.setGenerateNoPrefetch(TileGenerator::BlockListPrefetch::NoPrefetchForced);
 				else if (opt == "disabled")
-					generator.setGenerateNoPrefetch(1);
+					generator.setGenerateNoPrefetch(TileGenerator::BlockListPrefetch::NoPrefetch);
 				else if (opt == "auto")
 					generator.setScanEntireWorld(false);
 				else if (opt == "full")

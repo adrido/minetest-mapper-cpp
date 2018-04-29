@@ -96,10 +96,16 @@ public:
 		UnpackError(const char *t, size_t o, size_t l, size_t dl) : type(t), offset(o), length(l), dataLength(dl) {}
 	};
 
+	enum class BlockListPrefetch {
+		Prefetch,
+		NoPrefetch,
+		NoPrefetchForced
+	};
+
 	TileGenerator();
 	~TileGenerator();
 	void setSilenceSuggestion(unsigned flags);
-	void setGenerateNoPrefetch(int enable);
+	void setGenerateNoPrefetch(BlockListPrefetch enable);
 	void setDBFormat(BlockPos::StrFormat format, bool query);
 	void setHeightMap(bool enable);
 	void setHeightMapYScale(float scale);
@@ -230,7 +236,7 @@ private:
 	int m_heightScaleMinor{ 0 };
 
 	DB *m_db = nullptr;
-	int m_generateNoPrefetch{ 0 };
+	BlockListPrefetch m_generatePrefetch{ BlockListPrefetch::Prefetch };
 	bool m_databaseFormatSet{ false };
 	BlockPos::StrFormat m_databaseFormat{ BlockPos::Unknown };
 	std::string m_recommendedDatabaseFormat;
