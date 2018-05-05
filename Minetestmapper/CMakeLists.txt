@@ -32,6 +32,8 @@ set(sources
 	PaintEngine.h
 	PaintEngine_libgd.cpp
 	PaintEngine_libgd.h
+	PaintEngine_libgdTTF.cpp
+	PaintEngine_libgdTTF.h
 	porting.cpp
 	porting.h
 	db.h

@@ -100,9 +100,9 @@ void PaintEngine_libgd::clean()
 	gdImageDestroy(image);
 }
 
-gdFontPtr PaintEngine_libgd::getGdFont(Font font)
+gdFontPtr PaintEngine_libgd::getGdFont(Font font) const
 {
-	gdFontPtr f;
+	gdFontPtr f = nullptr;
 	switch (font)
 	{
 	case PaintEngine::Font::Tiny:
