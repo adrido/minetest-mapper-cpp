@@ -73,7 +73,11 @@ endif()
 
 set(leveldb_lib "")
 if(USE_LEVELDB)
-set(leveldb_lib ${LEVELDB_LIBRARY})
+	set(leveldb_lib ${LEVELDB_LIBRARY})
+	if(WIN32)
+		# the leveld database driver requires PathFileExistsW which is in the Shlwapi library
+		set(leveldb_lib ${LEVELDB_LIBRARY} "Shlwapi.lib")
+	endif(WIN32)
 endif()
 
 set(postgresql_lib "")
