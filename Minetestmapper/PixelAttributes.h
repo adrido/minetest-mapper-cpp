@@ -7,16 +7,14 @@
  * =====================================================================
  */
 
-#ifndef PIXELATTRIBUTES_H_ADZ35GYF
-#define PIXELATTRIBUTES_H_ADZ35GYF
+#pragma once
 
-#include <limits>
+#include "Color.h"
+#include <cassert>
 #include <cmath>
 #include <cstdint>
+#include <limits>
 #include <stdexcept>
-#include <cassert>
-#include "config.h"
-#include "Color.h"
 
 class PixelAttribute {
 public:
@@ -27,25 +25,25 @@ public:
 		AlphaMixAverage = 0x04,
 	};
 	static void setMixMode(AlphaMixingMode mode);
-	PixelAttribute(): nextEmpty(true), m_n(0), m_h(NAN), m_t(0), m_a(0), m_r(0), m_g(0), m_b(0) {};
+	PixelAttribute() = default;
 //	PixelAttribute(const PixelAttribute &p);
 	PixelAttribute(const Color &color, double height);
 	PixelAttribute(const ColorEntry &entry, double height);
-	bool nextEmpty;
-	double h(void) const { return m_h / (m_n ? m_n : 1); }
-	double t(void) const { return m_t / (m_n ? m_n : 1); }
-	double a(void) const { return m_a / (m_n ? m_n : 1); }
-	double r(void) const { return m_r / (m_n ? m_a : 1); }
-	double g(void) const { return m_g / (m_n ? m_a : 1); }
-	double b(void) const { return m_b / (m_n ? m_a : 1); }
-	uint8_t red(void) const { return int(r() * 255 + 0.5); }
-	uint8_t green(void) const { return int(g() * 255 + 0.5); }
-	uint8_t blue(void) const { return int(b() * 255 + 0.5); }
-	uint8_t alpha(void) const { return int(a() * 255 + 0.5); }
-	uint8_t thicken(void) const { return int(t() * 255 + 0.5); }
-	unsigned height(void) const { return unsigned(h() + 0.5); }
-	bool isNormalized(void) const { return !m_n; }
-	Color color(void) const { return Color(red(), green(), blue(), alpha()); }
+	bool nextEmpty{true};
+	double h() const { return m_h / (m_n ? m_n : 1); }
+	double t() const { return m_t / (m_n ? m_n : 1); }
+	double a() const { return m_a / (m_n ? m_n : 1); }
+	double r() const { return m_r / (m_n ? m_a : 1); }
+	double g() const { return m_g / (m_n ? m_a : 1); }
+	double b() const { return m_b / (m_n ? m_a : 1); }
+	uint8_t red() const { return int(r() * 255 + 0.5); }
+	uint8_t green() const { return int(g() * 255 + 0.5); }
+	uint8_t blue() const { return int(b() * 255 + 0.5); }
+	uint8_t alpha() const { return int(a() * 255 + 0.5); }
+	uint8_t thicken() const { return int(t() * 255 + 0.5); }
+	unsigned height() const { return unsigned(h() + 0.5); }
+	bool isNormalized() const { return !m_n; }
+	Color color() const { return Color(red(), green(), blue(), alpha()); }
 
 	inline bool is_valid() const { return !std::isnan(m_h); }
 	PixelAttribute &operator=(const PixelAttribute &p);
@@ -54,13 +52,13 @@ public:
 	void mixUnder(const PixelAttribute &p);
 private:
 	static AlphaMixingMode m_mixMode;
-	double m_n;
-	double m_h;
-	double m_t;
-	double m_a;
-	double m_r;
-	double m_g;
-	double m_b;
+	double m_n{0};
+	double m_h{ std::numeric_limits<double>::quiet_NaN() };
+	double m_t{0};
+	double m_a{0};
+	double m_r{0};
+	double m_g{0};
+	double m_b{0};
 
 friend class PixelAttributes;
 };
@@ -68,33 +66,33 @@ friend class PixelAttributes;
 class PixelAttributes
 {
 public:
-	PixelAttributes();
+	PixelAttributes() = default;
 	virtual ~PixelAttributes();
 	void setParameters(int width, int lines, int nextY, int scale, bool defaultEmpty);
 	void scroll(int keepY);
 	PixelAttribute &attribute(int y, int x);
 	void renderShading(double emphasis, bool drawAlpha);
-	int getNextY(void) { return m_nextY; }
+	int getNextY() { return m_nextY; }
 	void setLastY(int y);
-	int getLastY(void) { return m_lastY; }
+	int getLastY() { return m_lastY; }
 
 private:
 	int yCoord2Line(int y) { return y - m_firstY + m_firstLine; }
 	void freeAttributes();
 
 private:
-	int m_previousLine;
-	int m_firstLine;
-	int m_lastLine;
-	int m_emptyLine;
-	int m_lineCount;
-	PixelAttribute **m_pixelAttributes;
-	int m_width;
-	int m_firstY;
-	int m_nextY;
-	int m_lastY;
-	int m_firstUnshadedY;
-	int m_scale;
+	int m_previousLine{};
+	const int m_firstLine{1};
+	int m_lastLine{};
+	int m_emptyLine{};
+	int m_lineCount{};
+	PixelAttribute **m_pixelAttributes{nullptr};
+	int m_width{};
+	int m_firstY{};
+	int m_nextY{};
+	int m_lastY{};
+	int m_firstUnshadedY{};
+	int m_scale{};
 };
 
 inline void PixelAttributes::setLastY(int y)
@@ -156,6 +154,4 @@ inline PixelAttribute &PixelAttribute::operator=(const PixelAttribute &p)
 	m_b = p.m_b;
 	return *this;
 }
-
-#endif /* end of include guard: PIXELATTRIBUTES_H_ADZ35GYF */
 

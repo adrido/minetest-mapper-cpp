@@ -7,19 +7,12 @@
  * =====================================================================
  */
 
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
 #include "PixelAttributes.h"
+#include <cstring> // memcpy
 
 using namespace std;
 
 PixelAttribute::AlphaMixingMode PixelAttribute::m_mixMode = PixelAttribute::AlphaMixCumulative;
-
-PixelAttributes::PixelAttributes():
-	m_pixelAttributes(0)
-{
-}
 
 PixelAttributes::~PixelAttributes()
 {
@@ -31,7 +24,7 @@ void PixelAttributes::setParameters(int width, int lines, int nextY, int scale, 
 	freeAttributes();
 	m_width = width + 1; // 1px gradient calculation
 	m_previousLine = 0;
-	m_firstLine = 1;
+	//m_firstLine = 1;
 	m_lastLine = m_firstLine + lines - 1;
 	m_emptyLine = m_lastLine + 1;
 	m_lineCount = m_emptyLine + 1;
@@ -88,12 +81,12 @@ void PixelAttributes::freeAttributes()
 {
 	if (m_pixelAttributes) {
 		for (int i = 0; i < m_lineCount; ++i) {
-			if (m_pixelAttributes[i] != 0) {
+			if (m_pixelAttributes[i] != nullptr) {
 				delete[] m_pixelAttributes[i];
 			}
 		}
 		delete[] m_pixelAttributes;
-		m_pixelAttributes = 0;
+		m_pixelAttributes = nullptr;
 	}
 }
 
@@ -183,17 +176,17 @@ void PixelAttributes::renderShading(double emphasis, bool drawAlpha)
 // Color values with n>0 can be summed.
 
 // normalize() converts from n>0 to n==0 representation
-void PixelAttribute::normalize(double count, Color defColor)
+void PixelAttribute::normalize(double count, Color defaultColor)
 {
 	if (!m_n) {
 		// Already normalized
 		return;
 	}
 	if (m_n < count) {
-		m_r += (defColor.r / 255.0) * (defColor.a / 255.0) * (count - m_n);
-		m_g += (defColor.g / 255.0) * (defColor.a / 255.0) * (count - m_n);
-		m_b += (defColor.b / 255.0) * (defColor.a / 255.0) * (count - m_n);
-		m_a += (defColor.a / 255.0) * (count - m_n);
+		m_r += (defaultColor.r / 255.0) * (defaultColor.a / 255.0) * (count - m_n);
+		m_g += (defaultColor.g / 255.0) * (defaultColor.a / 255.0) * (count - m_n);
+		m_b += (defaultColor.b / 255.0) * (defaultColor.a / 255.0) * (count - m_n);
+		m_a += (defaultColor.a / 255.0) * (count - m_n);
 		m_h *= double(count) / m_n;
 		m_t *= double(count) / m_n;
 		m_n = count;

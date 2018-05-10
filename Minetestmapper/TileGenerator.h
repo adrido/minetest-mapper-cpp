@@ -25,6 +25,7 @@
 #include "MapBlock.h"
 #include "PaintEngine.h"
 #include "PixelAttributes.h"
+#include "config.h"
 #include "db.h"
 
 #define TILESIZE_CHUNK			(INT_MIN)
