@@ -8,16 +8,10 @@
  */
 
 #include "PixelAttributes.h"
-#include <cstring> // memcpy
 
 using namespace std;
 
 PixelAttribute::AlphaMixingMode PixelAttribute::m_mixMode = PixelAttribute::AlphaMixCumulative;
-
-PixelAttributes::~PixelAttributes()
-{
-	freeAttributes();
-}
 
 void PixelAttributes::setParameters(int width, int lines, int nextY, int scale, bool defaultEmpty)
 {
@@ -34,23 +28,20 @@ void PixelAttributes::setParameters(int width, int lines, int nextY, int scale, 
 	m_firstUnshadedY = 0;
 	m_scale = scale;
 
-	m_pixelAttributes = new PixelAttribute *[m_lineCount];
-	if (!m_pixelAttributes)
-		throw std::runtime_error("Failed to allocate memory for PixelAttributes");
+	PixelAttribute pa;
+	pa.m_a = 0;
+	pa.nextEmpty = false;
 
-	for (int i = 0; i < m_lineCount; ++i) {
-		m_pixelAttributes[i] = new PixelAttribute[m_width];
-		if (!m_pixelAttributes[i])
-			throw std::runtime_error("Failed to allocate memory for PixelAttributes");
-	}
-	for (int i=0; i<m_lineCount; i++)
-		for (int j=0; j<m_width; j++) {
-			m_pixelAttributes[i][j].m_a=0;
-			if (defaultEmpty)
-				m_pixelAttributes[i][j].nextEmpty = (j - 1) % (16 / scale) == 0;
-			else
-				m_pixelAttributes[i][j].nextEmpty = false;
+	m_pixelAttributes = vector<vector<PixelAttribute>>(m_lineCount, vector<PixelAttribute>(m_width, pa));
+
+	if (defaultEmpty) {
+		int emptyColumns = (16 / scale);
+		for (int i = 0; i < m_lineCount; i++) {
+			for (int j = 0; j < m_width; j += emptyColumns) {
+				m_pixelAttributes[i][j + 1].nextEmpty = true;
+			}
 		}
+	}
 }
 
 void PixelAttributes::scroll(int keepY)
@@ -59,15 +50,13 @@ void PixelAttributes::scroll(int keepY)
 	if (scroll > 0) {
 		int i;
 		for (i = m_previousLine; i + scroll <= m_lastLine; i++) {
-			PixelAttribute *tmp;
-			tmp = m_pixelAttributes[i];
+			auto tmp = m_pixelAttributes[i];
 			m_pixelAttributes[i] = m_pixelAttributes[i + scroll];
 			m_pixelAttributes[i + scroll] = tmp;
 		}
 
-		size_t lineLength = m_width * sizeof(PixelAttribute);
 		for (; i <= m_lastLine; ++i) {
-			memcpy(m_pixelAttributes[i], m_pixelAttributes[m_emptyLine], lineLength);
+			m_pixelAttributes[i] = m_pixelAttributes[m_emptyLine];
 		}
 
 		m_firstY += scroll;
@@ -79,15 +68,7 @@ void PixelAttributes::scroll(int keepY)
 
 void PixelAttributes::freeAttributes()
 {
-	if (m_pixelAttributes) {
-		for (int i = 0; i < m_lineCount; ++i) {
-			if (m_pixelAttributes[i] != nullptr) {
-				delete[] m_pixelAttributes[i];
-			}
-		}
-		delete[] m_pixelAttributes;
-		m_pixelAttributes = nullptr;
-	}
+	m_pixelAttributes.clear();
 }
 
 
@@ -305,5 +286,17 @@ void PixelAttribute::mixUnder(const PixelAttribute &p)
 		assert(1 && m_mixMode);
 	}
 #endif
+}
+
+bool PixelAttribute::operator==(const PixelAttribute & p)
+{
+	return m_n == p.m_n &&
+		m_h == p.m_h &&
+		m_t == p.m_t &&
+		m_a == p.m_a &&
+		m_r == p.m_r &&
+		m_g == p.m_g &&
+		m_b == p.m_b &&
+		nextEmpty == p.nextEmpty;
 }
 

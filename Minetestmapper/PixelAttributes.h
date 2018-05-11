@@ -15,6 +15,7 @@
 #include <cstdint>
 #include <limits>
 #include <stdexcept>
+#include <vector>
 
 class PixelAttribute {
 public:
@@ -50,6 +51,8 @@ public:
 	void normalize(double count = 0, Color defaultColor = Color(127, 127, 127));
 	void add(const PixelAttribute &p);
 	void mixUnder(const PixelAttribute &p);
+	bool operator==(const PixelAttribute &p);
+	bool operator!=(const PixelAttribute &p) { return !(*this == p); };
 private:
 	static AlphaMixingMode m_mixMode;
 	double m_n{0};
@@ -67,7 +70,7 @@ class PixelAttributes
 {
 public:
 	PixelAttributes() = default;
-	virtual ~PixelAttributes();
+	~PixelAttributes() = default;
 	void setParameters(int width, int lines, int nextY, int scale, bool defaultEmpty);
 	void scroll(int keepY);
 	PixelAttribute &attribute(int y, int x);
@@ -86,7 +89,7 @@ private:
 	int m_lastLine{};
 	int m_emptyLine{};
 	int m_lineCount{};
-	PixelAttribute **m_pixelAttributes{nullptr};
+	std::vector<std::vector<PixelAttribute>> m_pixelAttributes;
 	int m_width{};
 	int m_firstY{};
 	int m_nextY{};
