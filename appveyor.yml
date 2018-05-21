@@ -53,9 +53,13 @@ build_script:
     cmake --build . --target ALL_BUILD --config Release
 
     cpack -G "ZIP"
+
+    cpack -G "WIX"
 artifacts:
 - path: '\build\Minetestmapper*.zip'
   name: build
+- path: '\build\Minetestmapper*.msi'
+  name: installer
 deploy:
 - provider: GitHub
   auth_token:
