@@ -42,7 +42,6 @@ install:
     vcpkg install libpq:$($env:Platform)-windows
 cache:
 - c:\tools\vcpkg\installed\
-- c:\tools\vcpkg\downloads\
 build_script:
 - cmd: >-
     mkdir build
