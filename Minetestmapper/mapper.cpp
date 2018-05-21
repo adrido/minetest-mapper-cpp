@@ -165,7 +165,7 @@ int Mapper::start(int argc, char *argv[]) {
 					else {
 						std::cerr << "Invalid parameter to '" << long_options[option_index].name << "'; expected 'force' or nothing." << std::endl;
 						usage();
-						exit(1);
+						return EXIT_FAILURE;
 					}
 				}
 				else {
@@ -185,7 +185,7 @@ int Mapper::start(int argc, char *argv[]) {
 				else {
 					std::cerr << "Invalid parameter to '" << long_options[option_index].name << "': '" << optarg << "'" << std::endl;
 					usage();
-					exit(1);
+					return EXIT_FAILURE;
 				}
 			}
 									  break;
@@ -203,7 +203,7 @@ int Mapper::start(int argc, char *argv[]) {
 				else {
 					std::cerr << "Invalid parameter to '" << long_options[option_index].name << "': '" << optarg << "'" << std::endl;
 					usage();
-					exit(1);
+					return EXIT_FAILURE;
 				}
 			}
 									break;
@@ -217,7 +217,7 @@ int Mapper::start(int argc, char *argv[]) {
 					if (!isdigit(optarg[0])) {
 						std::cerr << "Invalid parameter to '" << long_options[option_index].name << "': must be a positive number" << std::endl;
 						usage();
-						exit(1);
+						return EXIT_FAILURE;
 					}
 #ifdef USE_SQLITE3
 					int size = atoi(optarg);
@@ -253,7 +253,7 @@ int Mapper::start(int argc, char *argv[]) {
 				else {
 					std::cerr << "Invalid parameter to '" << long_options[option_index].name << "': '" << optarg << "'" << std::endl;
 					usage();
-					exit(1);
+					return EXIT_FAILURE;
 				}
 				break;
 			case OPT_HEIGHT_LEVEL0:
@@ -264,7 +264,7 @@ int Mapper::start(int argc, char *argv[]) {
 				else {
 					std::cerr << "Invalid parameter to '" << long_options[option_index].name << "': '" << optarg << "'" << std::endl;
 					usage();
-					exit(1);
+					return EXIT_FAILURE;
 				}
 				break;
 			case OPT_BLOCKCOLOR:
@@ -303,7 +303,7 @@ int Mapper::start(int argc, char *argv[]) {
 						std::cerr << "Invalid parameter to '" << long_options[option_index].name
 							<< "': '" << optarg << "' (expected: left,top)" << std::endl;
 						usage();
-						exit(1);
+						return EXIT_FAILURE;
 					}
 				}
 				else {
@@ -324,7 +324,7 @@ int Mapper::start(int argc, char *argv[]) {
 					std::cerr << "Invalid parameter to '" << long_options[option_index].name
 						<< "': '" << optarg << "' (expected: <major>[,<minor>]" << std::endl;
 					usage();
-					exit(1);
+					return EXIT_FAILURE;
 				}
 				arg >> std::ws >> sep >> std::ws;
 				if (!arg.fail()) {
@@ -332,14 +332,14 @@ int Mapper::start(int argc, char *argv[]) {
 						std::cerr << "Invalid parameter to '" << long_options[option_index].name
 							<< "': '" << optarg << "' (expected: <major>[,<minor>]" << std::endl;
 						usage();
-						exit(1);
+						return EXIT_FAILURE;
 					}
 					arg >> minor;
 					if (minor < 0) {
 						std::cerr << "Invalid parameter to '" << long_options[option_index].name
 							<< "': '" << optarg << "' (expected: <major>[,<minor>]" << std::endl;
 						usage();
-						exit(1);
+						return EXIT_FAILURE;
 					}
 				}
 				else {
@@ -349,7 +349,7 @@ int Mapper::start(int argc, char *argv[]) {
 					if (major % minor) {
 						std::cerr << long_options[option_index].name << ": Cannot divide major interval in "
 							<< minor << " subintervals (not divisible)" << std::endl;
-						exit(1);
+						return EXIT_FAILURE;
 					}
 					minor = major / minor;
 				}
@@ -363,7 +363,7 @@ int Mapper::start(int argc, char *argv[]) {
 				}
 				else {
 					std::cerr << "Internal error: option " << long_options[option_index].name << " not handled" << std::endl;
-					exit(1);
+					return EXIT_FAILURE;
 				}
 			}
 									break;
@@ -392,7 +392,7 @@ int Mapper::start(int argc, char *argv[]) {
 					else {
 						std::cerr << "Invalid flag to '" << long_options[option_index].name << "': '" << flag << "'" << std::endl;
 						usage();
-						exit(1);
+						return EXIT_FAILURE;
 					}
 					iss >> flag;
 				}
@@ -433,7 +433,7 @@ int Mapper::start(int argc, char *argv[]) {
 				else {
 					std::cerr << "Invalid parameter to '" << long_options[option_index].name << "': '" << optarg << "'" << std::endl;
 					usage();
-					exit(1);
+					return EXIT_FAILURE;
 				}
 				break;
 			case OPT_DRAWAIR:
@@ -463,7 +463,7 @@ int Mapper::start(int argc, char *argv[]) {
 					else {
 						std::cerr << "Invalid " << long_options[option_index].name << " flag '" << flag << "'" << std::endl;
 						usage();
-						exit(1);
+						return EXIT_FAILURE;
 					}
 					iss >> flag;
 				}
@@ -506,7 +506,7 @@ int Mapper::start(int argc, char *argv[]) {
 				if (iss.fail() || size < 0) {
 					std::cerr << "Invalid chunk size (" << optarg << ")" << std::endl;
 					usage();
-					exit(1);
+					return EXIT_FAILURE;
 				}
 				generator.setChunkSize(size);
 			}
@@ -520,18 +520,18 @@ int Mapper::start(int argc, char *argv[]) {
 				arg >> one >> std::ws;
 				if (arg.fail() || one != 1) {
 					std::cerr << "Invalid scale factor specification (" << optarg << ") - expected: 1:<n>" << std::endl;
-					exit(1);
+					return EXIT_FAILURE;
 				}
 				if (!arg.eof()) {
 					arg >> colon >> factor >> std::ws;
 					if (arg.fail() || colon != ':' || factor<0 || !arg.eof()) {
 						std::cerr << "Invalid scale factor specification (" << optarg << ") - expected: 1:<n>" << std::endl;
 						usage();
-						exit(1);
+						return EXIT_FAILURE;
 					}
 					if (factor != 1 && factor != 2 && factor != 4 && factor != 8 && factor != 16) {
 						std::cerr << "Scale factor must be 1:1, 1:2, 1:4, 1:8 or 1:16" << std::endl;
-						exit(1);
+						return EXIT_FAILURE;
 					}
 				}
 				generator.setScaleFactor(factor);
@@ -555,7 +555,7 @@ int Mapper::start(int argc, char *argv[]) {
 					if (tilesize.fail() || size<0) {
 						std::cerr << "Invalid tile size specification (" << optarg << ")" << std::endl;
 						usage();
-						exit(1);
+						return EXIT_FAILURE;
 					}
 					generator.setTileSize(size, size);
 					tilesize >> c >> border;
@@ -563,7 +563,7 @@ int Mapper::start(int argc, char *argv[]) {
 						if (c != '+' || border < 1) {
 							std::cerr << "Invalid tile border size specification (" << optarg << ")" << std::endl;
 							usage();
-							exit(1);
+							return EXIT_FAILURE;
 						}
 						generator.setTileBorderSize(border);
 					}
@@ -606,7 +606,7 @@ int Mapper::start(int argc, char *argv[]) {
 					else {
 						std::cerr << "Invalid " << long_options[option_index].name << " parameter (" << optarg << ")" << std::endl;
 						usage();
-						exit(1);
+						return EXIT_FAILURE;
 					}
 				}
 			}
@@ -643,7 +643,7 @@ int Mapper::start(int argc, char *argv[]) {
 						else {
 							std::cerr << "Invalid geometry mode flag '" << flag << "'" << std::endl;
 							usage();
-							exit(1);
+							return EXIT_FAILURE;
 						}
 						if (flag == "fixed" || flag == "shrink")
 							setFixedOrShrinkGeometry = true;
@@ -666,7 +666,7 @@ int Mapper::start(int argc, char *argv[]) {
 				if (!parseMapGeometry(iss, coord1, coord2, legacy, center)) {
 					std::cerr << "Invalid geometry specification '" << optarg << "'" << std::endl;
 					usage();
-					exit(1);
+					return EXIT_FAILURE;
 				}
 				// Set defaults
 				if (!foundGeometrySpec) {
@@ -720,7 +720,7 @@ int Mapper::start(int argc, char *argv[]) {
 					std::cerr << "Internal error: unrecognised object ("
 						<< long_options[option_index].name
 						<< ")" << std::endl;
-					exit(1);
+					return EXIT_FAILURE;
 					break;
 				}
 
@@ -742,7 +742,7 @@ int Mapper::start(int argc, char *argv[]) {
 						<< long_options[option_index].name
 						<< " '" << optarg << "'" << std::endl;
 					usage();
-					exit(1);
+					return EXIT_FAILURE;
 				}
 				bool haveCoord2 = coord2.dimension[0] != NodeCoord::Invalid
 					&& coord2.dimension[1] != NodeCoord::Invalid;
@@ -786,7 +786,7 @@ int Mapper::start(int argc, char *argv[]) {
 						<< long_options[option_index].name
 						<< " '" << optarg << "'" << std::endl;
 					usage();
-					exit(1);
+					return EXIT_FAILURE;
 				}
 				drawObject.color = colorStr;
 
@@ -799,7 +799,7 @@ int Mapper::start(int argc, char *argv[]) {
 							<< long_options[option_index].name
 							<< " '" << optarg << "'" << std::endl;
 						usage();
-						exit(1);
+						return EXIT_FAILURE;
 					}
 					drawObject.text = localizedText;
 				}
@@ -809,7 +809,7 @@ int Mapper::start(int argc, char *argv[]) {
 					if (drawObject.haveCenter) {
 						std::cerr << "Arrow cannot use a centered dimension."
 							<< " Specify at least one corner." << std::endl;
-						exit(1);
+						return EXIT_FAILURE;
 					}
 					bool useDimensions = drawObject.haveDimensions;
 
@@ -836,7 +836,7 @@ int Mapper::start(int argc, char *argv[]) {
 				generator.setBackend(strlower(optarg));
 				break;
 			default:
-				exit(1);
+				return EXIT_FAILURE;
 			}
 		}
 	}
