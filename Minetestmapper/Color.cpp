@@ -5,44 +5,36 @@
 #include <cstdlib>
 #include <cstring>
 #include <iomanip>
-#include <map>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 
-class ColorTable : public std::map<std::string, Color>
-{
-public:
-	ColorTable()
-	{
-		map<std::string, Color> &table = *this;
-		table["white"] = Color(0xff, 0xff, 0xff);
-		table["black"] = Color(0, 0, 0);
-		table["gray"] = Color(0x7f, 0x7f, 0x7f);
-		table["grey"] = Color(0x7f, 0x7f, 0x7f);
+static const std::unordered_map<std::string, const Color> colorTable{
+	{"white", Color(0xff, 0xff, 0xff)},
+	{"black", Color(0, 0, 0)},
+	{"gray", Color(0x7f, 0x7f, 0x7f)},
+	{"grey", Color(0x7f, 0x7f, 0x7f)},
 
-		table["red"] = Color(0xff, 0, 0);
-		table["green"] = Color(0, 0xff, 0);
-		table["blue"] = Color(0, 0, 0xff);
+	{"red", Color(0xff, 0, 0)},
+	{"green", Color(0, 0xff, 0)},
+	{"blue", Color(0, 0, 0xff)},
 
-		table["yellow"] = Color(0xff, 0xff, 0);
-		table["magenta"] = Color(0xff, 0, 0xff);
-		table["fuchsia"] = Color(0xff, 0, 0xff);
-		table["cyan"] = Color(0, 0xff, 0xff);
-		table["aqua"] = Color(0, 0xff, 0xff);
+	{"yellow", Color(0xff, 0xff, 0)},
+	{"magenta", Color(0xff, 0, 0xff)},
+	{"fuchsia", Color(0xff, 0, 0xff)},
+	{"cyan", Color(0, 0xff, 0xff)},
+	{"aqua", Color(0, 0xff, 0xff)},
 
-		table["orange"] = Color(0xff, 0x7f, 0);
-		table["chartreuse"] = Color(0x7f, 0xff, 0);
-		table["pink"] = Color(0xff, 0, 0x7f);
-		table["violet"] = Color(0x7f, 0, 0xff);
-		table["springgreen"] = Color(0, 0xff, 0x7f);
-		table["azure"] = Color(0, 0x7f, 0xff);
+	{"orange", Color(0xff, 0x7f, 0)},
+	{"chartreuse", Color(0x7f, 0xff, 0)},
+	{"pink", Color(0xff, 0, 0x7f)},
+	{"violet", Color(0x7f, 0, 0xff)},
+	{"springgreen", Color(0, 0xff, 0x7f)},
+	{"azure", Color(0, 0x7f, 0xff)},
 
-		table["brown"] = Color(0x7f, 0x3f, 0);
-	}
+	{"brown", Color(0x7f, 0x3f, 0)},
 };
-ColorTable colorTable;
-
 
 // alpha:
 //	 0: don't expect/allow alpha
@@ -57,11 +49,11 @@ Color::Color(const std::string &color, int alpha)
 		colormod = color.substr(pos);
 	}
 
-
 	if (basecolor[0] != '#') { // Color name
 		std::transform(basecolor.begin(), basecolor.end(), basecolor.begin(), ::tolower);
-		if (colorTable.count(basecolor) > 0) {
-			*this = colorTable[basecolor];
+		auto colorTableIter = colorTable.find(basecolor);
+		if (colorTableIter != colorTable.end()) {
+			*this = colorTableIter->second;
 		}
 		else {
 			throw std::runtime_error(std::string("Symbolic color '") + color + "' not known, or color does not begin with #");
@@ -219,4 +211,3 @@ Color::Color(const std::string &color, int alpha)
 		}
 	}
 }
-
