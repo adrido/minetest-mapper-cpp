@@ -10,6 +10,8 @@
 #include <gdfonts.h>
 #include <gdfontt.h>
 
+#include "porting.h"
+
 
 PaintEngine_libgd::PaintEngine_libgd()
 {
@@ -83,10 +85,10 @@ void PaintEngine_libgd::drawPixel(int x, int y, const Color &color)
 bool PaintEngine_libgd::save(const std::string & filename, const std::string & format, int quality)
 {
 	FILE *out;
-	out = fopen(filename.c_str(), "wb");
+	out = porting::fopen(filename.c_str(), "wb");
 	if (!out) {
 		std::ostringstream oss;
-		oss << "Error opening '" << filename << "': " << std::strerror(errno);
+		oss << "Error opening '" << filename << "': " << porting::strerror(errno);
 		throw std::runtime_error(oss.str());
 	}
 	gdImagePng(image, out);

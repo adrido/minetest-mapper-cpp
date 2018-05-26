@@ -969,7 +969,7 @@ void Mapper::parseDataFile(TileGenerator & generator, const string & input, stri
 	// Check if input/../.. looks like a valid minetest directory
 	string minetestPath = input + PATH_SEPARATOR + ".." + PATH_SEPARATOR + "..";
 	string minetestConf = minetestPath + PATH_SEPARATOR + "minetest.conf";
-	if (FILE *file = fopen(minetestConf.c_str(), "r")) {
+	if (FILE *file = porting::fopen(minetestConf.c_str(), "r")) {
 		fclose(file);
 		colorPaths.push_back(minetestPath);
 	}
