@@ -1,5 +1,10 @@
 #include "version.h"
-#include "Windows.h"
+#include <Windows.h>
+
+/* VERSIONINFO can be read with the WINAPI https://msdn.microsoft.com/en-us/library/windows/desktop/ms647003(v=vs.85).aspx
+   or by POWERSHELL:
+     PS> (dir *.exe).VersionInfo|fl 
+*/
 
 #ifndef DEBUG
 #define VER_DEBUG                   0
@@ -7,14 +12,34 @@
 #define VER_DEBUG                   VS_FF_DEBUG
 #endif
 
-#define VER_PRIVATEBUILD 0
-#define VER_PRERELEASE VS_FF_PRERELEASE
+// DIRTY_BUILD (patched) if there are uncommitted changes
+#if DIRTY_BUILD
+#define VER_PATCHED                 VS_FF_PATCHED
+#else
+#define VER_PATCHED                 0
+#endif
+
+// SPECIALBUILD if build from a different branch then master
+#if SPECIALBUILD
+#define VER_SPECIALBUILD            VS_FF_SPECIALBUILD
+#else
+#define VER_SPECIALBUILD            0
+#endif
+
+// PRERELEASE if its not build on a tag
+#if PRERELEASE
+#define VER_PRERELEASE              VS_FF_PRERELEASE
+#else
+#define VER_PRERELEASE              0
+#endif
+
+#define VER_PRIVATEBUILD            0
 
 VS_VERSION_INFO VERSIONINFO
 FILEVERSION    	VER_FILEVERSION
 PRODUCTVERSION 	VER_PRODUCTVERSION
 FILEFLAGSMASK  	VS_FFI_FILEFLAGSMASK
-FILEFLAGS      	(VER_PRIVATEBUILD|VER_PRERELEASE|VER_DEBUG)
+FILEFLAGS      	(VER_PRIVATEBUILD | VER_PRERELEASE | VER_DEBUG | VER_PATCHED | VER_SPECIALBUILD)
 FILEOS         	VOS__WINDOWS32
 FILETYPE       	VFT_APP
 FILESUBTYPE    	VFT2_UNKNOWN
@@ -33,6 +58,9 @@ BEGIN
             VALUE "OriginalFilename", VER_ORIGINALFILENAME_STR
             VALUE "ProductName",      VER_PRODUCTNAME_STR
             VALUE "ProductVersion",   VER_PRODUCTVERSION_STR
+#if SPECIALBUILD
+            VALUE "SpecialBuild",     "Build on branch " BUILD_BRANCH
+#endif
         END
     END
 
