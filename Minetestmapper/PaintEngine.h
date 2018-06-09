@@ -14,6 +14,8 @@ public:
 		Giant // 15px bold?
 	};
 	virtual ~PaintEngine() = default;
+	/* Checks if the requested imagesize can handled by the Paintengine. Prints warnings to out. Returns true if there are no trouble*/
+	virtual bool checkImageSize(int w, int h, std::ostream &out) = 0;
 	virtual bool create(int w, int h) = 0;
 	virtual void fill(const Color &color) = 0;
 	virtual void drawText(int x, int y, Font font, const std::string &text, const Color &color) = 0;

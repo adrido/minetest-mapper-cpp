@@ -1200,23 +1200,6 @@ void TileGenerator::computeMapParameters(const std::string &input)
 	m_pictWidth += m_tileBorderXCount * m_tileBorderSize;
 	m_pictHeight /= m_scaleFactor;
 	m_pictHeight += m_tileBorderYCount * m_tileBorderSize;
-
-	// Print some useful messages in cases where it may not be possible to generate the image...
-	long long pixels = static_cast<long long>(m_pictWidth + borderLeft() + borderRight()) * (m_pictHeight + borderTop() + borderBottom());
-	// Study the libgd code to known why the maximum is the following:
-	long long max_pixels = INT_MAX - INT_MAX % m_pictHeight;
-	if (pixels > max_pixels) {
-		cerr << "WARNING: Image will have " << pixels << " pixels; the PNG graphics library will refuse to handle more than approximately " << INT_MAX << std::endl;
-		cerr << "         (If map generation fails, consider using --scalefactor to reduce the image size by a factor 2)" << std::endl;
-	}
-	// Estimated approximate maximum was determined by trial and error...
-	// (24100x24100 succeeded; 24200x24200 failed)
-	#define ESTIMATED_MAX_PIXELS_32BIT (24100*24100L)
-	else if (sizeof(void *) == 4 && pixels > ESTIMATED_MAX_PIXELS_32BIT) {
-		cerr << "WARNING: Image will have " << pixels << " pixels; The maximum achievable on a 32-bit system is approximately " << ESTIMATED_MAX_PIXELS_32BIT << std::endl;
-		cerr << "         (If map generation fails, consider using --scalefactor to reduce the image size by a factor 2 or 4)" << std::endl;
-	}
-	#undef ESTIMATED_MAX_PIXELS_32BIT
 }
 
 
@@ -1226,6 +1209,8 @@ void TileGenerator::createImage()
 	int totalPictWidth = m_pictWidth + borderLeft() + borderRight();
 
 	paintEngine = new PaintEngine_libgd();
+
+	paintEngine->checkImageSize(totalPictWidth, totalPictHeight, std::cerr);
 	if (!paintEngine->create(totalPictWidth, totalPictHeight)) {
 		ostringstream oss;
 		oss << "Failed to allocate " << totalPictWidth << "x" << totalPictHeight << " image";

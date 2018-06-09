@@ -9,6 +9,7 @@ class PaintEngine_libgd :
 public:
 	PaintEngine_libgd();
 	~PaintEngine_libgd() override;
+	bool checkImageSize(int w, int h, std::ostream & out) override;
 	bool create(int w, int h) override;
 	void fill(const Color &color) override;
 	void drawText(int x, int y, Font font, const std::string &text, const Color &color) override;

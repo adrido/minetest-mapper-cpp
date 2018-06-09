@@ -3,6 +3,7 @@
 #include <sstream>
 #include <cstring>
 #include <stdexcept>
+#include <limits>
 
 #include <gdfontmb.h>
 #include <gdfontl.h>
@@ -24,6 +25,32 @@ PaintEngine_libgd::PaintEngine_libgd()
 PaintEngine_libgd::~PaintEngine_libgd()
 {
 	clean();
+}
+
+bool PaintEngine_libgd::checkImageSize(int w, int h, std::ostream &out)
+{
+	constexpr int int_max = std::numeric_limits<int>::max();
+	constexpr bool is32bit = (sizeof(void *) == 4);
+	// Estimated approximate maximum was determined by trial and error...
+	// (24100x24100 succeeded; 24200x24200 failed)
+	constexpr long long estimated_max_pixels_32bit = 24100L * 24100L;
+
+	// Print some useful messages in cases where it may not be possible to generate the image...
+	long long pixels = w*h;
+	// Study the libgd code to known why the maximum is the following:
+	long long max_pixels = int_max - int_max % h;
+
+	if (pixels > max_pixels) {
+		out << "WARNING: Image will have " << pixels << " pixels; the PNG graphics library will refuse to handle more than approximately " << int_max << std::endl;
+		out << "         (If map generation fails, consider using --scalefactor to reduce the image size by a factor 2)" << std::endl;
+		return false;
+	}
+	else if (is32bit && pixels > estimated_max_pixels_32bit) {
+		out << "WARNING: Image will have " << pixels << " pixels; The maximum achievable on a 32-bit system is approximately " << estimated_max_pixels_32bit << std::endl;
+		out << "         (If map generation fails, consider using --scalefactor to reduce the image size by a factor 2 or 4)" << std::endl;
+		return false;
+	}
+	return true;
 }
 
 bool PaintEngine_libgd::create(int w, int h)
