@@ -1,6 +1,6 @@
 
 #include "config.h"
-#if USE_REDIS
+#ifdef USE_REDIS
 
 #include <stdexcept>
 #include <sstream>

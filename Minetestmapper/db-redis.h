@@ -1,7 +1,7 @@
 #pragma once
 
 #include "config.h"
-#if USE_REDIS
+#ifdef USE_REDIS
 
 
 
