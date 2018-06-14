@@ -17,7 +17,7 @@ FILE *porting::fopen(const char *filename, const char *mode)
 #ifdef _WIN32	
 	fopen_s(&file, filename, mode);
 #else
-	file = fopen(filename, mode);
+	file = ::fopen(filename, mode);
 #endif // _WIN32
 
 	return file;
@@ -32,7 +32,7 @@ std::string porting::getenv(const char *name)
 	std::size_t len;
 	_dupenv_s(&buf, &len, name);
 #else
-	env = getenv(name);
+	env = ::getenv(name);
 #endif // _WIN32
 	return buf == nullptr ? std::string() : std::string(buf);
 }
