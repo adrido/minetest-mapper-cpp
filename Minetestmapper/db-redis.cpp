@@ -6,7 +6,6 @@
 #include <sstream>
 #include <fstream>
 #include "db-redis.h"
-#include "types.h"
 #include "Settings.h"
 
 static inline int64_t stoi64(const std::string &s)
@@ -84,11 +83,11 @@ const DB::BlockPosList &DBRedis::getBlockPosList()
 }
 
 
-DB::Block DBRedis::getBlockOnPos(const BlockPos &pos)
+const DB::Block DBRedis::getBlockOnPos(const BlockPos &pos)
 {
 	redisReply *reply;
 	std::string tmp;
-	Block block(pos,reinterpret_cast<const unsigned char *>(""));
+	Block block(pos, {});
 
 	m_blocksQueriedCount++;
 
@@ -97,7 +96,7 @@ DB::Block DBRedis::getBlockOnPos(const BlockPos &pos)
 		throw std::runtime_error(std::string("redis command 'HGET %s %s' failed: ") + ctx->errstr);
 	if (reply->type == REDIS_REPLY_STRING && reply->len != 0) {
 		m_blocksReadCount++;
-		block = Block(pos, ustring(reinterpret_cast<const unsigned char *>(reply->str), reply->len));
+		block = Block(pos, reinterpret_cast<const unsigned char *>(reply->str), reply->len);
 	} else
 		throw std::runtime_error("Got wrong response to 'HGET %s %s' command");
 	freeReplyObject(reply);

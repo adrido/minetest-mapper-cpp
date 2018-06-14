@@ -14,7 +14,7 @@ public:
 	virtual int getBlocksQueriedCount(void);
 	virtual int getBlocksReadCount(void);
 	virtual const BlockPosList &getBlockPosList();
-	virtual Block getBlockOnPos(const BlockPos &pos);
+	virtual const Block getBlockOnPos(const BlockPos &pos);
 	~DBRedis();
 private:
 	int m_blocksReadCount;
