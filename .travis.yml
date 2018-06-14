@@ -8,11 +8,12 @@ addons:
     packages:
       - libgd2-noxpm-dev
       - libleveldb-dev
+      - libhiredis
 
 before_script:
   - mkdir build
   - cd build
-  - cmake .. -DENABLE_LEVELDB=true -DENABLE_POSTGRESQL=true
+  - cmake .. -DENABLE_LEVELDB=true -DENABLE_POSTGRESQL=true -DENABLE_REDIS=true
 
 script: 
   - cmake --build . --config Release
