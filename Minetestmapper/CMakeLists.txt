@@ -24,8 +24,8 @@ set(sources
 	BlockPos.h
 	MapBlock.cpp
 	MapBlock.h
-	mapper.cpp
-	mapper.h
+	Mapper.cpp
+	Mapper.h
 	main.cpp
 	CharEncodingConverter.cpp
 	CharEncodingConverter.h

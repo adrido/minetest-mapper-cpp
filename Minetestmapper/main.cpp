@@ -1,4 +1,4 @@
-#include "mapper.h"
+#include "Mapper.h"
 #include <string>
 
 int main(int argc, char *argv[])
