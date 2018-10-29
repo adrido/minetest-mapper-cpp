@@ -1,7 +1,6 @@
 #pragma once
 
 #include "TileGenerator.h"
-#include <getopt.h>
 #include <istream>
 #include <string>
 

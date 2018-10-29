@@ -113,9 +113,11 @@ set(CPACK_GENERATOR "ZIP")
 include (CPack)
 install (TARGETS Minetestmapper RUNTIME DESTINATION ".")
 
-# Config might not set, so there might missing dll's after installation
-install(DIRECTORY "${PROJECT_BINARY_DIR}/Minetestmapper/$<CONFIG>/" DESTINATION "." 
+if(WIN32)
+#copy required dlls to install dir
+install(DIRECTORY "${PROJECT_BINARY_DIR}/Minetestmapper/" DESTINATION "." 
 	FILES_MATCHING PATTERN "*.dll" PATTERN "/" EXCLUDE)
+endif(WIN32)
 
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/colors/" DESTINATION "colors/" 
 	FILES_MATCHING PATTERN "*.txt")
