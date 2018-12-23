@@ -13,6 +13,7 @@ namespace fs = std::filesystem;
 
 #include <fstream>
 #include <sstream>
+#include <stdexcept>
 #include <iostream>
 #include "PlayerAttributes.h"
 
@@ -23,34 +24,66 @@ PlayerAttributes::PlayerAttributes(const std::string &sourceDirectory)
 {
 	const string playersPath = sourceDirectory + "players";
 
+	// if players.sqlite, could not be opened, then process the playerfiles
+	if (!extractPlayersSqlite(playersPath)) {
 #ifdef HAVE_FILESYSTEM
-	for (const auto &dirEntry : fs::directory_iterator(playersPath)) {
-		cout << dirEntry << std::endl;
-		//dirEntry.path().filename();
+		for (const auto &dirEntry : fs::directory_iterator(playersPath)) {
+			cout << dirEntry << std::endl;
+			//dirEntry.path().filename();
 
-		extractPlayer(dirEntry.path().string());
-	}
+			extractPlayer(dirEntry.path().string());
+		}
 #else
-	DIR *dir;
-	dir = opendir(playersPath.c_str());
-	if (dir == NULL) {
-		return;
-	}
-
-	struct dirent *ent;
-	while ((ent = readdir(dir)) != NULL) {
-		if (ent->d_name[0] == '.') {
-			continue;
+		DIR *dir;
+		dir = opendir(playersPath.c_str());
+		if (dir == NULL) {
+			return;
 		}
 
-		const string path = playersPath + '/' + ent->d_name;
+		struct dirent *ent;
+		while ((ent = readdir(dir)) != NULL) {
+			if (ent->d_name[0] == '.') {
+				continue;
+			}
 
-		extractPlayer(path);
-	}
-	closedir(dir);
+			const string path = playersPath + '/' + ent->d_name;
+
+			extractPlayer(path);
+		}
+		closedir(dir);
 #endif // HAVE_FILESYSTEM
-
+	}
 	
+}
+
+bool PlayerAttributes::extractPlayersSqlite(const std::string &playersPath)
+{
+	const string playersDB = playersPath + ".sqlite";
+	const string statement = "SELECT name, posX, posY, posZ FROM player";
+
+	int sqlite_state = sqlite3_open_v2(playersDB.c_str(), &db, SQLITE_OPEN_READONLY | SQLITE_OPEN_PRIVATECACHE, nullptr);
+	if (sqlite_state == SQLITE_CANTOPEN) {
+		return false;
+	}
+
+	if (sqlite_state != SQLITE_OK) {
+		throw std::runtime_error(std::string(sqlite3_errmsg(db)) + ", Database file: " + playersDB);
+	}
+	if (SQLITE_OK != sqlite3_prepare_v2(db, statement.c_str(), -1, &preparedStatement, nullptr)) {
+		throw std::runtime_error("Failed to prepare SQL statement (dataVersionStatement)");
+	}
+
+	while (sqlite3_step(preparedStatement) == SQLITE_ROW) {
+		Player player;
+		player.name = reinterpret_cast<const char*>(sqlite3_column_text(preparedStatement, 0));
+		player.x = sqlite3_column_double(preparedStatement, 1);
+		player.y = sqlite3_column_double(preparedStatement, 2);
+		player.z = sqlite3_column_double(preparedStatement, 3);
+		m_players.push_back(player);
+	};
+	sqlite3_finalize(preparedStatement);
+	sqlite3_close(db);
+	return true;
 }
 
 void PlayerAttributes::extractPlayer(const std::string &path)
