@@ -145,7 +145,6 @@ if(ENABLE_REDIS OR ENABLE_ANY_DATABASE OR ENABLE_ALL_DATABASES)
 endif(ENABLE_REDIS OR ENABLE_ANY_DATABASE OR ENABLE_ALL_DATABASES)
 
 # Schließen Sie Unterprojekte ein.
-#add_subdirectory ("wingetopt")
 add_subdirectory ("Minetestmapper")
 
 message(STATUS "VCPKG_APPLOCAL_DEPS: ${VCPKG_APPLOCAL_DEPS}")

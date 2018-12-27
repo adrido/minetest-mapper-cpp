@@ -14,7 +14,6 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
-#include <getopt.h>
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -30,6 +29,7 @@
 #include "porting.h"
 #include "util.h"
 #include "version.h"
+#include "ketopt.h"
 
 
 using namespace std;
@@ -50,79 +50,80 @@ int Mapper::start(int argc, char *argv[]) {
 	auto begin = std::chrono::high_resolution_clock::now();
 
 	// TODO: Get rid of getopt and use a proper cmdarg parsing lib or write something own.
-	static struct option long_options[] =
+	static ko_longopt_t long_options[] =
 	{
-		{ "help", no_argument, nullptr, 'h' },
-		{ "version", no_argument, nullptr, 'V' },
-		{ "input", required_argument, nullptr, 'i' },
-		{ "output", required_argument, nullptr, 'o' },
-		{ "colors", required_argument, nullptr, 'C' },
-		{ "heightmap-nodes", required_argument, nullptr, OPT_HEIGHTMAPNODESFILE },
-		{ "heightmap-colors", required_argument, nullptr, OPT_HEIGHTMAPCOLORSFILE },
-		{ "heightmap", optional_argument, nullptr, OPT_HEIGHTMAP },
-		{ "heightmap-yscale", required_argument, nullptr, OPT_HEIGHTMAPYSCALE },
-		{ "height-level-0", required_argument, nullptr, OPT_HEIGHT_LEVEL0 },
-		{ "bgcolor", required_argument, nullptr, 'b' },
-		{ "blockcolor", required_argument, nullptr, OPT_BLOCKCOLOR },
-		{ "scalecolor", required_argument, nullptr, 's' },
-		{ "origincolor", required_argument, nullptr, 'r' },
-		{ "playercolor", required_argument, nullptr, 'p' },
-		{ "draworigin", no_argument, nullptr, 'R' },
-		{ "drawplayers", no_argument, nullptr, 'P' },
-		{ "drawscale", optional_argument, nullptr, 'S' },
-		{ "sidescale-interval", required_argument, nullptr, OPT_SCALEINTERVAL },
-		{ "drawheightscale", no_argument, nullptr, OPT_DRAWHEIGHTSCALE },
-		{ "heightscale-interval", required_argument, nullptr, OPT_SCALEINTERVAL },
-		{ "drawalpha", optional_argument, nullptr, 'e' },
-		{ "drawair", no_argument, nullptr, OPT_DRAWAIR },
-		{ "drawnodes", required_argument, nullptr, OPT_DRAWNODES },
-		{ "ignorenodes", required_argument, nullptr, OPT_DRAWNODES },
-		{ "drawpoint", required_argument, nullptr, OPT_DRAW_OBJECT },
-		{ "drawline", required_argument, nullptr, OPT_DRAW_OBJECT },
-		{ "drawcircle", required_argument, nullptr, OPT_DRAW_OBJECT },
-		{ "drawellipse", required_argument, nullptr, OPT_DRAW_OBJECT },
-		{ "drawrectangle", required_argument, nullptr, OPT_DRAW_OBJECT },
-		{ "drawarrow", required_argument, nullptr, OPT_DRAW_OBJECT },
-		{ "drawtext", required_argument, nullptr, OPT_DRAW_OBJECT },
-		{ "drawmappoint", required_argument, nullptr, OPT_DRAW_OBJECT },
-		{ "drawmapline", required_argument, nullptr, OPT_DRAW_OBJECT },
-		{ "drawmapcircle", required_argument, nullptr, OPT_DRAW_OBJECT },
-		{ "drawmapellipse", required_argument, nullptr, OPT_DRAW_OBJECT },
-		{ "drawmaprectangle", required_argument, nullptr, OPT_DRAW_OBJECT },
-		{ "drawmaparrow", required_argument, nullptr, OPT_DRAW_OBJECT },
-		{ "drawmaptext", required_argument, nullptr, OPT_DRAW_OBJECT },
-		{ "noshading", no_argument, nullptr, 'H' },
-		{ "geometry", required_argument, nullptr, 'g' },
-		{ "cornergeometry", required_argument, nullptr, 'g' },
-		{ "centergeometry", required_argument, nullptr, 'g' },
-		{ "geometrymode", required_argument, nullptr, 'G' },
-		{ "forcegeometry", no_argument, nullptr, 'G' },
-		{ "min-y", required_argument, nullptr, 'a' },
-		{ "max-y", required_argument, nullptr, 'c' },
-		{ "backend", required_argument, nullptr, 'd' },
-		{ "disable-blocklist-prefetch", optional_argument, nullptr, OPT_NO_BLOCKLIST_PREFETCH },
-		{ "database-format", required_argument, nullptr, OPT_DATABASE_FORMAT },
-		{ "prescan-world", required_argument, nullptr, OPT_PRESCAN_WORLD },
-		{ "sqlite-cacheworldrow", no_argument, nullptr, OPT_SQLITE_CACHEWORLDROW },
-		{ "sqlite3-limit-prescan-query-size", optional_argument, nullptr, OPT_SQLITE_LIMIT_PRESCAN_QUERY },
-		{ "tiles", required_argument, nullptr, 't' },
-		{ "tileorigin", required_argument, nullptr, 'T' },
-		{ "tilecenter", required_argument, nullptr, 'T' },
-		{ "tilebordercolor", required_argument, nullptr, 'B' },
-		{ "scalefactor", required_argument, nullptr, OPT_SCALEFACTOR },
-		{ "chunksize", required_argument, nullptr, OPT_CHUNKSIZE },
-		{ "silence-suggestions", required_argument, nullptr, OPT_SILENCE_SUGGESTIONS },
-		{ "verbose", optional_argument, nullptr, 'v' },
-		{ "verbose-search-colors", optional_argument, nullptr, OPT_VERBOSE_SEARCH_COLORS },
-		{ "progress", no_argument, nullptr, OPT_PROGRESS_INDICATOR },
-		{ nullptr, 0, nullptr, 0 }
+		{ "help", ko_no_argument, 'h' },
+		{ "version", ko_no_argument, 'V' },
+		{ "input", ko_required_argument, 'i' },
+		{ "output", ko_required_argument, 'o' },
+		{ "colors", ko_required_argument, 'C' },
+		{ "heightmap-nodes", ko_required_argument, OPT_HEIGHTMAPNODESFILE },
+		{ "heightmap-colors", ko_required_argument, OPT_HEIGHTMAPCOLORSFILE },
+		{ "heightmap", ko_optional_argument, OPT_HEIGHTMAP },
+		{ "heightmap-yscale", ko_required_argument, OPT_HEIGHTMAPYSCALE },
+		{ "height-level-0", ko_required_argument, OPT_HEIGHT_LEVEL0 },
+		{ "bgcolor", ko_required_argument, 'b' },
+		{ "blockcolor", ko_required_argument, OPT_BLOCKCOLOR },
+		{ "scalecolor", ko_required_argument, 's' },
+		{ "origincolor", ko_required_argument, 'r' },
+		{ "playercolor", ko_required_argument, 'p' },
+		{ "draworigin", ko_no_argument, 'R' },
+		{ "drawplayers", ko_no_argument, 'P' },
+		{ "drawscale", ko_optional_argument, 'S' },
+		{ "sidescale-interval", ko_required_argument, OPT_SCALEINTERVAL },
+		{ "drawheightscale", ko_no_argument, OPT_DRAWHEIGHTSCALE },
+		{ "heightscale-interval", ko_required_argument, OPT_SCALEINTERVAL },
+		{ "drawalpha", ko_optional_argument, 'e' },
+		{ "drawair", ko_no_argument, OPT_DRAWAIR },
+		{ "drawnodes", ko_required_argument, OPT_DRAWNODES },
+		{ "ignorenodes", ko_required_argument, OPT_DRAWNODES },
+		{ "drawpoint", ko_required_argument, OPT_DRAW_OBJECT },
+		{ "drawline", ko_required_argument, OPT_DRAW_OBJECT },
+		{ "drawcircle", ko_required_argument, OPT_DRAW_OBJECT },
+		{ "drawellipse", ko_required_argument, OPT_DRAW_OBJECT },
+		{ "drawrectangle", ko_required_argument, OPT_DRAW_OBJECT },
+		{ "drawarrow", ko_required_argument, OPT_DRAW_OBJECT },
+		{ "drawtext", ko_required_argument, OPT_DRAW_OBJECT },
+		{ "drawmappoint", ko_required_argument, OPT_DRAW_OBJECT },
+		{ "drawmapline", ko_required_argument, OPT_DRAW_OBJECT },
+		{ "drawmapcircle", ko_required_argument, OPT_DRAW_OBJECT },
+		{ "drawmapellipse", ko_required_argument, OPT_DRAW_OBJECT },
+		{ "drawmaprectangle", ko_required_argument, OPT_DRAW_OBJECT },
+		{ "drawmaparrow", ko_required_argument, OPT_DRAW_OBJECT },
+		{ "drawmaptext", ko_required_argument, OPT_DRAW_OBJECT },
+		{ "noshading", ko_no_argument, 'H' },
+		{ "geometry", ko_required_argument, 'g' },
+		{ "cornergeometry", ko_required_argument, 'g' },
+		{ "centergeometry", ko_required_argument, 'g' },
+		{ "geometrymode", ko_required_argument, 'G' },
+		{ "forcegeometry", ko_no_argument, 'G' },
+		{ "min-y", ko_required_argument, 'a' },
+		{ "max-y", ko_required_argument, 'c' },
+		{ "backend", ko_required_argument, 'd' },
+		{ "disable-blocklist-prefetch", ko_optional_argument, OPT_NO_BLOCKLIST_PREFETCH },
+		{ "database-format", ko_required_argument, OPT_DATABASE_FORMAT },
+		{ "prescan-world", ko_required_argument, OPT_PRESCAN_WORLD },
+		{ "sqlite-cacheworldrow", ko_no_argument, OPT_SQLITE_CACHEWORLDROW },
+		{ "sqlite3-limit-prescan-query-size", ko_optional_argument, OPT_SQLITE_LIMIT_PRESCAN_QUERY },
+		{ "tiles", ko_required_argument, 't' },
+		{ "tileorigin", ko_required_argument, 'T' },
+		{ "tilecenter", ko_required_argument, 'T' },
+		{ "tilebordercolor", ko_required_argument, 'B' },
+		{ "scalefactor", ko_required_argument, OPT_SCALEFACTOR },
+		{ "chunksize", ko_required_argument, OPT_CHUNKSIZE },
+		{ "silence-suggestions", ko_required_argument, OPT_SILENCE_SUGGESTIONS },
+		{ "verbose", ko_optional_argument, 'v' },
+		{ "verbose-search-colors", ko_optional_argument, OPT_VERBOSE_SEARCH_COLORS },
+		{ "progress", ko_no_argument, OPT_PROGRESS_INDICATOR },
+		{ nullptr, 0, 0 }
 	};
 
 	try {
-		int option_index = 0;
+		//int option_index = 0;
+		ketopt_t opt = KETOPT_INIT;
 		int c = 0;
 		while (true) {
-			c = getopt_long(argc, argv, "hi:o:", long_options, &option_index);
+			c = ketopt(&opt, argc, argv, 0, "hi:o:", long_options);
 			if (c == -1) {
 				if (input.empty() || output.empty()) {
 					std::cerr << "Input (world directory) or output (PNG filename) missing" << std::endl;
@@ -132,6 +133,22 @@ int Mapper::start(int argc, char *argv[]) {
 				break;
 			}
 			switch (c) {
+			case '?':
+				if (opt.opt == 0) // Unknown long option
+					std::cerr << "Unknown Option: '" << argv[opt.ind - 1] << "'." << std::endl;
+				else
+					std::cerr << "Unknown Option: '-" << static_cast<char>(opt.opt) << "'." << std::endl;
+				usage();
+				return EXIT_FAILURE;
+				break;
+			case ':':
+				if (opt.longidx != -1)
+					std::cerr << "Missing Argument: --'" << long_options[opt.longidx].name << "'." << std::endl;
+				else
+					std::cerr << "Missing Argument: -'" << opt.opt << "'." << std::endl;
+				usage();
+				return EXIT_FAILURE;
+				break;
 			case 'h':
 				usage();
 				return 0;
@@ -141,29 +158,29 @@ int Mapper::start(int argc, char *argv[]) {
 				return 0;
 				break;
 			case 'i':
-				input = optarg;
+				input = opt.arg;
 				break;
 			case 'o':
-				output = optarg;
+				output = opt.arg;
 				break;
 			case 'C':
-				nodeColorsFile = optarg;
+				nodeColorsFile = opt.arg;
 				break;
 			case OPT_HEIGHTMAPNODESFILE:
-				heightMapNodesFile = optarg;
+				heightMapNodesFile = opt.arg;
 				break;
 			case OPT_HEIGHTMAPCOLORSFILE:
-				heightMapColorsFile = optarg;
+				heightMapColorsFile = opt.arg;
 				break;
 			case 'b':
-				generator.setBgColor(Color(optarg, 0));
+				generator.setBgColor(Color(opt.arg, 0));
 				break;
 			case OPT_NO_BLOCKLIST_PREFETCH:
-				if (optarg && *optarg) {
-					if (strlower(optarg) == "force")
+				if (opt.arg && *opt.arg) {
+					if (strlower(opt.arg) == "force")
 						generator.setGenerateNoPrefetch(TileGenerator::BlockListPrefetch::NoPrefetchForced);
 					else {
-						std::cerr << "Invalid parameter to '" << long_options[option_index].name << "'; expected 'force' or nothing." << std::endl;
+						std::cerr << "Invalid parameter to '" << long_options[opt.ind].name << "'; expected 'force' or nothing." << std::endl;
 						usage();
 						return EXIT_FAILURE;
 					}
@@ -173,54 +190,54 @@ int Mapper::start(int argc, char *argv[]) {
 				}
 				break;
 			case OPT_DATABASE_FORMAT: {
-				std::string opt = strlower(optarg);
-				if (opt == "minetest-i64")
+				std::string option = strlower(opt.arg);
+				if (option == "minetest-i64")
 					generator.setDBFormat(BlockPos::I64, false);
-				else if (opt == "freeminer-axyz")
+				else if (option == "freeminer-axyz")
 					generator.setDBFormat(BlockPos::AXYZ, false);
-				else if (opt == "mixed")
+				else if (option == "mixed")
 					generator.setDBFormat(BlockPos::Unknown, false);
-				else if (opt == "query")
+				else if (option == "query")
 					generator.setDBFormat(BlockPos::Unknown, true);
 				else {
-					std::cerr << "Invalid parameter to '" << long_options[option_index].name << "': '" << optarg << "'" << std::endl;
+					std::cerr << "Invalid parameter to '" << long_options[opt.ind].name << "': '" << opt.arg << "'" << std::endl;
 					usage();
 					return EXIT_FAILURE;
 				}
 			}
-									  break;
+				break;
 			case OPT_PRESCAN_WORLD: {
-				std::string opt = strlower(optarg);
+				std::string option = strlower(opt.arg);
 				generator.setGenerateNoPrefetch(TileGenerator::BlockListPrefetch::Prefetch);
-				if (opt == "disabled-force")
+				if (option == "disabled-force")
 					generator.setGenerateNoPrefetch(TileGenerator::BlockListPrefetch::NoPrefetchForced);
-				else if (opt == "disabled")
+				else if (option == "disabled")
 					generator.setGenerateNoPrefetch(TileGenerator::BlockListPrefetch::NoPrefetch);
-				else if (opt == "auto")
+				else if (option == "auto")
 					generator.setScanEntireWorld(false);
-				else if (opt == "full")
+				else if (option == "full")
 					generator.setScanEntireWorld(true);
 				else {
-					std::cerr << "Invalid parameter to '" << long_options[option_index].name << "': '" << optarg << "'" << std::endl;
+					std::cerr << "Invalid parameter to '" << long_options[opt.ind].name << "': '" << opt.arg << "'" << std::endl;
 					usage();
 					return EXIT_FAILURE;
 				}
 			}
-									break;
+				break;
 			case OPT_SQLITE_LIMIT_PRESCAN_QUERY:
-				if (!optarg || !*optarg) {
+				if (!opt.arg || !*opt.arg) {
 #ifdef USE_SQLITE3
 					DBSQLite3::setLimitBlockListQuerySize();
 #endif
 				}
 				else {
-					if (!isdigit(optarg[0])) {
-						std::cerr << "Invalid parameter to '" << long_options[option_index].name << "': must be a positive number" << std::endl;
+					if (!isdigit(opt.arg[0])) {
+						std::cerr << "Invalid parameter to '" << long_options[opt.ind].name << "': must be a positive number" << std::endl;
 						usage();
 						return EXIT_FAILURE;
 					}
 #ifdef USE_SQLITE3
-					int size = atoi(optarg);
+					int size = atoi(opt.arg);
 					DBSQLite3::setLimitBlockListQuerySize(size);
 #endif
 				}
@@ -228,9 +245,9 @@ int Mapper::start(int argc, char *argv[]) {
 			case OPT_HEIGHTMAP:
 				generator.setHeightMap(true);
 				heightMap = true;
-				if (optarg && *optarg) {
+				if (opt.arg && *opt.arg) {
 					loadHeightMapColorsFile = false;
-					std::string color = strlower(optarg);
+					std::string color = strlower(opt.arg);
 					if (color == "grey" || color == "gray")
 						generator.setHeightMapColor(Color(0, 0, 0), Color(255, 255, 255));
 					else if (color == "black")
@@ -246,41 +263,41 @@ int Mapper::start(int argc, char *argv[]) {
 				}
 				break;
 			case OPT_HEIGHTMAPYSCALE:
-				if (isdigit(optarg[0]) || ((optarg[0] == '-' || optarg[0] == '+') && isdigit(optarg[1]))) {
-					float scale = static_cast<float>(atof(optarg));
+				if (isdigit(opt.arg[0]) || ((opt.arg[0] == '-' || opt.arg[0] == '+') && isdigit(opt.arg[1]))) {
+					float scale = static_cast<float>(atof(opt.arg));
 					generator.setHeightMapYScale(scale);
 				}
 				else {
-					std::cerr << "Invalid parameter to '" << long_options[option_index].name << "': '" << optarg << "'" << std::endl;
+					std::cerr << "Invalid parameter to '" << long_options[opt.ind].name << "': '" << opt.arg << "'" << std::endl;
 					usage();
 					return EXIT_FAILURE;
 				}
 				break;
 			case OPT_HEIGHT_LEVEL0:
-				if (isdigit(optarg[0]) || ((optarg[0] == '-' || optarg[0] == '+') && isdigit(optarg[1]))) {
-					int level = atoi(optarg);
+				if (isdigit(opt.arg[0]) || ((opt.arg[0] == '-' || opt.arg[0] == '+') && isdigit(opt.arg[1]))) {
+					int level = atoi(opt.arg);
 					generator.setSeaLevel(level);
 				}
 				else {
-					std::cerr << "Invalid parameter to '" << long_options[option_index].name << "': '" << optarg << "'" << std::endl;
+					std::cerr << "Invalid parameter to '" << long_options[opt.ind].name << "': '" << opt.arg << "'" << std::endl;
 					usage();
 					return EXIT_FAILURE;
 				}
 				break;
 			case OPT_BLOCKCOLOR:
-				generator.setBlockDefaultColor(Color(optarg, 0));
+				generator.setBlockDefaultColor(Color(opt.arg, 0));
 				break;
 			case 's':
-				generator.setScaleColor(Color(optarg, 0));
+				generator.setScaleColor(Color(opt.arg, 0));
 				break;
 			case 'r':
-				generator.setOriginColor(Color(optarg, 1));
+				generator.setOriginColor(Color(opt.arg, 1));
 				break;
 			case 'p':
-				generator.setPlayerColor(Color(optarg, 1));
+				generator.setPlayerColor(Color(opt.arg, 1));
 				break;
 			case 'B':
-				generator.setTileBorderColor(Color(optarg, 0));
+				generator.setTileBorderColor(Color(opt.arg, 0));
 				break;
 			case 'R':
 				generator.setDrawOrigin(true);
@@ -289,19 +306,19 @@ int Mapper::start(int argc, char *argv[]) {
 				generator.setDrawPlayers(true);
 				break;
 			case 'S':
-				if (optarg && *optarg) {
-					std::string opt = strlower(optarg);
-					if (opt == "left")
+				if (opt.arg && *opt.arg) {
+					std::string option = strlower(opt.arg);
+					if (option == "left")
 						generator.setDrawScale(DRAWSCALE_LEFT);
-					else if (opt == "top")
+					else if (option == "top")
 						generator.setDrawScale(DRAWSCALE_TOP);
-					else if (opt == "left,top")
+					else if (option == "left,top")
 						generator.setDrawScale(DRAWSCALE_LEFT | DRAWSCALE_TOP);
-					else if (opt == "top,left")
+					else if (option == "top,left")
 						generator.setDrawScale(DRAWSCALE_LEFT | DRAWSCALE_TOP);
 					else {
-						std::cerr << "Invalid parameter to '" << long_options[option_index].name
-							<< "': '" << optarg << "' (expected: left,top)" << std::endl;
+						std::cerr << "Invalid parameter to '" << long_options[opt.ind].name
+							<< "': '" << opt.arg << "' (expected: left,top)" << std::endl;
 						usage();
 						return EXIT_FAILURE;
 					}
@@ -315,29 +332,29 @@ int Mapper::start(int argc, char *argv[]) {
 				break;
 			case OPT_SCALEINTERVAL: {
 				istringstream arg;
-				arg.str(optarg);
+				arg.str(opt.arg);
 				int major;
 				int minor;
 				char sep;
 				arg >> major;
-				if (major < 0 || !isdigit(*optarg) || arg.fail()) {
-					std::cerr << "Invalid parameter to '" << long_options[option_index].name
-						<< "': '" << optarg << "' (expected: <major>[,<minor>]" << std::endl;
+				if (major < 0 || !isdigit(*opt.arg) || arg.fail()) {
+					std::cerr << "Invalid parameter to '" << long_options[opt.ind].name
+						<< "': '" << opt.arg << "' (expected: <major>[,<minor>]" << std::endl;
 					usage();
 					return EXIT_FAILURE;
 				}
 				arg >> std::ws >> sep >> std::ws;
 				if (!arg.fail()) {
 					if ((sep != ',' && sep != ':') || !isdigit(arg.peek())) {
-						std::cerr << "Invalid parameter to '" << long_options[option_index].name
-							<< "': '" << optarg << "' (expected: <major>[,<minor>]" << std::endl;
+						std::cerr << "Invalid parameter to '" << long_options[opt.ind].name
+							<< "': '" << opt.arg << "' (expected: <major>[,<minor>]" << std::endl;
 						usage();
 						return EXIT_FAILURE;
 					}
 					arg >> minor;
 					if (minor < 0) {
-						std::cerr << "Invalid parameter to '" << long_options[option_index].name
-							<< "': '" << optarg << "' (expected: <major>[,<minor>]" << std::endl;
+						std::cerr << "Invalid parameter to '" << long_options[opt.ind].name
+							<< "': '" << opt.arg << "' (expected: <major>[,<minor>]" << std::endl;
 						usage();
 						return EXIT_FAILURE;
 					}
@@ -347,7 +364,7 @@ int Mapper::start(int argc, char *argv[]) {
 				}
 				if (minor && sep == ':') {
 					if (major % minor) {
-						std::cerr << long_options[option_index].name << ": Cannot divide major interval in "
+						std::cerr << long_options[opt.ind].name << ": Cannot divide major interval in "
 							<< minor << " subintervals (not divisible)" << std::endl;
 						return EXIT_FAILURE;
 					}
@@ -355,25 +372,25 @@ int Mapper::start(int argc, char *argv[]) {
 				}
 				if ((minor % major) == 0)
 					minor = 0;
-				if (long_options[option_index].name[0] == 's') {
+				if (long_options[opt.ind].name[0] == 's') {
 					generator.setSideScaleInterval(major, minor);
 				}
-				else if (long_options[option_index].name[0] == 'h') {
+				else if (long_options[opt.ind].name[0] == 'h') {
 					generator.setHeightScaleInterval(major, minor);
 				}
 				else {
-					std::cerr << "Internal error: option " << long_options[option_index].name << " not handled" << std::endl;
+					std::cerr << "Internal error: option " << long_options[opt.ind].name << " not handled" << std::endl;
 					return EXIT_FAILURE;
 				}
 			}
-									break;
+				break;
 			case OPT_SILENCE_SUGGESTIONS: {
-				for (size_t i = 0; i < strlen(optarg); i++) {
-					optarg[i] = tolower(optarg[i]);
-					if (optarg[i] == ',')
-						optarg[i] = ' ';
+				for (size_t i = 0; i < strlen(opt.arg); i++) {
+					opt.arg[i] = tolower(opt.arg[i]);
+					if (opt.arg[i] == ',')
+						opt.arg[i] = ' ';
 				}
-				std::istringstream iss(optarg);
+				std::istringstream iss(opt.arg);
 				std::string flag;
 				iss >> std::skipws >> flag;
 				while (!iss.fail()) {
@@ -390,18 +407,18 @@ int Mapper::start(int argc, char *argv[]) {
 #endif
 					}
 					else {
-						std::cerr << "Invalid flag to '" << long_options[option_index].name << "': '" << flag << "'" << std::endl;
+						std::cerr << "Invalid flag to '" << long_options[opt.ind].name << "': '" << flag << "'" << std::endl;
 						usage();
 						return EXIT_FAILURE;
 					}
 					iss >> flag;
 				}
 			}
-										  break;
+				break;
 			case 'v':
-				if (optarg && isdigit(optarg[0]) && optarg[1] == '\0') {
-					generator.verboseStatistics = optarg[0] - '0';
-					generator.verboseCoordinates = optarg[0] - '0';
+				if (opt.arg && isdigit(opt.arg[0]) && opt.arg[1] == '\0') {
+					generator.verboseStatistics = opt.arg[0] - '0';
+					generator.verboseCoordinates = opt.arg[0] - '0';
 				}
 				else {
 					generator.verboseStatistics = 1;
@@ -409,8 +426,8 @@ int Mapper::start(int argc, char *argv[]) {
 				}
 				break;
 			case OPT_VERBOSE_SEARCH_COLORS:
-				if (optarg && isdigit(optarg[0]) && optarg[1] == '\0') {
-					generator.verboseReadColors = optarg[0] - '0';
+				if (opt.arg && isdigit(opt.arg[0]) && opt.arg[1] == '\0') {
+					generator.verboseReadColors = opt.arg[0] - '0';
 				}
 				else {
 					generator.verboseReadColors++;
@@ -418,20 +435,20 @@ int Mapper::start(int argc, char *argv[]) {
 				break;
 			case 'e':
 				generator.setDrawAlpha(true);
-				if (!optarg || !*optarg)
+				if (!opt.arg || !*opt.arg)
 					PixelAttribute::setMixMode(PixelAttribute::AlphaMixAverage);
-				else if (string(optarg) == "cumulative" || strlower(optarg) == "nodarken")
+				else if (string(opt.arg) == "cumulative" || strlower(opt.arg) == "nodarken")
 					// "nodarken" is supported for backwards compatibility
 					PixelAttribute::setMixMode(PixelAttribute::AlphaMixCumulative);
-				else if (string(optarg) == "darken" || strlower(optarg) == "cumulative-darken")
+				else if (string(opt.arg) == "darken" || strlower(opt.arg) == "cumulative-darken")
 					// "darken" is supported for backwards compatibility
 					PixelAttribute::setMixMode(PixelAttribute::AlphaMixCumulativeDarken);
-				else if (strlower(optarg) == "average")
+				else if (strlower(opt.arg) == "average")
 					PixelAttribute::setMixMode(PixelAttribute::AlphaMixAverage);
-				else if (strlower(optarg) == "none")
+				else if (strlower(opt.arg) == "none")
 					generator.setDrawAlpha(false);
 				else {
-					std::cerr << "Invalid parameter to '" << long_options[option_index].name << "': '" << optarg << "'" << std::endl;
+					std::cerr << "Invalid parameter to '" << long_options[opt.ind].name << "': '" << opt.arg << "'" << std::endl;
 					usage();
 					return EXIT_FAILURE;
 				}
@@ -440,12 +457,12 @@ int Mapper::start(int argc, char *argv[]) {
 				generator.setDrawAir(true);
 				break;
 			case OPT_DRAWNODES: {
-				bool draw = long_options[option_index].name[0] == 'd';
-				for (char *c = optarg; *c; c++) {
+				bool draw = long_options[opt.ind].name[0] == 'd';
+				for (char *c = opt.arg; *c; c++) {
 					*c = tolower(*c);
 					if (*c == ',') *c = ' ';
 				}
-				istringstream iss(optarg);
+				istringstream iss(opt.arg);
 				string flag;
 				iss >> std::skipws >> flag;
 				while (!iss.fail()) {
@@ -461,14 +478,14 @@ int Mapper::start(int argc, char *argv[]) {
 					else if (flag == "air")
 						generator.setDrawAir(enable);
 					else {
-						std::cerr << "Invalid " << long_options[option_index].name << " flag '" << flag << "'" << std::endl;
+						std::cerr << "Invalid " << long_options[opt.ind].name << " flag '" << flag << "'" << std::endl;
 						usage();
 						return EXIT_FAILURE;
 					}
 					iss >> flag;
 				}
 			}
-								break;
+				break;
 			case 'H':
 				generator.setShading(false);
 				break;
@@ -484,48 +501,48 @@ int Mapper::start(int argc, char *argv[]) {
 				break;
 			case 'a': {
 				istringstream iss;
-				iss.str(optarg);
+				iss.str(opt.arg);
 				int miny;
 				iss >> miny;
 				generator.setMinY(miny);
 			}
-					  break;
+				break;
 			case 'c': {
 				istringstream iss;
-				iss.str(optarg);
+				iss.str(opt.arg);
 				int maxy;
 				iss >> maxy;
 				generator.setMaxY(maxy);
 			}
-					  break;
+				break;
 			case OPT_CHUNKSIZE: {
 				istringstream iss;
-				iss.str(optarg);
+				iss.str(opt.arg);
 				int size;
 				iss >> size;
 				if (iss.fail() || size < 0) {
-					std::cerr << "Invalid chunk size (" << optarg << ")" << std::endl;
+					std::cerr << "Invalid chunk size (" << opt.arg << ")" << std::endl;
 					usage();
 					return EXIT_FAILURE;
 				}
 				generator.setChunkSize(size);
 			}
-								break;
+				break;
 			case OPT_SCALEFACTOR: {
 				istringstream arg;
-				arg.str(optarg);
+				arg.str(opt.arg);
 				int one;
 				char colon;
 				int factor = 1;
 				arg >> one >> std::ws;
 				if (arg.fail() || one != 1) {
-					std::cerr << "Invalid scale factor specification (" << optarg << ") - expected: 1:<n>" << std::endl;
+					std::cerr << "Invalid scale factor specification (" << opt.arg << ") - expected: 1:<n>" << std::endl;
 					return EXIT_FAILURE;
 				}
 				if (!arg.eof()) {
 					arg >> colon >> factor >> std::ws;
 					if (arg.fail() || colon != ':' || factor<0 || !arg.eof()) {
-						std::cerr << "Invalid scale factor specification (" << optarg << ") - expected: 1:<n>" << std::endl;
+						std::cerr << "Invalid scale factor specification (" << opt.arg << ") - expected: 1:<n>" << std::endl;
 						usage();
 						return EXIT_FAILURE;
 					}
@@ -536,10 +553,10 @@ int Mapper::start(int argc, char *argv[]) {
 				}
 				generator.setScaleFactor(factor);
 			}
-								  break;
+				break;
 			case 't': {
 				istringstream tilesize;
-				tilesize.str(strlower(optarg));
+				tilesize.str(strlower(opt.arg));
 				if (tilesize.str() == "block") {
 					generator.setTileSize(BLOCK_SIZE, BLOCK_SIZE);
 					generator.setTileOrigin(TILECORNER_AT_WORLDCENTER, TILECORNER_AT_WORLDCENTER);
@@ -553,7 +570,7 @@ int Mapper::start(int argc, char *argv[]) {
 					char c;
 					tilesize >> size;
 					if (tilesize.fail() || size<0) {
-						std::cerr << "Invalid tile size specification (" << optarg << ")" << std::endl;
+						std::cerr << "Invalid tile size specification (" << opt.arg << ")" << std::endl;
 						usage();
 						return EXIT_FAILURE;
 					}
@@ -561,7 +578,7 @@ int Mapper::start(int argc, char *argv[]) {
 					tilesize >> c >> border;
 					if (!tilesize.fail()) {
 						if (c != '+' || border < 1) {
-							std::cerr << "Invalid tile border size specification (" << optarg << ")" << std::endl;
+							std::cerr << "Invalid tile border size specification (" << opt.arg << ")" << std::endl;
 							usage();
 							return EXIT_FAILURE;
 						}
@@ -569,11 +586,11 @@ int Mapper::start(int argc, char *argv[]) {
 					}
 				}
 			}
-					  break;
+				break;
 			case 'T': {
-				bool origin = long_options[option_index].name[4] == 'o';
+				bool origin = long_options[opt.ind].name[4] == 'o';
 				istringstream iss;
-				iss.str(strlower(optarg));
+				iss.str(strlower(opt.arg));
 				NodeCoord coord;
 				if (iss.str() == "world") {
 					if (origin)
@@ -590,7 +607,7 @@ int Mapper::start(int argc, char *argv[]) {
 				else {
 					bool result = true;
 					if (!parseCoordinates(iss, coord, 2, 0, ',')) {
-						iss.str(optarg);
+						iss.str(opt.arg);
 						result = parseCoordinates(iss, coord, 2, 0, ':');
 					}
 					if (result) {
@@ -604,15 +621,15 @@ int Mapper::start(int argc, char *argv[]) {
 						}
 					}
 					else {
-						std::cerr << "Invalid " << long_options[option_index].name << " parameter (" << optarg << ")" << std::endl;
+						std::cerr << "Invalid " << long_options[opt.ind].name << " parameter (" << opt.arg << ")" << std::endl;
 						usage();
 						return EXIT_FAILURE;
 					}
 				}
 			}
-					  break;
+				break;
 			case 'G':
-				if (long_options[option_index].name[0] == 'f') {
+				if (long_options[opt.ind].name[0] == 'f') {
 					// '--forcegeometry'
 					// Old behavior - for compatibility.
 					generator.setShrinkGeometry(false);
@@ -620,13 +637,13 @@ int Mapper::start(int argc, char *argv[]) {
 					if (!foundGeometrySpec)
 						generator.setBlockGeometry(true);
 				}
-				else if (optarg && *optarg) {
-					for (char *c = optarg; *c; c++) {
+				else if (opt.arg && *opt.arg) {
+					for (char *c = opt.arg; *c; c++) {
 						*c = tolower(*c);
 						if (*c == ',') *c = ' ';
 					}
 					istringstream iss;
-					iss.str(optarg);
+					iss.str(opt.arg);
 					string flag;
 					iss >> std::skipws >> flag;
 					while (!iss.fail()) {
@@ -654,23 +671,23 @@ int Mapper::start(int argc, char *argv[]) {
 				break;
 			case 'g': {
 				istringstream iss;
-				iss.str(optarg);
+				iss.str(opt.arg);
 				NodeCoord coord1;
 				NodeCoord coord2;
 				bool legacy;
 				FuzzyBool center = FuzzyBool::Maybe;
-				if (long_options[option_index].name[0] == 'c' && long_options[option_index].name[1] == 'e')
+				if (long_options[opt.ind].name[0] == 'c' && long_options[opt.ind].name[1] == 'e')
 					center = FuzzyBool::Yes;
-				if (long_options[option_index].name[0] == 'c' && long_options[option_index].name[1] == 'o')
+				if (long_options[opt.ind].name[0] == 'c' && long_options[opt.ind].name[1] == 'o')
 					center = FuzzyBool::No;
 				if (!parseMapGeometry(iss, coord1, coord2, legacy, center)) {
-					std::cerr << "Invalid geometry specification '" << optarg << "'" << std::endl;
+					std::cerr << "Invalid geometry specification '" << opt.arg << "'" << std::endl;
 					usage();
 					return EXIT_FAILURE;
 				}
 				// Set defaults
 				if (!foundGeometrySpec) {
-					if (long_options[option_index].name[0] == 'g' && legacy) {
+					if (long_options[opt.ind].name[0] == 'g' && legacy) {
 						// Compatibility when using the option 'geometry'
 						generator.setBlockGeometry(true);
 						generator.setShrinkGeometry(true);
@@ -691,11 +708,11 @@ int Mapper::start(int argc, char *argv[]) {
 				generator.setGeometry(coord1, coord2);
 				foundGeometrySpec = true;
 			}
-					  break;
+			break;
 			case OPT_DRAW_OBJECT: {
 				TileGenerator::DrawObject drawObject;
-				drawObject.world = long_options[option_index].name[4] != 'm';
-				char object = long_options[option_index].name[4 + (drawObject.world ? 0 : 3)];
+				drawObject.world = long_options[opt.ind].name[4] != 'm';
+				char object = long_options[opt.ind].name[4 + (drawObject.world ? 0 : 3)];
 				switch (object) {
 				case 'p':
 					drawObject.type = TileGenerator::DrawObject::Point;
@@ -718,14 +735,14 @@ int Mapper::start(int argc, char *argv[]) {
 					break;
 				default:
 					std::cerr << "Internal error: unrecognised object ("
-						<< long_options[option_index].name
+						<< long_options[opt.ind].name
 						<< ")" << std::endl;
 					return EXIT_FAILURE;
 					break;
 				}
 
 				istringstream iss;
-				iss.str(optarg);
+				iss.str(opt.arg);
 				NodeCoord coord1;
 				NodeCoord coord2;
 				NodeCoord dimensions;
@@ -739,8 +756,8 @@ int Mapper::start(int argc, char *argv[]) {
 					needDimensions = FuzzyBool::Yes;
 				if (!parseGeometry(iss, coord1, coord2, dimensions, legacy, centered, 2, needDimensions)) {
 					std::cerr << "Invalid drawing geometry specification for "
-						<< long_options[option_index].name
-						<< " '" << optarg << "'" << std::endl;
+						<< long_options[opt.ind].name
+						<< " '" << opt.arg << "'" << std::endl;
 					usage();
 					return EXIT_FAILURE;
 				}
@@ -783,8 +800,8 @@ int Mapper::start(int argc, char *argv[]) {
 				iss >> std::ws >> colorStr;
 				if (iss.fail()) {
 					std::cerr << "Missing color for "
-						<< long_options[option_index].name
-						<< " '" << optarg << "'" << std::endl;
+						<< long_options[opt.ind].name
+						<< " '" << opt.arg << "'" << std::endl;
 					usage();
 					return EXIT_FAILURE;
 				}
@@ -796,8 +813,8 @@ int Mapper::start(int argc, char *argv[]) {
 					std::getline(iss, localizedText);
 					if (localizedText.empty() || iss.fail()) {
 						std::cerr << "Invalid or missing text for "
-							<< long_options[option_index].name
-							<< " '" << optarg << "'" << std::endl;
+							<< long_options[opt.ind].name
+							<< " '" << opt.arg << "'" << std::endl;
 						usage();
 						return EXIT_FAILURE;
 					}
@@ -831,9 +848,9 @@ int Mapper::start(int argc, char *argv[]) {
 					generator.drawObject(drawObject);
 				}
 			}
-								  break;
+			break;
 			case 'd':
-				generator.setBackend(strlower(optarg));
+				generator.setBackend(strlower(opt.arg));
 				break;
 			default:
 				return EXIT_FAILURE;

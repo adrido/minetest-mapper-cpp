@@ -45,6 +45,7 @@ set(sources
 	db-redis.h
 	db-sqlite3.cpp
 	db-sqlite3.h
+	ketopt.h
 )
 
 if(WIN32)
@@ -59,16 +60,8 @@ find_library(LIBGD_LIBRARY NAMES gd libgd libgd_static)
 find_path(LIBGD_INCLUDE_DIR NAMES gd.h)
 
 if(WIN32)
-	include_directories(../wingetopt/src/)
 	find_path(SYSTEM_INCLUDE_DIR dirent.h)
 	include_directories(${SYSTEM_INCLUDE_DIR})
-
-	add_library (wingetopt STATIC ../wingetopt/src/getopt.c)
-endif()
-
-set(wingetopt_lib "")
-if(WIN32)
-set(wingetopt_lib wingetopt)
 endif()
 
 set(leveldb_lib "")
@@ -95,11 +88,10 @@ if(USE_REDIS)
 endif()
 
 
-#link_directories (../wingetopt)
 # Fügen Sie der ausführbaren Datei für dieses Projekt eine Quelle hinzu.
 add_executable (Minetestmapper ${sources})
 set_target_properties(Minetestmapper PROPERTIES COMPILE_FLAGS -DBUILDER_STATIC_DEFINE)
-target_link_libraries(Minetestmapper ${wingetopt_lib} ${LIBGD_LIBRARY} ${ZLIB_LIBRARY} ${SQLITE3_LIBRARY} ${leveldb_lib} ${postgresql_lib} ${redis_lib})
+target_link_libraries(Minetestmapper ${LIBGD_LIBRARY} ${ZLIB_LIBRARY} ${SQLITE3_LIBRARY} ${leveldb_lib} ${postgresql_lib} ${redis_lib})
 # TODO: Fügen Sie bei Bedarf Tests und Installationsziele hinzu.
 
 
