@@ -10,9 +10,9 @@ Quick links (functional on github. Elsewhere possibly not):
 :User manual:		`<doc/manual.rst>`_
 :Changelog:		`<Changelog>`_
 :Building:		`<doc/build-instructions.rst>`_
-:Github:		`<https://github.com/Rogier-5/minetest-mapper-cpp>`_
-:Submitting bugs:	`<https://github.com/Rogier-5/minetest-mapper-cpp/issues>`_
-:Binary downloads:	`<https://github.com/Rogier-5/minetest-mapper-cpp/wiki/Downloads>`_
+:Github:		`<https://github.com/adrido/minetest-mapper-cpp>`_
+:Submitting bugs:	`<https://github.com/adrido/minetest-mapper-cpp/issues>`_
+:Binary downloads:	`<https://github.com/adrido/minetest-mapper-cpp/wiki/Downloads>`_
 :Generating colors.txt: `<dumpnodes/README.dumpnodes>`_
 
 Features (short list)
@@ -53,16 +53,16 @@ Windows
 -------
 
 Check the download page to obtain a compiled version:
-`<https://github.com/Rogier-5/minetest-mapper-cpp/wiki/Downloads>`_
+`<https://github.com/adrido/minetest-mapper-cpp/wiki/Downloads>`_
 
 Or check the building instructions for compiling using MSVC:
-`<doc/build-instructions.rst>`_.
+`<docs/build-instructions.rst>`_.
 
 Install Dependencies
 --------------------
 
 Make sure development versions of the following packages are installed.
-For more detailed instructions, see `<doc/build-instructions.rst>`_.
+For more detailed instructions, see `<docs/build-instructions.rst>`_.
 
 **Libraries:**
 
@@ -145,6 +145,6 @@ Manual
 ======
 
 For more elaborate compilation and installation documentation, please consult
-the build manual: `<doc/build-instructions.rst>`_.
+the build manual: `<docs/build-instructions.rst>`_.
 
-For more elaborate usage instruction, please consult the user manual: `<doc/manual.rst>`_.
+For more elaborate usage instruction, please consult the user manual: `<docs/manual.rst>`_.
