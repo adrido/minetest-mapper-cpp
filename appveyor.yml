@@ -29,17 +29,7 @@ install:
 - ps: >-
     echo "Build Platform: $($env:Platform)"
 
-    vcpkg install zlib:$($env:Platform)-windows
-
-    vcpkg install sqlite3:$($env:Platform)-windows
-
-    vcpkg install dirent:$($env:Platform)-windows
-
-    vcpkg install libgd:$($env:Platform)-windows
-
-    vcpkg install leveldb:$($env:Platform)-windows
-
-    vcpkg install libpq:$($env:Platform)-windows
+    vcpkg install zlib sqlite3 dirent libgd leveldb libpq --triplet "$($env:Platform)-windows"
 cache:
 - c:\tools\vcpkg\installed\
 build_script:
