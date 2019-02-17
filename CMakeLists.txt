@@ -12,6 +12,11 @@ if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
       CACHE STRING "")
 endif()
 
+# This is important to vcpkg to select the right libraries
+IF(NOT CMAKE_BUILD_TYPE )
+    SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "")
+ENDIF()
+
 project (
 	"Minetestmapper"
 	DESCRIPTION "Map generator for Minetest"
@@ -146,8 +151,6 @@ endif(ENABLE_REDIS OR ENABLE_ANY_DATABASE OR ENABLE_ALL_DATABASES)
 
 # Schließen Sie Unterprojekte ein.
 add_subdirectory ("Minetestmapper")
-
-message(STATUS "VCPKG_APPLOCAL_DEPS: ${VCPKG_APPLOCAL_DEPS}")
 
 configure_file(
 	"${PROJECT_SOURCE_DIR}/version.h.in"
