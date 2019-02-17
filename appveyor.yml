@@ -40,7 +40,7 @@ build_script:
 
     cd build
 
-    cmake .. -DVCPKG_TARGET_TRIPLET=%Platform%-windows -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -G %generator% -DENABLE_POSTGRESQL=true
+    cmake .. -DVCPKG_TARGET_TRIPLET=%Platform%-windows -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake -G %generator% -DENABLE_POSTGRESQL=true
 
     cmake --build . --target ALL_BUILD --config Release
 
