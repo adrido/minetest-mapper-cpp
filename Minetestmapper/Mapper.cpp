@@ -124,16 +124,9 @@ int Mapper::start(int argc, char *argv[]) {
 		struct parg_state ps;
 
 		parg_init(&ps);
-		while (true) {
-			c = parg_getopt_long(&ps, argc, argv, "hi:o:", long_options, &option_index);
-			if (c == -1) {
-				if (input.empty() || output.empty()) {
-					std::cerr << "Input (world directory) or output (PNG filename) missing" << std::endl;
-					usage();
-					return 0;
-				}
-				break;
-			}
+
+		while ((c = parg_getopt_long(&ps, argc, argv, "hi:o:", long_options, &option_index)) != -1) {
+
 			switch (c) {
 			case '?':
 				if (option_index) {
@@ -863,6 +856,12 @@ int Mapper::start(int argc, char *argv[]) {
 					<< "Please file a bug to https://github.com/adrido/minetest-mapper-cpp/" << endl;
 				return EXIT_FAILURE;
 			}
+		}
+
+		if (input.empty() || output.empty()) {
+			std::cerr << "Input (world directory) or output (PNG filename) missing" << std::endl;
+			usage();
+			return 0;
 		}
 	}
 	catch (std::runtime_error e) {
