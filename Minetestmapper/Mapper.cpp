@@ -430,27 +430,27 @@ int Mapper::start(int argc, char *argv[]) {
 					generator.verboseReadColors++;
 				}
 				break;
-			case 'e':
-				// Todo: Unnecessary calls to strlower. Optimize
+			case 'e': {
 				generator.setDrawAlpha(true);
-				if (!ps.optarg || !*ps.optarg)
+				const string optarg = strlower(ps.optarg);
+				if (optarg.empty())
 					PixelAttribute::setMixMode(PixelAttribute::AlphaMixAverage);
-				else if (string(ps.optarg) == "cumulative" || strlower(ps.optarg) == "nodarken")
+				else if (optarg == "cumulative" || optarg == "nodarken")
 					// "nodarken" is supported for backwards compatibility
 					PixelAttribute::setMixMode(PixelAttribute::AlphaMixCumulative);
-				else if (string(ps.optarg) == "darken" || strlower(ps.optarg) == "cumulative-darken")
+				else if (optarg == "darken" || optarg == "cumulative-darken")
 					// "darken" is supported for backwards compatibility
 					PixelAttribute::setMixMode(PixelAttribute::AlphaMixCumulativeDarken);
-				else if (strlower(ps.optarg) == "average")
+				else if (optarg == "average")
 					PixelAttribute::setMixMode(PixelAttribute::AlphaMixAverage);
-				else if (strlower(ps.optarg) == "none")
+				else if (optarg == "none")
 					generator.setDrawAlpha(false);
 				else {
-					std::cerr << "Invalid parameter to '" << long_options[option_index].name << "': '" << ps.optarg << "'" << std::endl;
+					cerr << "Invalid parameter to '" << long_options[option_index].name << "': '" << ps.optarg << "'" << endl;
 					usage();
 					return EXIT_FAILURE;
 				}
-				break;
+			} break;
 			case OPT_DRAWAIR:
 				generator.setDrawAir(true);
 				break;
@@ -1112,7 +1112,8 @@ bool Mapper::parseNodeCoordinate(istream & is, int & coord, bool & isBlockCoord,
 	}
 	if (is.fail())
 		return false;
-	coord = i;
+	coord = i; // TODO: Find out what i is doing an what it schould do.
+			   //i is uninitialized if c == 42 && wildcard == false && is->fail == false
 	isBlockCoord = false;
 	if (validStreamAtEof(is))
 		return true;

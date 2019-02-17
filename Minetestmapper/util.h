@@ -1,8 +1,6 @@
+#pragma once
 
-#ifndef _UTIL_H_
-#define _UTIL_H_
-
-#include<cstring>
+#include <cstring>
 
 inline std::string strlower(const std::string &s)
 {
@@ -12,5 +10,3 @@ inline std::string strlower(const std::string &s)
 		sl[i] = tolower(sl[i]);
 	return sl;
 }
-
-#endif // _UTIL_H_
