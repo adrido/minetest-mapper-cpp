@@ -47,6 +47,7 @@ set(sources
 	db-sqlite3.h
 	parg.h
 	parg.c
+	util.h
 )
 
 if(WIN32)
