@@ -29,6 +29,8 @@ install:
 - ps: >-
     echo "Build Platform: $($env:Platform)"
 
+    vcpkg upgrade --no-dry-run
+
     vcpkg install zlib sqlite3 dirent libgd leveldb libpq --triplet "$($env:Platform)-windows"
 cache:
 - c:\tools\vcpkg\installed\
