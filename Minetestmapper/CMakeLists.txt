@@ -45,7 +45,8 @@ set(sources
 	db-redis.h
 	db-sqlite3.cpp
 	db-sqlite3.h
-	ketopt.h
+	parg.h
+	parg.c
 )
 
 if(WIN32)
@@ -63,6 +64,7 @@ if(WIN32)
 	find_path(SYSTEM_INCLUDE_DIR dirent.h)
 	include_directories(${SYSTEM_INCLUDE_DIR})
 endif()
+
 
 set(leveldb_lib "")
 if(USE_LEVELDB)
@@ -88,6 +90,7 @@ if(USE_REDIS)
 endif()
 
 
+#link_directories (../wingetopt)
 # Fügen Sie der ausführbaren Datei für dieses Projekt eine Quelle hinzu.
 add_executable (Minetestmapper ${sources})
 set_target_properties(Minetestmapper PROPERTIES COMPILE_FLAGS -DBUILDER_STATIC_DEFINE)
