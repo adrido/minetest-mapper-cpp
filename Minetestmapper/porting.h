@@ -6,7 +6,7 @@
 #include <thread>
 
 #ifdef _MSC_VER
-#ifndef strcasecmp 
+#ifndef strcasecmp
 #define strcasecmp(a, b) _stricmp(a, b)
 #endif
 #endif
@@ -20,7 +20,7 @@ namespace porting {
 	it is also much faster the the deprecated fopen (~50 ms!)
 	On other systems it does still use the original fopen
 	*/
-	FILE* fopen(const char *filename, const char *mode);
+	FILE *fopen(const char *filename, const char *mode);
 
 	/*
 	Wrapper for getenv_s on Windows.
@@ -30,5 +30,4 @@ namespace porting {
 
 	std::string strerror(int errnum);
 
-}  // namespace porting
-
+} // namespace porting
