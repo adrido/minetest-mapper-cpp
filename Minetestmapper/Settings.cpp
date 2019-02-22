@@ -2,14 +2,14 @@
 #include <iostream>
 #include "Settings.h"
 
-static std::string trim(const std::string s)
+static std::string trim(const std::string &s)
 {
     size_t start = s.find_first_not_of(" \t\r\n");
     size_t end = s.find_last_not_of(" \t\r\n");
     return s.substr(start, (end-start+1));
 }
 
-Settings::Settings(std::string filename, std::string msgName)
+Settings::Settings(const std::string &filename, const std::string &msgName)
 	:  m_filename(filename),
 	   m_messageName(msgName)
 {
@@ -25,7 +25,7 @@ Settings::~Settings(void)
 	m_file.close();
 }
 
-std::string Settings::get(std::string key)
+std::string Settings::get(const std::string &key)
 {
 	std::string value;
 	if (getGeneric(key, &value))
@@ -34,7 +34,7 @@ std::string Settings::get(std::string key)
 		throw std::runtime_error(std::string("Failed to read key '") + key + "' from file '" + m_messageName + "'");
 }
 
-std::string Settings::get(std::string key, std::string defaultValue)
+std::string Settings::get(const std::string &key, const std::string &defaultValue)
 {
 	std::string value;
 	if (getGeneric(key, &value))
@@ -43,7 +43,7 @@ std::string Settings::get(std::string key, std::string defaultValue)
 		return defaultValue;
 }
 
-bool Settings::getGeneric(std::string key, std::string *pvalue)
+bool Settings::getGeneric(const std::string &key, std::string *pvalue)
 {
 	std::string line;
 	int linenr = 0;
