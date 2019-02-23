@@ -135,7 +135,7 @@ Color::Color(const std::string &color, int alpha)
 				if (ccode == 'w') {
 					mixr = mixg = mixb = 255;
 				}
-				else if (operation == 'k') {
+				else if (ccode == 'k') {
 					mixr = mixg = mixb = 0;
 				}
 				else if (ccode == 'r') {
@@ -161,7 +161,7 @@ Color::Color(const std::string &color, int alpha)
 				if (ccode == 'w') {
 					mixr = mixg = mixb = 0;
 				}
-				else if (operation == 'k') {
+				else if (ccode == 'k') {
 					mixr = mixg = mixb = 255;
 				}
 				else if (ccode == 'r') {
