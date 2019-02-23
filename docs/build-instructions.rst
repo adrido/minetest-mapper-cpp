@@ -155,17 +155,10 @@ The following must be installed to successfully compile minetestmapper using MSV
 
 * Visual Studio 2015 or 2013 (lower may not work). VS Community can be obtained here:
   https://www.visualstudio.com/
-* A precompiled version of the gd library. A suitable version can be downloaded from
-  https://github.com/Rogier-5/minetest-mapper-cpp/wiki/Downloads#the-gd-library-for-compiling-minetestmapper-with-msvc
-
-  Alternatively, the gd sources can be downloaded from https://github.com/libgd/libgd.
-  They must be compiled using the same version of zlib that will be used when compiling
-  minetestmapper.
-
-  Version 2.2.1 of gd is verified to work, but any version 2.2.x should also work.
-  And presumably any version 2.x later than 2.2 should work as well.
-
-All other required dependencies will be downloaded automatically by MSVC.
+* vcpkg a c++ libary manager https://github.com/Microsoft/vcpkg
+* Install the required Libraries using vcpkg:
+  ``vcpkg install gd zlib sqlite3 --triplet x64-windows``
+  ``triplet`` can also be x68-windows for 32 bit
 
 
 Other
@@ -211,24 +204,18 @@ Unfortunately, at the moment no instructions are available for Windows building 
 Windows (MSVC)
 --------------
 
-Setting up the IDE
-..................
+Generating the Visual Studio Project
+....................................
 
-1. Open ``minetestmapper.sln`` or ``MSVC\mintestmapper.vcxproj`` with Visual Studio.
-2. Configure the gd libary:
-    1. Open projectsettings `ALT+F7`.
-    2. Select `All Configurations` and `All Platforms`.
-    3. Click `C/C++` -> `additional include directories` and enter the path to the include directory of libGD.
-    4. Click `Apply`
-    5. Select a configuration (``Debug|Release``) and a platform (``x86|x64``)
-    6. Click `Linker` --> `additional libary directories` Enter the path to libgd that fits to your configuration and platform.
+::
 
-       Do this step for all configurations and platforms you want to use.
+   cmake . -DVCPKG_TOOLCHAIN_FILE=D:\vcpkg\scripts\buildsystems\vcpkg.cmake
 
-       WARNING: You will get a linker error if you select a version of libgd that does not fit to your configuration and platform.
 
 Building Minetestmapper
 .......................
+
+Open ``Minetestmapper.sln`` with Visual Studio.
 
 With everything set up, Minetestmapper can be built.
 
