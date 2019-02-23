@@ -9,6 +9,7 @@
 
 #include "Mapper.h"
 
+#include <algorithm>
 #include <cctype>
 #include <chrono>
 #include <cmath>
@@ -383,10 +384,8 @@ int Mapper::start(int argc, char *argv[]) {
 									break;
 			case OPT_SILENCE_SUGGESTIONS: {
 				string optarg = strlower(ps.optarg);
-				for(char &c : optarg) {
-					if (c == ',')
-						c = ' ';
-				}
+				std::replace(optarg.begin(), optarg.end(), ',', ' ');
+
 				std::istringstream iss(optarg);
 				std::string flag;
 				iss >> std::skipws >> flag;
@@ -457,9 +456,8 @@ int Mapper::start(int argc, char *argv[]) {
 			case OPT_DRAWNODES: {
 				bool draw = long_options[option_index].name[0] == 'd';
 				string optarg = strlower(ps.optarg);
-				for (char &c : optarg){
-					if (c == ',') c = ' ';
-				}
+				std::replace(optarg.begin(), optarg.end(), ',', ' ');
+
 				istringstream iss(optarg);
 				string flag;
 				iss >> std::skipws >> flag;
@@ -637,10 +635,8 @@ int Mapper::start(int argc, char *argv[]) {
 				}
 				else if (ps.optarg && *ps.optarg) {
 					string optarg = strlower(ps.optarg);
-					for (char &c : optarg) {
-						if (c == ',')
-							c = ' ';
-					}
+					std::replace(optarg.begin(), optarg.end(), ',', ' ');
+
 					istringstream iss;
 					iss.str(optarg);
 					string flag;
