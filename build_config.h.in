@@ -7,3 +7,5 @@
 #cmakedefine USE_LEVELDB
 
 #cmakedefine USE_REDIS
+
+#cmakedefine USE_ICONV

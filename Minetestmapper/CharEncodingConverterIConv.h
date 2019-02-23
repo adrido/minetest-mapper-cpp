@@ -1,21 +1,22 @@
+#pragma once
 
-#ifndef _CHARENCODINGCONVERTERICONV_H_INCLUDED_
-#define _CHARENCODINGCONVERTERICONV_H_INCLUDED_
-
-#include <iconv.h>
 #include "CharEncodingConverter.h"
+#include "build_config.h"
+
+
+#ifdef USE_ICONV
+#include <iconv.h>
 
 class CharEncodingConverterIConv : public CharEncodingConverter
 {
 public:
-	CharEncodingConverterIConv(std::string to, std::string from = "");
-	virtual ~CharEncodingConverterIConv(void);
+	CharEncodingConverterIConv(const std::string &to, const std::string &from = "");
+	virtual ~CharEncodingConverterIConv();
 
-	static std::string getCurrentCharEncoding(void);
+	static std::string getCurrentCharEncoding();
 	std::string convert(const std::string &src) override;
+
 private:
 	iconv_t m_iconv;
 };
-
-#endif // _CHARENCODINGCONVERTERICONV_H_INCLUDED_
-
+#endif
