@@ -20,6 +20,8 @@
 
 #define sleepMs(x) std::this_thread::sleep_for(std::chrono::milliseconds(x))
 
+using namespace std;
+
 // If zero, a full block list is obtained using a single query.
 // If negative, the default value (BLOCKLIST_QUERY_SIZE_DEFAULT) will be used.
 int DBSQLite3::m_blockListQuerySize = 0;
@@ -51,27 +53,27 @@ DBSQLite3::DBSQLite3(const std::string &mapdir) :
 	m_firstDatabaseInitialized = true;
 	std::string db_name = mapdir + "map.sqlite";
 	if (sqlite3_open_v2(db_name.c_str(), &m_db, SQLITE_OPEN_READONLY | SQLITE_OPEN_PRIVATECACHE, nullptr) != SQLITE_OK) {
-		throw std::runtime_error(std::string(sqlite3_errmsg(m_db)) + ", Database file: " + db_name);
+		throw runtime_error(std::string(sqlite3_errmsg(m_db)) + ", Database file: " + db_name);
 	}
 	if (SQLITE_OK != sqlite3_prepare_v2(m_db, DATAVERSION_STATEMENT, sizeof(DATAVERSION_STATEMENT) - 1, &m_dataVersionStatement, nullptr)) {
-		throw std::runtime_error("Failed to prepare SQL statement (dataVersionStatement)");
+		throw runtime_error(string("Failed to prepare SQL statement (dataVersionStatement): ") + sqlite3_errmsg(m_db));
 	}
 	if (m_blockListQuerySize == 0) {
 		if (SQLITE_OK != sqlite3_prepare_v2(m_db, BLOCKPOSLIST_STATEMENT, sizeof(BLOCKPOSLIST_STATEMENT) - 1, &m_blockPosListStatement, nullptr)) {
-			throw std::runtime_error("Failed to prepare SQL statement (blockPosListStatement)");
+			throw runtime_error(string("Failed to prepare SQL statement (blockPosListStatement): ") + sqlite3_errmsg(m_db));
 		}
 	}
 	else {
 		if (SQLITE_OK != sqlite3_prepare_v2(m_db, BLOCKPOSLIST_LIMITED_STATEMENT,
 			sizeof(BLOCKPOSLIST_LIMITED_STATEMENT) - 1, &m_blockPosListStatement, nullptr)) {
-			throw std::runtime_error("Failed to prepare SQL statement (blockPosListStatement (limited))");
+			throw runtime_error(string("Failed to prepare SQL statement (blockPosListStatement (limited)): ") + sqlite3_errmsg(m_db));
 		}
 	}
 	if (SQLITE_OK != sqlite3_prepare_v2(m_db, BLOCK_STATEMENT_POS, sizeof(BLOCK_STATEMENT_POS) - 1, &m_blockOnPosStatement, nullptr)) {
-		throw std::runtime_error("Failed to prepare SQL statement (blockOnPosStatement)");
+		throw runtime_error(string("Failed to prepare SQL statement (blockOnPosStatement): ") + +sqlite3_errmsg(m_db));
 	}
 	if (SQLITE_OK != sqlite3_prepare_v2(m_db, BLOCK_STATEMENT_ROWID, sizeof(BLOCK_STATEMENT_ROWID) - 1, &m_blockOnRowidStatement, nullptr)) {
-		throw std::runtime_error("Failed to prepare SQL statement (blockOnRowidStatement)");
+		throw runtime_error(string("Failed to prepare SQL statement (blockOnRowidStatement): ") + sqlite3_errmsg(m_db));
 	}
 }
 
