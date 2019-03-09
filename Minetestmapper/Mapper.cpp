@@ -536,8 +536,9 @@ int Mapper::start(int argc, char *argv[]) {
 					return EXIT_FAILURE;
 				}
 				if (!arg.eof()) {
-					arg >> colon >> factor >> std::ws;
+					arg >> colon >> factor;
 					if (arg.fail() || colon != ':' || factor<0 || !arg.eof()) {
+						cerr << arg.fail() << arg.eof() << endl;
 						std::cerr << "Invalid scale factor specification (" << ps.optarg << ") - expected: 1:<n>" << std::endl;
 						usage();
 						return EXIT_FAILURE;
