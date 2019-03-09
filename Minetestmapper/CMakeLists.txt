@@ -6,7 +6,7 @@ cmake_minimum_required (VERSION 3.8)
 set (CMAKE_CXX_STANDARD 17)
 
 set(sources
-    PixelAttributes.cpp
+	PixelAttributes.cpp
 	PixelAttributes.h
 	PlayerAttributes.cpp
 	PlayerAttributes.h
@@ -51,54 +51,66 @@ set(sources
 	parg.c
 	util.h
 )
-
 if(WIN32)
-set(sources ${sources} Minetestmapper.rc)
-add_definitions(-D_USE_MATH_DEFINES)
+	list(APPEND sources Minetestmapper.rc)
 endif(WIN32)
 
-find_library(ZLIB_LIBRARY NAMES zlib z)
-find_path(ZLIB_INCLUDE_DIR NAMES zlib.h)
+add_executable(Minetestmapper ${sources})
+
+# Platform dependant stuff
+if(WIN32)
+	target_compile_definitions(Minetestmapper PRIVATE _USE_MATH_DEFINES)
+elseif(UNIX)
+
+endif()
+
+# Required Libraries
+###############################################################################
+find_library(SQLITE3_LIBRARY sqlite3)
+find_path(SQLITE3_INCLUDE_DIR sqlite3.h)
+
+find_package(ZLIB REQUIRED)
 
 find_library(LIBGD_LIBRARY NAMES gd libgd libgd_static)
 find_path(LIBGD_INCLUDE_DIR NAMES gd.h)
 
-if(WIN32)
-	find_path(SYSTEM_INCLUDE_DIR dirent.h)
-	include_directories(${SYSTEM_INCLUDE_DIR})
+target_link_libraries(Minetestmapper ${LIBGD_LIBRARY} ZLIB::ZLIB ${SQLITE3_LIBRARY})
+target_include_directories(Minetestmapper PRIVATE ${LIBGD_INCLUDE_DIR})
+
+if(UNIX)
+	find_package(PNG REQUIRED)
+	find_package(Threads REQUIRED)
+	find_library(fs_LIBRARY NAMES stdc++fs)
+	if(fs_LIBRARY)
+		target_link_libraries(Minetestmapper fs_LIBRARY)
+	endif()
+	target_link_libraries(Minetestmapper PNG::PNG Threads::Threads ${CMAKE_DL_LIBS})
 endif()
 
-
-set(leveldb_lib "")
+# Optional Libraries
+###############################################################################
 if(USE_LEVELDB)
-	set(leveldb_lib ${LEVELDB_LIBRARY})
+	target_link_libraries(Minetestmapper ${LEVELDB_LIBRARY})
 	if(WIN32)
 		# the leveld database driver requires PathFileExistsW which is in the Shlwapi library
-		set(leveldb_lib ${LEVELDB_LIBRARY} "Shlwapi.lib")
+		target_link_libraries(Minetestmapper "Shlwapi.lib")
 	endif(WIN32)
 endif()
 
-set(postgresql_lib "")
 if(USE_POSTGRESQL)
-	set(postgresql_lib ${POSTGRESQL_LIBRARY})
+	target_link_libraries(Minetestmapper ${POSTGRESQL_LIBRARY})
 	if(WIN32)
 		# the libpq database driver requires htonl which is in the Ws2_32 library
-		set(postgresql_lib ${POSTGRESQL_LIBRARY} "Ws2_32.lib")
+		target_link_libraries(Minetestmapper "Ws2_32.lib")
 	endif(WIN32)
 endif()
 
-set(redis_lib "")
 if(USE_REDIS)
-	set(redis_lib ${REDIS_LIBRARY})
+	target_link_libraries(Minetestmapper ${REDIS_LIBRARY})
 endif()
 
-
-#link_directories (../wingetopt)
-# Fügen Sie der ausführbaren Datei für dieses Projekt eine Quelle hinzu.
-add_executable (Minetestmapper ${sources})
-set_target_properties(Minetestmapper PROPERTIES COMPILE_FLAGS -DBUILDER_STATIC_DEFINE)
-target_link_libraries(Minetestmapper ${LIBGD_LIBRARY} ${ZLIB_LIBRARY} ${SQLITE3_LIBRARY} ${leveldb_lib} ${postgresql_lib} ${redis_lib})
-# TODO: Fügen Sie bei Bedarf Tests und Installationsziele hinzu.
+# Installation
+###############################################################################
 
 
 set (CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION ".")
@@ -108,13 +120,27 @@ set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
 set(CPACK_PACKAGE_INSTALL_DIRECTORY ${PROJECT_NAME})
 set(CPACK_GENERATOR "ZIP")
-include (CPack)
-install (TARGETS Minetestmapper RUNTIME DESTINATION ".")
+include(CPack)
+install(TARGETS Minetestmapper RUNTIME DESTINATION ".")
 
 if(WIN32)
-#copy required dlls to install dir
-install(DIRECTORY "${PROJECT_BINARY_DIR}/Minetestmapper/" DESTINATION "." 
-	FILES_MATCHING PATTERN "*.dll" PATTERN "/" EXCLUDE)
+	#copy required dlls to install dir
+	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Release/
+			DESTINATION . 
+			CONFIGURATIONS Release
+			FILES_MATCHING PATTERN "*.dll")
+	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Debug/
+			DESTINATION .
+			CONFIGURATIONS Debug
+			FILES_MATCHING PATTERN "*.dll")
+	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/RelWithDebInfo/
+			DESTINATION .
+			CONFIGURATIONS RelWithDebInfo
+			FILES_MATCHING PATTERN "*.dll")
+	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/MinSizeRel/
+			DESTINATION .
+			CONFIGURATIONS RelWithDebInfo
+			FILES_MATCHING PATTERN "*.dll")
 endif(WIN32)
 
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/colors/" DESTINATION "colors/" 
