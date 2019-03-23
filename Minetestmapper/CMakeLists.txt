@@ -80,11 +80,10 @@ target_include_directories(Minetestmapper PRIVATE ${LIBGD_INCLUDE_DIR})
 if(UNIX)
 	find_package(PNG REQUIRED)
 	find_package(Threads REQUIRED)
-	find_library(fs_LIBRARY NAMES stdc++fs)
-	if(fs_LIBRARY)
-		target_link_libraries(Minetestmapper fs_LIBRARY)
-	endif()
+
 	target_link_libraries(Minetestmapper PNG::PNG Threads::Threads ${CMAKE_DL_LIBS})
+
+	target_link_libraries(Minetestmapper $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:stdc++fs>)
 endif()
 
 # Optional Libraries
