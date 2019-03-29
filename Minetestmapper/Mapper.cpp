@@ -152,7 +152,7 @@ int Mapper::start(int argc, char *argv[]) {
 				return 0;
 				break;
 			case 'V':
-				cout << "Minetestmapper - Version-ID: " << PROJECT_VERSION_MAJOR << "." << PROJECT_VERSION_MINOR << std::endl;
+				cout << "Minetestmapper - Version-ID: " << PROJECT_VERSION << "("<<PACKAGE_VENDOR<<")" << std::endl;
 				return 0;
 				break;
 			case 'i':
