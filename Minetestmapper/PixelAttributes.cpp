@@ -8,10 +8,12 @@
  */
 
 #include "PixelAttributes.h"
+#include <cstring> // memcpy
 
 using namespace std;
 
 PixelAttribute::AlphaMixingMode PixelAttribute::m_mixMode = PixelAttribute::AlphaMixCumulative;
+
 
 void PixelAttributes::setParameters(int width, int lines, int nextY, int scale, bool defaultEmpty)
 {
@@ -28,20 +30,13 @@ void PixelAttributes::setParameters(int width, int lines, int nextY, int scale, 
 	m_firstUnshadedY = 0;
 	m_scale = scale;
 
-	PixelAttribute pa;
-	pa.m_a = 0;
-	pa.nextEmpty = false;
+	m_pixelAttributes = vector<vector<PixelAttribute>>(m_lineCount, vector<PixelAttribute>(m_width, PixelAttribute()));
 
-	m_pixelAttributes = vector<vector<PixelAttribute>>(m_lineCount, vector<PixelAttribute>(m_width, pa));
-
-	if (defaultEmpty) {
-		int emptyColumns = (16 / scale);
-		for (int i = 0; i < m_lineCount; i++) {
-			for (int j = 0; j < m_width; j += emptyColumns) {
-				m_pixelAttributes[i][j + 1].nextEmpty = true;
+	if (defaultEmpty)
+		for (int i = 0; i < m_lineCount; i++)
+			for (int j = 0; j < m_width; j++) {
+				m_pixelAttributes[i][j].nextEmpty = (j - 1) % (16 / scale) == 0;
 			}
-		}
-	}
 }
 
 void PixelAttributes::scroll(int keepY)
@@ -50,19 +45,20 @@ void PixelAttributes::scroll(int keepY)
 	if (scroll > 0) {
 		int i;
 		for (i = m_previousLine; i + scroll <= m_lastLine; i++) {
-			auto tmp = m_pixelAttributes[i];
-			m_pixelAttributes[i] = m_pixelAttributes[i + scroll];
-			m_pixelAttributes[i + scroll] = tmp;
+			m_pixelAttributes[i].swap(m_pixelAttributes[i + scroll]);
 		}
 
+		size_t lineLength = m_width * sizeof(PixelAttribute);
 		for (; i <= m_lastLine; ++i) {
-			m_pixelAttributes[i] = m_pixelAttributes[m_emptyLine];
+			// TODO: get rid of memcpy. This seems non-trivial.
+			memcpy(m_pixelAttributes[i].data(), m_pixelAttributes[m_emptyLine].data(), lineLength);
 		}
 
 		m_firstY += scroll;
 		m_nextY = m_firstY;
 		m_firstUnshadedY -= scroll;
-		if (m_firstUnshadedY < m_firstY) m_firstUnshadedY = m_firstY;
+		if (m_firstUnshadedY < m_firstY)
+			m_firstUnshadedY = m_firstY;
 	}
 }
 
@@ -115,14 +111,14 @@ void PixelAttributes::renderShading(double emphasis, bool drawAlpha)
 				d = 3;
 			}
 			d = d * 12 / 255 * emphasis;
-			#define pixel (m_pixelAttributes[y][x])
+#define pixel (m_pixelAttributes[y][x])
 			//PixelAttribute &pixel = m_pixelAttributes[y][x];
 			if (drawAlpha)
 				d = d * (1 - pixel.m_t);
 			pixel.m_r = colorSafeBounds(pixel.m_r + d);
 			pixel.m_g = colorSafeBounds(pixel.m_g + d);
 			pixel.m_b = colorSafeBounds(pixel.m_b + d);
-			#undef pixel
+#undef pixel
 		}
 	}
 	m_firstUnshadedY = y - yCoord2Line(0);
@@ -234,7 +230,7 @@ void PixelAttribute::mixUnder(const PixelAttribute &p)
 		m_h = p.m_h;
 	}
 	else if (m_a == 1)
-		;		// Nothing to do: pixel is already fully opaque.
+		; // Nothing to do: pixel is already fully opaque.
 	else if ((m_mixMode & AlphaMixCumulative) == AlphaMixCumulative || (m_mixMode == AlphaMixAverage && p.m_a == 1)) {
 		PixelAttribute pp(p);
 #ifdef DEBUG
@@ -287,16 +283,3 @@ void PixelAttribute::mixUnder(const PixelAttribute &p)
 	}
 #endif
 }
-
-bool PixelAttribute::operator==(const PixelAttribute & p)
-{
-	return m_n == p.m_n &&
-		m_h == p.m_h &&
-		m_t == p.m_t &&
-		m_a == p.m_a &&
-		m_r == p.m_r &&
-		m_g == p.m_g &&
-		m_b == p.m_b &&
-		nextEmpty == p.nextEmpty;
-}
-

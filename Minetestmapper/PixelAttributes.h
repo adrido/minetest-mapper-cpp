@@ -17,7 +17,8 @@
 #include <stdexcept>
 #include <vector>
 
-class PixelAttribute {
+class PixelAttribute
+{
 public:
 	enum AlphaMixingMode {
 		AlphaMixDarkenBit = 0x01,
@@ -27,10 +28,10 @@ public:
 	};
 	static void setMixMode(AlphaMixingMode mode);
 	PixelAttribute() = default;
-//	PixelAttribute(const PixelAttribute &p);
+	//	PixelAttribute(const PixelAttribute &p);
 	PixelAttribute(const Color &color, double height);
 	PixelAttribute(const ColorEntry &entry, double height);
-	bool nextEmpty{true};
+	bool nextEmpty{false};
 	double h() const { return m_h / (m_n ? m_n : 1); }
 	double t() const { return m_t / (m_n ? m_n : 1); }
 	double a() const { return m_a / (m_n ? m_n : 1); }
@@ -51,19 +52,18 @@ public:
 	void normalize(double count = 0, Color defaultColor = Color(127, 127, 127));
 	void add(const PixelAttribute &p);
 	void mixUnder(const PixelAttribute &p);
-	bool operator==(const PixelAttribute &p);
-	bool operator!=(const PixelAttribute &p) { return !(*this == p); };
+
 private:
 	static AlphaMixingMode m_mixMode;
 	double m_n{0};
-	double m_h{ std::numeric_limits<double>::quiet_NaN() };
+	double m_h{std::numeric_limits<double>::quiet_NaN()};
 	double m_t{0};
 	double m_a{0};
 	double m_r{0};
 	double m_g{0};
 	double m_b{0};
 
-friend class PixelAttributes;
+	friend class PixelAttributes;
 };
 
 class PixelAttributes
@@ -134,15 +134,15 @@ inline PixelAttribute &PixelAttributes::attribute(int y, int x)
 //	operator=(p);
 //}
 
-inline PixelAttribute::PixelAttribute(const Color &color, double height) :
-	nextEmpty(false), m_n(0), m_h(height), m_t(0), m_a(color.a/255.0),
-	m_r(color.r/255.0), m_g(color.g/255.0), m_b(color.b/255.0)
+inline PixelAttribute::PixelAttribute(const Color &color, double height)
+	: nextEmpty(false), m_n(0), m_h(height), m_t(0), m_a(color.a / 255.0),
+	  m_r(color.r / 255.0), m_g(color.g / 255.0), m_b(color.b / 255.0)
 {
 }
 
-inline PixelAttribute::PixelAttribute(const ColorEntry &entry, double height) :
-	nextEmpty(false), m_n(0), m_h(height), m_t(entry.t/255.0), m_a(entry.a/255.0),
-	m_r(entry.r/255.0), m_g(entry.g/255.0), m_b(entry.b/255.0)
+inline PixelAttribute::PixelAttribute(const ColorEntry &entry, double height)
+	: nextEmpty(false), m_n(0), m_h(height), m_t(entry.t / 255.0), m_a(entry.a / 255.0),
+	  m_r(entry.r / 255.0), m_g(entry.g / 255.0), m_b(entry.b / 255.0)
 {
 }
 
@@ -157,4 +157,3 @@ inline PixelAttribute &PixelAttribute::operator=(const PixelAttribute &p)
 	m_b = p.m_b;
 	return *this;
 }
-
