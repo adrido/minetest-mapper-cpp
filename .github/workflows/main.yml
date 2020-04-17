@@ -1,0 +1,69 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  Build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        branch: [x86, x64]
+        type: [portable, installer]
+        include:
+          - os: windows-latest
+            vcpkg_cmd: zlib libpng sqlite3 libgd[core,png] --triplet x64-windows
+            cpack_install_generator: -G WIX
+          - os: ubuntu-latest
+            vcpkg_cmd: zlib libpng sqlite3 libgd[core,png] --triplet x64-linux
+            cpack_install_generator: -G DEB
+          - os: macos-latest
+            vcpkg_cmd: zlib libpng sqlite3 libgd[core,png] --triplet x64-osx
+        exclude:
+          - branch: x86
+# TODO: make x86 work
+# TODO: generate the triplet of branch and os
+    steps:
+      - name: 🐞 Remove chocolately
+        run: Remove-Item -Path $env:ChocolateyInstall\\bin\\cpack.exe -Force
+        shell: pwsh
+        if: "contains(matrix.os, 'windows')"
+
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Run vcpkg
+        run: vcpkg install  ${{matrix.vcpkg_cmd}}
+
+      - name: CMake
+        run: |
+          echo -DBUILD_PORTABLE=$PORTABLE
+          cmake -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake" -DCMAKE_BUILD_TYPE=Release . -DBUILD_PORTABLE=$PORTABLE
+        shell: bash
+        env:
+          PORTABLE: ${{contains(matrix.type, 'portable')}}
+
+      - name: Build
+        run: cmake --build . --config Release
+
+      - name: Package Install
+        run: cpack ${{matrix.cpack_install_generator}}
+        if: "!contains(matrix.type, 'portable')"
+
+      - name: Package Portable
+        run: cpack -G ZIP
+        if: "contains(matrix.type, 'portable')"
+
+      - uses: actions/upload-artifact@v2-preview
+        with:
+          name: Package
+          path: ./_CPack_Packages

@@ -15,6 +15,7 @@ namespace fs = std::filesystem;
 #include <sstream>
 #include <stdexcept>
 #include <iostream>
+#include <ostream>
 #include "PlayerAttributes.h"
 
 using namespace std;
@@ -28,7 +29,7 @@ PlayerAttributes::PlayerAttributes(const std::string &sourceDirectory)
 	if (!extractPlayersSqlite(playersPath)) {
 #ifdef HAVE_FILESYSTEM
 		for (const auto &dirEntry : fs::directory_iterator(playersPath)) {
-			cout << dirEntry << std::endl;
+			cout << dirEntry.path().string() << std::endl;
 			//dirEntry.path().filename();
 
 			extractPlayer(dirEntry.path().string());
